@@ -3,4 +3,6 @@ Research of usage deep reinfocrement learning to solve differential games proble
 
 # **links:**
 [Continuous Deep Q-Learning with Model-based Acceleration](https://arxiv.org/abs/1603.00748)
+
+
 [Diffrent types of Deep Q-Learing](http://rail.eecs.berkeley.edu/deeprlcourse-fa17/f17docs/lecture_7_advanced_q_learning.pdf)
