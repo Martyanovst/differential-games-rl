@@ -4,14 +4,17 @@ from torch import nn
 import random
 import gym
 import matplotlib.pyplot as plt
+from copy import deepcopy
 
-class Network(nn.Module):
-    def __init(self, layers, hidden_activation, output_activation):
+
+class LinearNetwork(nn.Module):
+    def __init__(self, layers, hidden_activation, output_activation):
         super().__init__()
         self.hidden_activation = hidden_activation
         self.output_activation = output_activation
         self.layers_count = len(layers)
-        self.output_layer = nn.Linear(layers[self.layers_count - 2], self.layers_count - 1])
+        self.output_layer = nn.Linear(
+            layers[self.layers_count - 2], layers[self.layers_count - 1])
         self.init_hidden_layers_(layers)
 
     def init_hidden_layers_(self, layers):
@@ -21,54 +24,82 @@ class Network(nn.Module):
             current_layear = layers[i]
             linear = nn.Linear(previous_layer, current_layear)
             self.hidden_layers.append(linear)
-        
 
     def forward(self, tensor):
         hidden = tensor
         for layer in self.hidden_layers:
             hidden = self.hidden_activation(layer(hidden))
         output = self.output_activation(self.output_layer(hidden))
-        return hidden
+        return output
 
 
 class NAF_Network(nn.Module):
 
     def __init__(self, input_dim, output_dim):
         super().__init__()
-        self.mu = Network([input_dim, 64, 64, 32, output_dim], nn.Relu(), nn.Tahn())
-        self.P = Network([input_dim, 64, 64, 32, int(output_dim * (output_dim + 1) / 2)], nn.Relu(), nn.Relu())
-        self.v = Network([input_dim, 32, 16, 1], nn.Relu(), nn.Tahn())        
+        self.output_dim = output_dim
+        self.input_dim = input_dim
+        self.mu = LinearNetwork(layers=[input_dim, 64, 64, 32, output_dim],
+                                hidden_activation=nn.ReLU(),
+                                output_activation=nn.Tanh())
+        self.P = LinearNetwork(layers=[input_dim, 64, 64, 32, int(
+            output_dim * (output_dim + 1) / 2)],
+            hidden_activation=nn.ReLU(),
+            output_activation=nn.ReLU())
+        self.v = LinearNetwork(layers=[input_dim, 32, 16, 1], hidden_activation=nn.ReLU(
+        ), output_activation=nn.ReLU())
 
-    def forward(self, tensor):
+    def _forward_(self, tensor):
         mu = self.mu(tensor)
         L = self.P(tensor)
         v = self.v(tensor)
         return mu, L, v
 
-    def Q_value(self, tensor, action):
-        mu, L, v = self.forward(tensor)
+    def forward(self, tensor, action):
+        mu, L_vec, v = self._forward_(tensor)
+        L = torch.zeros((tensor.shape[0], self.output_dim))
+        idx = torch.tril_indices(tensor.shape[0], self.output_dim)
+        L[idx] = L_vec
         P = L @ L.T
         A = -1/2 * (action - mu).T @ P @ (action - mu)
         return A + v
-    
+
     def maximum_q_value(self, tensor):
         return self.v(tensor)
 
     def argmax_action(self, tensor):
         return self.mu(tensor)
-    
-    def Q_value(self, state, action):
-        mu, P, V = self.forward(state)
-        A = - 1/2 * (action - mu).T * P * (action - mu) 
-        return A + V
+
+
+class OUNoise:
+    def __init__(self, action_dimension, mu=0, theta=0.15, sigma=0.3, threshold=1, threshold_min=0.001, threshold_decrease=0.0001):
+        self.action_dimension = action_dimension
+        self.mu = mu
+        self.theta = theta
+        self.sigma = sigma
+        self.state = np.ones(self.action_dimension) * self.mu 
+        self.reset()
+
+    def reset(self):
+        self.state = np.ones(self.action_dimension) * self.mu
+
+    def noise(self):
+        x = self.state
+        dx = self.theta * (self.mu - x) + self.sigma * np.random.randn(len(x))
+        self.state = x + dx
+        return self.state
+
+    def decrease(self):
+        if self.threshold > self.threshold_min:
+            self.threshold -= self.threshold_decrease
 
 
 class DQNAgent(nn.Module):
 
-    def __init__(self, state_dim, action_space):
+    def __init__(self, state_dim, action_dim):
         super().__init__()
         self.state_dim = state_dim
-        self.action_space = action_space
+        self.action_dim = action_dim
 
         self.gamma = 0.95
         self.epsilon = 1
@@ -76,65 +107,60 @@ class DQNAgent(nn.Module):
         self.epsilon_min = 0.1
         self.memory_size = 200000
         self.memory = []
-        self.batch_size = 512
+        self.batch_size = 2
         self.learinig_rate = 1e-2
-
-        self.q_normalized = Network(self.state_dim, self.action_space.shape[0])
         self.tau = 0.8
-        self.q_target = Network(self.state_dim, self.action_space.shape[0])
-        self.update_weights(1)
-        self.optimazer = torch.optim.Adam(
-            self.q_normalized.parameters(), lr=self.learinig_rate)
+        self.reward_normalize = 0.01
+
+        self.action_exploration = OUNoise(action_dim.shape[0])
+        self.init_naf_networks()
+
+    def init_naf_networks(self):
+        self.Q = NAF_Network(self.state_dim, self.action_dim.shape[0])
+        self.q_target = deepcopy(self.Q)
+        self.opt = torch.optim.Adam(
+            self.Q.parameters(), lr=self.learinig_rate)
 
     def get_action(self, state):
         state = torch.FloatTensor(state)
-        mu, P, V = self.q_target(state)
+        action = self.q_target.argmax_action(state).detach().data.numpy()
+        action_exploration = self.action_exploration.noise()
+        return np.clip(action + action_exploration, -1, 1)
 
-        # argmax_action = torch.argmax().data.numpy()
-        action_exploration = np.random.normal(0, 0.25 * self.epsilon, 2)
-        action = np.clip(mu.data.numpy() + action_exploration, -1, 1)
-        return action
-
-    def update_weights(self, tau):
-        for new_parameter, old_parameter in zip(self.q_target.parameters(), self.q_normalized.parameters()):
+    def soft_update(self, tau):
+        for new_parameter, old_parameter in zip(self.q_target.parameters(), self.Q.parameters()):
             new_parameter.data.copy_(
                 (tau) * old_parameter + (1 - tau) * new_parameter)
 
+    def get_batch(self):
+        minibatch = random.sample(self.memory, self.batch_size)
+        states, actions, rewards, dones, next_states = map(np.array, zip(*minibatch))
+        states = torch.tensor(states, dtype=torch.float32)
+        actions = torch.tensor(actions, dtype=torch.float32)
+        rewards = torch.tensor(rewards, dtype=torch.float32)
+        dones = torch.tensor(dones, dtype=torch.float32)
+        next_states = torch.tensor(next_states, dtype=torch.float32)
+        return states, actions, rewards, dones, next_states
+
     def fit(self, state, action, reward, done, next_state):
         self.memory.append([state, action, reward, done, next_state])
-        if len(self.memory) > self.memory_size:
-            self.memory.pop(0)
-        if len(self.memory) > self.batch_size:
-            for _ in range(5):
-                batch = random.sample(self.memory, self.batch_size)
-
-                states, actions, rewards, dones, next_states = list(
-                    zip(*batch))
-                states = torch.FloatTensor(states)
-                actions = torch.FloatTensor(actions)
-                tensor = zip(states, actions)
-                
-                q_values = list(map(lambda inpt: self.q_normalized.Q_value(inpt[0], inpt[1]), tensor))
-                next_states = torch.FloatTensor(next_states)
-                next_q_values = self.q_target(next_states)
-                targets = q_values.clone()
-                for i in range(self.batch_size):
-                    targets[i][actions[i]] = rewards[i] + self.gamma * \
-                        (1 - dones[i]) * max(next_q_values[i])
-                loss = torch.mean((targets.detach() - q_values) ** 2)
-
-                loss.backward()
-                self.optimazer.step()
-                self.optimazer.zero_grad()
-                self.update_weights(self.tau)
-            if self.epsilon > self.epsilon_min:
-                self.epsilon *= self.epsilon_desc
+        
+        if len(self.memory) >= self.batch_size:
+            states, actions, rewards, dones, next_states = self.get_batch()
+            self.opt.zero_grad()
+            target = self.reward_normalize * rewards + self.gamma * (1 - dones) * self.Q.maximum_q_value(next_states).detach()
+            loss = torch.mean((self.Q(states, actions) - target) ** 2)
+            loss.backward()
+            self.opt.step()
+            self.soft_update()
+            
+            self.action_exploration.decrease()
 
 
 env = gym.make('LunarLanderContinuous-v2')
 state_dim = env.observation_space.shape[0]
-action_space = env.action_space
-agent = DQNAgent(state_dim, action_space)
+action_dim = env.action_space
+agent = DQNAgent(state_dim, action_dim)
 episode_n = 300
 rewards = []
 for episode in range(episode_n):
