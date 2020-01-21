@@ -49,6 +49,11 @@ class NAF_Network(nn.Module):
         self.v = LinearNetwork(layers=[input_dim, 32, 16, 1], hidden_activation=nn.ReLU(
         ), output_activation=nn.ReLU())
 
+    def _to_P_matrix_(self, vector):
+        tril_matrix = np.zeros((self.output_dim, self.output_dim))
+        tril_matrix[np.tril_indices(self.output_dim)] = vector
+        return tril_matrix @ tril_matrix.T
+
     def _forward_(self, tensor):
         mu = self.mu(tensor)
         L = self.P(tensor)
@@ -57,11 +62,18 @@ class NAF_Network(nn.Module):
 
     def forward(self, tensor, action):
         mu, L_vec, v = self._forward_(tensor)
-        L = torch.zeros((tensor.shape[0], self.output_dim))
-        idx = torch.tril_indices(tensor.shape[0], self.output_dim)
-        L[idx] = L_vec
-        P = L @ L.T
-        A = -1/2 * (action - mu).T @ P @ (action - mu)
+        # --------------------------------
+        mu = mu.detach().numpy()
+        L_vec = L_vec.detach().numpy()
+        v = v.detach().numpy()
+        P = np.apply_along_axis(self._to_P_matrix_, 1, L_vec)
+
+        # --------------------------------
+        action = action.detach().numpy()
+        A = (action - mu)
+        A = np.tensordot(A, P, 1)
+        A = A @ (action - mu)
+        # A = -1/2 * (action - mu) @ P @ (action - mu).T
         return A + v
 
     def maximum_q_value(self, tensor):
@@ -107,7 +119,7 @@ class DQNAgent(nn.Module):
         self.epsilon_min = 0.1
         self.memory_size = 200000
         self.memory = []
-        self.batch_size = 2
+        self.batch_size = 64
         self.learinig_rate = 1e-2
         self.tau = 0.8
         self.reward_normalize = 0.01
