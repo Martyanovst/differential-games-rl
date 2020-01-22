@@ -166,9 +166,9 @@ class DQNAgent(nn.Module):
             self.memory.pop(0)
         if len(self.memory) >= self.batch_size:
             states, actions, rewards, dones, next_states = self.get_batch()
-            self.opt.zero_grad()
             target = self.reward_normalize * rewards + self.gamma * (1 - dones) + self.q_target.maximum_q_value(next_states).detach()
             loss = torch.mean((self.Q(states, actions) - target) ** 2)
+            self.opt.zero_grad()
             loss.backward()
             self.opt.step()
             self.soft_update(self.tau)
