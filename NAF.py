@@ -35,18 +35,21 @@ class LinearNetwork(nn.Module):
 
 class NAF_Network(nn.Module):
 
+    def func(self, x):
+        return x
+
     def __init__(self, input_dim, output_dim):
         super().__init__()
         self.output_dim = output_dim
         self.input_dim = input_dim
-        self.mu = LinearNetwork(layers=[input_dim, 64, 64, 32, output_dim],
+        self.mu = LinearNetwork(layers=[input_dim, 128, 64, output_dim],
                                 hidden_activation=nn.ReLU(),
                                 output_activation=nn.Tanh())
-        self.P = LinearNetwork(layers=[input_dim, 64, 64, 32, output_dim ** 2],
+        self.P = LinearNetwork(layers=[input_dim, 128, 64, output_dim ** 2],
             hidden_activation=nn.ReLU(),
-            output_activation=nn.ReLU())
-        self.v = LinearNetwork(layers=[input_dim, 32, 16, 1], hidden_activation=nn.ReLU(
-        ), output_activation=nn.ReLU())
+            output_activation=self.func)
+        self.v = LinearNetwork(layers=[input_dim, 128, 64, 1], hidden_activation=nn.ReLU(
+        ), output_activation=self.func)
 
         self.tril_mask = Variable(torch.tril(torch.ones(
             output_dim, output_dim), diagonal=-1).unsqueeze(0))
@@ -112,21 +115,21 @@ class DQNAgent(nn.Module):
         self.action_dim = action_dim
 
         self.gamma = 0.99
-        self.memory_size = 200000
+        self.memory_size = 2000000
         self.memory = []
-        self.batch_size = 512
-        self.learinig_rate = 1e-2
+        self.batch_size = 256
+        self.learning_rate = 0.5
         self.tau = 1e-1
-        self.reward_normalize = 0.01
+        self.reward_normalize = 1
 
-        self.action_exploration = OUNoise(action_dim.shape[0])
+        self.action_exploration = OUNoise(action_dim.shape[0],threshold_decrease=0.007)
         self.init_naf_networks()
 
     def init_naf_networks(self):
         self.Q = NAF_Network(self.state_dim, self.action_dim.shape[0])
         self.q_target = deepcopy(self.Q)
         self.opt = torch.optim.Adam(
-            self.Q.parameters(), lr=self.learinig_rate)
+            self.Q.parameters(), lr=self.learning_rate)
 
     def get_action(self, state):
         state = torch.FloatTensor(state)
@@ -152,39 +155,42 @@ class DQNAgent(nn.Module):
 
     def fit(self, state, action, reward, done, next_state):
         self.memory.append([state, action, reward, done, next_state])
-
+        if len(self.memory) > self.memory_size:
+            self.memory.pop(0)
         if len(self.memory) >= self.batch_size:
             states, actions, rewards, dones, next_states = self.get_batch()
             self.opt.zero_grad()
             target = self.reward_normalize * rewards + self.gamma * \
-                (1 - dones) * self.Q.maximum_q_value(next_states).detach()
+                self.Q.maximum_q_value(next_states).detach()
             loss = torch.mean((self.Q(states, actions) - target) ** 2)
             loss.backward()
             self.opt.step()
             self.soft_update(self.tau)
 
             self.action_exploration.decrease()
+            return float(loss)
 
-
-env = gym.make('LunarLanderContinuous-v2')
+env = gym.make('MountainCarContinuous-v0')
+# env = gym.make('LunarLanderContinuous-v2')
 state_dim = env.observation_space.shape[0]
 action_dim = env.action_space
 agent = DQNAgent(state_dim, action_dim)
-episode_n = 500
+episode_n = 100
 rewards = []
 for episode in range(episode_n):
     state = env.reset()
     total_reward = 0
+    loss = 0
     for t in range(10000):
         action = agent.get_action(state)
         next_state, reward, done, _ = env.step(action)
         # env.render()
-        agent.fit(state, action, reward, done, next_state)
+        loss = agent.fit(state, action, reward, done, next_state)
         state = next_state
         total_reward += reward
         if done:
             break
-    print(str(episode) + ' : ' + str(total_reward))
+    print(str(episode) + ' : ' + str(total_reward) + ' loss: '+ str(loss) + ' memory: ' +str(len(agent.memory)))
     rewards.append(total_reward)
 
 plt.plot(range(episode_n), rewards)
