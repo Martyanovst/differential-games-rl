@@ -5,7 +5,7 @@ import random
 import gym
 import matplotlib.pyplot as plt
 from copy import deepcopy
-
+from torch.autograd import Variable
 
 class LinearNetwork(nn.Module):
     def __init__(self, layers, hidden_activation, output_activation):
@@ -42,17 +42,17 @@ class NAF_Network(nn.Module):
         self.mu = LinearNetwork(layers=[input_dim, 64, 64, 32, output_dim],
                                 hidden_activation=nn.ReLU(),
                                 output_activation=nn.Tanh())
-        self.P = LinearNetwork(layers=[input_dim, 64, 64, 32, int(
-            output_dim * (output_dim + 1) / 2)],
+        self.P = LinearNetwork(layers=[input_dim, 64, 64, 32, output_dim ** 2],
             hidden_activation=nn.ReLU(),
             output_activation=nn.ReLU())
         self.v = LinearNetwork(layers=[input_dim, 32, 16, 1], hidden_activation=nn.ReLU(
         ), output_activation=nn.ReLU())
 
-    def _to_P_matrix_(self, vector):
-        tril_matrix = np.zeros((self.output_dim, self.output_dim))
-        tril_matrix[np.tril_indices(self.output_dim)] = vector
-        return tril_matrix @ tril_matrix.T
+        self.tril_mask = Variable(torch.tril(torch.ones(
+            output_dim, output_dim), diagonal=-1).unsqueeze(0))
+
+        self.diag_mask = Variable(torch.diag(torch.diag(
+            torch.ones(output_dim, output_dim))).unsqueeze(0))
 
     def _forward_(self, tensor):
         mu = self.mu(tensor)
@@ -63,16 +63,13 @@ class NAF_Network(nn.Module):
     def forward(self, tensor, action):
         mu, L_vec, v = self._forward_(tensor)
         # --------------------------------
-        mu = mu.detach().numpy()
-        L_vec = L_vec.detach().numpy()
-        v = v.detach().numpy()
-        action = action.detach().numpy()
-        P = np.apply_along_axis(self._to_P_matrix_, 1, L_vec)
-
+        L = L_vec.view(-1, self.output_dim, self.output_dim)
+        L = L * self.tril_mask.expand_as(L) + torch.exp(L) * self.diag_mask.expand_as(L)
+        P = torch.bmm(L, L.transpose(2, 1))
+        action_mu = (action - mu).unsqueeze(2)
+        A = -0.5 * torch.bmm(torch.bmm(action_mu.transpose(2, 1), P), action_mu)[:, :, 0]
         # --------------------------------
-        A = -1/2 * np.einsum('ij,ij->i',
-                             np.diagonal((action - mu) @ P).T, action - mu)
-        return torch.FloatTensor(A + v)
+        return A + v
 
     def maximum_q_value(self, tensor):
         return self.v(tensor)
@@ -87,6 +84,9 @@ class OUNoise:
         self.mu = mu
         self.theta = theta
         self.sigma = sigma
+        self.threshold = threshold
+        self.threshold_min = threshold_min
+        self.threshold_decrease = threshold_decrease
         self.state = np.ones(self.action_dimension) * self.mu
         self.reset()
 
@@ -111,15 +111,12 @@ class DQNAgent(nn.Module):
         self.state_dim = state_dim
         self.action_dim = action_dim
 
-        self.gamma = 0.95
-        self.epsilon = 1
-        self.epsilon_desc = 0.99
-        self.epsilon_min = 0.1
+        self.gamma = 0.99
         self.memory_size = 200000
         self.memory = []
-        self.batch_size = 64
+        self.batch_size = 512
         self.learinig_rate = 1e-2
-        self.tau = 0.8
+        self.tau = 1e-1
         self.reward_normalize = 0.01
 
         self.action_exploration = OUNoise(action_dim.shape[0])
@@ -164,7 +161,7 @@ class DQNAgent(nn.Module):
             loss = torch.mean((self.Q(states, actions) - target) ** 2)
             loss.backward()
             self.opt.step()
-            self.soft_update()
+            self.soft_update(self.tau)
 
             self.action_exploration.decrease()
 
@@ -173,7 +170,7 @@ env = gym.make('LunarLanderContinuous-v2')
 state_dim = env.observation_space.shape[0]
 action_dim = env.action_space
 agent = DQNAgent(state_dim, action_dim)
-episode_n = 300
+episode_n = 500
 rewards = []
 for episode in range(episode_n):
     state = env.reset()
