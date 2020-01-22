@@ -7,6 +7,13 @@ import matplotlib.pyplot as plt
 from copy import deepcopy
 from torch.autograd import Variable
 
+class Identical(nn.Module):
+    def __init__(self):
+        super().__init__()
+    
+    def forward(self, input):
+        return input
+
 class LinearNetwork(nn.Module):
     def __init__(self, layers, hidden_activation, output_activation):
         super().__init__()
@@ -42,14 +49,14 @@ class NAF_Network(nn.Module):
         super().__init__()
         self.output_dim = output_dim
         self.input_dim = input_dim
-        self.mu = LinearNetwork(layers=[input_dim, 128, 64, output_dim],
+        self.mu = LinearNetwork(layers=[input_dim, 1024, 512, 512, output_dim],
                                 hidden_activation=nn.ReLU(),
                                 output_activation=nn.Tanh())
-        self.P = LinearNetwork(layers=[input_dim, 128, 64, output_dim ** 2],
+        self.P = LinearNetwork(layers=[input_dim, 1024, 512, 512,output_dim ** 2],
             hidden_activation=nn.ReLU(),
-            output_activation=self.func)
-        self.v = LinearNetwork(layers=[input_dim, 128, 64, 1], hidden_activation=nn.ReLU(
-        ), output_activation=self.func)
+            output_activation=Identical())
+        self.v = LinearNetwork(layers=[input_dim, 512, 128, 64, 1], hidden_activation=nn.ReLU(
+        ), output_activation= Identical())
 
         self.tril_mask = Variable(torch.tril(torch.ones(
             output_dim, output_dim), diagonal=-1).unsqueeze(0))
@@ -115,14 +122,14 @@ class DQNAgent(nn.Module):
         self.action_dim = action_dim
 
         self.gamma = 0.99
-        self.memory_size = 2000000
+        self.memory_size = 200000
         self.memory = []
-        self.batch_size = 256
-        self.learning_rate = 0.5
-        self.tau = 1e-1
+        self.batch_size = 1024
+        self.learning_rate = 1e-3
+        self.tau = 1e-3
         self.reward_normalize = 1
 
-        self.action_exploration = OUNoise(action_dim.shape[0],threshold_decrease=0.007)
+        self.action_exploration = OUNoise(action_dim.shape[0])
         self.init_naf_networks()
 
     def init_naf_networks(self):
@@ -133,7 +140,7 @@ class DQNAgent(nn.Module):
 
     def get_action(self, state):
         state = torch.FloatTensor(state)
-        action = self.q_target.argmax_action(state).detach().data.numpy()
+        action = self.Q.argmax_action(state).detach().data.numpy()
         action_exploration = self.action_exploration.noise()
         return np.clip(action + action_exploration, -1, 1)
 
@@ -160,8 +167,7 @@ class DQNAgent(nn.Module):
         if len(self.memory) >= self.batch_size:
             states, actions, rewards, dones, next_states = self.get_batch()
             self.opt.zero_grad()
-            target = self.reward_normalize * rewards + self.gamma * \
-                self.Q.maximum_q_value(next_states).detach()
+            target = self.reward_normalize * rewards + self.gamma * (1 - dones) + self.q_target.maximum_q_value(next_states).detach()
             loss = torch.mean((self.Q(states, actions) - target) ** 2)
             loss.backward()
             self.opt.step()
@@ -170,12 +176,13 @@ class DQNAgent(nn.Module):
             self.action_exploration.decrease()
             return float(loss)
 
-env = gym.make('MountainCarContinuous-v0')
-# env = gym.make('LunarLanderContinuous-v2')
+# env = gym.make('Pendulum-v0')
+# env = gym.make('MountainCarContinuous-v0')
+env = gym.make('LunarLanderContinuous-v2')
 state_dim = env.observation_space.shape[0]
 action_dim = env.action_space
 agent = DQNAgent(state_dim, action_dim)
-episode_n = 100
+episode_n = 500
 rewards = []
 for episode in range(episode_n):
     state = env.reset()
