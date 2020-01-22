@@ -66,15 +66,13 @@ class NAF_Network(nn.Module):
         mu = mu.detach().numpy()
         L_vec = L_vec.detach().numpy()
         v = v.detach().numpy()
+        action = action.detach().numpy()
         P = np.apply_along_axis(self._to_P_matrix_, 1, L_vec)
 
         # --------------------------------
-        action = action.detach().numpy()
-        A = (action - mu)
-        A = np.tensordot(A, P, 1)
-        A = A @ (action - mu)
-        # A = -1/2 * (action - mu) @ P @ (action - mu).T
-        return A + v
+        A = -1/2 * np.einsum('ij,ij->i',
+                             np.diagonal((action - mu) @ P).T, action - mu)
+        return torch.FloatTensor(A + v)
 
     def maximum_q_value(self, tensor):
         return self.v(tensor)
@@ -89,7 +87,7 @@ class OUNoise:
         self.mu = mu
         self.theta = theta
         self.sigma = sigma
-        self.state = np.ones(self.action_dimension) * self.mu 
+        self.state = np.ones(self.action_dimension) * self.mu
         self.reset()
 
     def reset(self):
@@ -146,7 +144,8 @@ class DQNAgent(nn.Module):
 
     def get_batch(self):
         minibatch = random.sample(self.memory, self.batch_size)
-        states, actions, rewards, dones, next_states = map(np.array, zip(*minibatch))
+        states, actions, rewards, dones, next_states = map(
+            np.array, zip(*minibatch))
         states = torch.tensor(states, dtype=torch.float32)
         actions = torch.tensor(actions, dtype=torch.float32)
         rewards = torch.tensor(rewards, dtype=torch.float32)
@@ -156,16 +155,17 @@ class DQNAgent(nn.Module):
 
     def fit(self, state, action, reward, done, next_state):
         self.memory.append([state, action, reward, done, next_state])
-        
+
         if len(self.memory) >= self.batch_size:
             states, actions, rewards, dones, next_states = self.get_batch()
             self.opt.zero_grad()
-            target = self.reward_normalize * rewards + self.gamma * (1 - dones) * self.Q.maximum_q_value(next_states).detach()
+            target = self.reward_normalize * rewards + self.gamma * \
+                (1 - dones) * self.Q.maximum_q_value(next_states).detach()
             loss = torch.mean((self.Q(states, actions) - target) ** 2)
             loss.backward()
             self.opt.step()
             self.soft_update()
-            
+
             self.action_exploration.decrease()
 
 
