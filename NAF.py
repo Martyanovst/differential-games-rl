@@ -12,7 +12,7 @@ env = gym.make('Pendulum-v0')
 state_dim = env.observation_space
 action_dim = env.action_space
 agent = DQNAgent(state_dim.shape[0], action_dim)
-episode_n = 500
+episode_n = 2000
 rewards = []
 for episode in range(episode_n):
     state = env.reset()
@@ -22,8 +22,8 @@ for episode in range(episode_n):
         action = agent.get_action(state)
         # print('action: ' + str(action))
         next_state, reward, done, _ = env.step(action)
-        if episode > 50:
-            env.render()
+        # if episode > 50:
+        #     env.render()
         loss = agent.fit(state, action, reward, done, next_state)
         state = next_state
         total_reward += reward

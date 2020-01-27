@@ -15,13 +15,13 @@ class NAF_Network(nn.Module):
         super().__init__()
         self.output_dim = output_dim
         self.input_dim = input_dim
-        self.mu = LinearNetwork(layers=[input_dim, 64,  64, output_dim],
-                                hidden_activation=nn.Sigmoid(),
+        self.mu = LinearNetwork(layers=[input_dim, 256,  256, 256, output_dim],
+                                hidden_activation=nn.ReLU(),
                                 output_activation=nn.Tanh())
-        self.P = LinearNetwork(layers=[input_dim,  1024, 1024, 512, output_dim ** 2],
+        self.P = LinearNetwork(layers=[input_dim,  256, 256, 256, output_dim ** 2],
                                hidden_activation=nn.ReLU(),
                                output_activation=Identical())
-        self.v = LinearNetwork(layers=[input_dim, 64,  64, 1],
+        self.v = LinearNetwork(layers=[input_dim, 256,  256, 256, 1],
                                hidden_activation=nn.ReLU(), output_activation=Identical())
 
         self.tril_mask = torch.tril(torch.ones(
@@ -65,9 +65,9 @@ class DQNAgent(nn.Module):
         self.action_max = action_dim.high[0]
         self.action_min =  action_dim.low[0]
         self.gamma = 0.99
-        self.memory_size = 2000
+        self.memory_size = 200000
         self.memory = []
-        self.batch_size = 64
+        self.batch_size = 1024
         self.learning_rate = 1e-3
         self.tau = 1e-2
         self.reward_normalize = 1
@@ -79,7 +79,8 @@ class DQNAgent(nn.Module):
 
     def init_naf_networks(self):
         self.Q = NAF_Network(self.state_dim, self.action_dim.shape[0])
-        self.q_target = deepcopy(self.Q)
+        self.q_target = NAF_Network(self.state_dim, self.action_dim.shape[0])
+        self.soft_update(1)
         self.opt = torch.optim.Adam(
             self.Q.parameters(), lr=self.learning_rate)
 
@@ -92,7 +93,7 @@ class DQNAgent(nn.Module):
     def soft_update(self, tau):
         for new_parameter, old_parameter in zip(self.q_target.parameters(), self.Q.parameters()):
             new_parameter.data.copy_(
-                (tau) * old_parameter + (1 - tau) * new_parameter)
+                (tau) * old_parameter.data + (1 - tau) * new_parameter.data)
 
     def get_batch(self):
         minibatch = random.sample(self.memory, self.batch_size)
@@ -116,6 +117,7 @@ class DQNAgent(nn.Module):
             loss = self.loss(self.Q(states, actions), target)
             self.opt.zero_grad()
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(self.Q.parameters(), 1)
             self.opt.step()
             self.soft_update(self.tau)
 
