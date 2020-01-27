@@ -18,17 +18,17 @@ class NAF_Network(nn.Module):
         self.mu = LinearNetwork(layers=[input_dim, 64,  64, output_dim],
                                 hidden_activation=nn.Sigmoid(),
                                 output_activation=nn.Tanh())
-        self.P = LinearNetwork(layers=[input_dim,  64,  64, output_dim ** 2],
+        self.P = LinearNetwork(layers=[input_dim,  1024, 1024, 512, output_dim ** 2],
                                hidden_activation=nn.ReLU(),
                                output_activation=Identical())
         self.v = LinearNetwork(layers=[input_dim, 64,  64, 1],
                                hidden_activation=nn.ReLU(), output_activation=Identical())
 
-        self.tril_mask = Variable(torch.tril(torch.ones(
-            output_dim, output_dim), diagonal=-1).unsqueeze(0))
+        self.tril_mask = torch.tril(torch.ones(
+            output_dim, output_dim), diagonal=-1).unsqueeze(0)
 
-        self.diag_mask = Variable(torch.diag(torch.diag(
-            torch.ones(output_dim, output_dim))).unsqueeze(0))
+        self.diag_mask = torch.diag(torch.diag(
+            torch.ones(output_dim, output_dim))).unsqueeze(0)
 
     def _forward_(self, tensor):
         mu = self.mu(tensor)
@@ -65,15 +65,16 @@ class DQNAgent(nn.Module):
         self.action_max = action_dim.high[0]
         self.action_min =  action_dim.low[0]
         self.gamma = 0.99
-        self.memory_size = 200000
+        self.memory_size = 2000
         self.memory = []
-        self.batch_size = 256
+        self.batch_size = 64
         self.learning_rate = 1e-3
         self.tau = 1e-2
         self.reward_normalize = 1
         self.loss = nn.MSELoss()
 
-        self.action_exploration = OUNoise(action_dim.shape[0], threshold=0.75)
+        # self.action_exploration = OUNoise(action_dim.shape[0], threshold=0.75)
+        self.action_exploration = UniformNoise(action_dim.shape[0], threshold=self.action_max)
         self.init_naf_networks()
 
     def init_naf_networks(self):
@@ -110,8 +111,8 @@ class DQNAgent(nn.Module):
             self.memory.pop(0)
         if len(self.memory) >= self.batch_size:
             states, actions, rewards, dones, next_states = self.get_batch()
-            target = self.reward_normalize * rewards + self.gamma * \
-                (1 - dones) * self.q_target.maximum_q_value(next_states).detach()
+            target = self.reward_normalize * rewards + (self.gamma * \
+                dones * self.q_target.maximum_q_value(next_states).detach())
             loss = self.loss(self.Q(states, actions), target)
             self.opt.zero_grad()
             loss.backward()

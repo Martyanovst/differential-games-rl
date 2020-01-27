@@ -20,7 +20,7 @@ for episode in range(episode_n):
     loss = 0
     for t in range(10000):
         action = agent.get_action(state)
-        print('action: ' + str(action))
+        # print('action: ' + str(action))
         next_state, reward, done, _ = env.step(action)
         if episode > 50:
             env.render()
