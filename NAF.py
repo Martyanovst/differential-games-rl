@@ -8,13 +8,11 @@ from copy import deepcopy
 from torch.autograd import Variable
 from nafAgent import DQNAgent
 
-# env = gym.make('Pendulum-v0')
-# env = gym.make('MountainCarContinuous-v0')
-env = gym.make('LunarLanderContinuous-v2')
-state_dim = env.observation_space.shape[0]
+env = gym.make('Pendulum-v0')
+state_dim = env.observation_space
 action_dim = env.action_space
-agent = DQNAgent(state_dim, action_dim)
-episode_n = 200
+agent = DQNAgent(state_dim.shape[0], action_dim)
+episode_n = 500
 rewards = []
 for episode in range(episode_n):
     state = env.reset()
@@ -22,6 +20,7 @@ for episode in range(episode_n):
     loss = 0
     for t in range(10000):
         action = agent.get_action(state)
+        print('action: ' + str(action))
         next_state, reward, done, _ = env.step(action)
         if episode > 50:
             env.render()

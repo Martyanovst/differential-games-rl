@@ -15,14 +15,14 @@ class NAF_Network(nn.Module):
         super().__init__()
         self.output_dim = output_dim
         self.input_dim = input_dim
-        self.mu = LinearNetwork(layers=[input_dim, 1024, 512, 512, output_dim],
+        self.mu = LinearNetwork(layers=[input_dim, 64,  64, output_dim],
                                 hidden_activation=nn.Sigmoid(),
                                 output_activation=nn.Tanh())
-        self.P = LinearNetwork(layers=[input_dim, 1024, 512, 512, output_dim ** 2],
-                               hidden_activation=nn.Sigmoid(),
+        self.P = LinearNetwork(layers=[input_dim,  64,  64, output_dim ** 2],
+                               hidden_activation=nn.ReLU(),
                                output_activation=Identical())
-        self.v = LinearNetwork(layers=[input_dim, 512, 128, 64, 1],
-                               hidden_activation=nn.Sigmoid(), output_activation=Identical())
+        self.v = LinearNetwork(layers=[input_dim, 64,  64, 1],
+                               hidden_activation=nn.ReLU(), output_activation=Identical())
 
         self.tril_mask = Variable(torch.tril(torch.ones(
             output_dim, output_dim), diagonal=-1).unsqueeze(0))
@@ -34,7 +34,7 @@ class NAF_Network(nn.Module):
         mu = self.mu(tensor)
         L = self.P(tensor)
         v = self.v(tensor)
-        return mu, L, v
+        return mu * 2, L, v
 
     def forward(self, tensor, action):
         mu, L_vec, v = self._forward_(tensor)
@@ -62,16 +62,18 @@ class DQNAgent(nn.Module):
         super().__init__()
         self.state_dim = state_dim
         self.action_dim = action_dim
-
+        self.action_max = action_dim.high[0]
+        self.action_min =  action_dim.low[0]
         self.gamma = 0.99
         self.memory_size = 200000
         self.memory = []
-        self.batch_size = 400
+        self.batch_size = 256
         self.learning_rate = 1e-3
-        self.tau = 1
+        self.tau = 1e-2
         self.reward_normalize = 1
+        self.loss = nn.MSELoss()
 
-        self.action_exploration = OUNoise(action_dim.shape[0])
+        self.action_exploration = OUNoise(action_dim.shape[0], threshold=0.75)
         self.init_naf_networks()
 
     def init_naf_networks(self):
@@ -84,7 +86,7 @@ class DQNAgent(nn.Module):
         state = torch.FloatTensor(state)
         action = self.Q.argmax_action(state).detach().data.numpy()
         action_exploration = self.action_exploration.noise()
-        return np.clip(action + action_exploration, -1, 1)
+        return np.clip(action + action_exploration, self.action_min, self.action_max)
 
     def soft_update(self, tau):
         for new_parameter, old_parameter in zip(self.q_target.parameters(), self.Q.parameters()):
@@ -98,7 +100,7 @@ class DQNAgent(nn.Module):
         states = torch.tensor(states, dtype=torch.float32)
         actions = torch.tensor(actions, dtype=torch.float32)
         rewards = torch.tensor(rewards, dtype=torch.float32)
-        dones = torch.tensor(dones, dtype=torch.float32)
+        dones = torch.tensor(dones.astype(np.float32), dtype=torch.float32)
         next_states = torch.tensor(next_states, dtype=torch.float32)
         return states, actions, rewards, dones, next_states
 
@@ -109,8 +111,8 @@ class DQNAgent(nn.Module):
         if len(self.memory) >= self.batch_size:
             states, actions, rewards, dones, next_states = self.get_batch()
             target = self.reward_normalize * rewards + self.gamma * \
-                (1 - dones) + self.q_target.maximum_q_value(next_states).detach()
-            loss = torch.mean((self.Q(states, actions) - target) ** 2)
+                (1 - dones) * self.q_target.maximum_q_value(next_states).detach()
+            loss = self.loss(self.Q(states, actions), target)
             self.opt.zero_grad()
             loss.backward()
             self.opt.step()
