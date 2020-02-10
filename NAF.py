@@ -24,13 +24,13 @@ for episode in range(episode_n):
         next_state, reward, done, _ = env.step(action)
         # if episode > 50:
         #     env.render()
-        loss = agent.fit(state, action, reward, done, next_state)
+        loss, noise_threshold = agent.fit(state, action, reward, done, next_state)
         state = next_state
         total_reward += reward
         if done:
             break
     print(str(episode) + ' : ' + str(total_reward) + ' loss: ' +
-          str(loss) + ' memory: ' + str(len(agent.memory)))
+          str(loss) + ' memory: ' + str(len(agent.memory)) + ' noise threshold: ' + str(noise_threshold))
     rewards.append(total_reward)
 
 plt.plot(range(episode_n), rewards)

@@ -6,7 +6,7 @@ import gym
 import matplotlib.pyplot as plt
 from copy import deepcopy
 from torch.autograd import Variable
-from noises import UniformNoise, OUNoise
+from noises import UniformNoise, OUNoise, ZeroNoise
 from linearNetwork import LinearNetwork, Identical
 
 class NAF_Network(nn.Module):
@@ -15,13 +15,17 @@ class NAF_Network(nn.Module):
         super().__init__()
         self.output_dim = output_dim
         self.input_dim = input_dim
-        self.mu = LinearNetwork(layers=[input_dim, 256,  256, 256, output_dim],
+        middleware_out_dim = 10
+        self.middleware = LinearNetwork(layers=[input_dim, 100,  100, middleware_out_dim],
+                                hidden_activation=nn.ReLU(),
+                                output_activation=nn.ReLU())
+        self.mu = LinearNetwork(layers=[middleware_out_dim, 100,  100, output_dim],
                                 hidden_activation=nn.ReLU(),
                                 output_activation=nn.Tanh())
-        self.P = LinearNetwork(layers=[input_dim,  256, 256, 256, output_dim ** 2],
+        self.P = LinearNetwork(layers=[middleware_out_dim,  100, 100, output_dim ** 2],
                                hidden_activation=nn.ReLU(),
                                output_activation=Identical())
-        self.v = LinearNetwork(layers=[input_dim, 256,  256, 256, 1],
+        self.v = LinearNetwork(layers=[middleware_out_dim, 100, 100, 1],
                                hidden_activation=nn.ReLU(), output_activation=Identical())
 
         self.tril_mask = torch.tril(torch.ones(
@@ -31,6 +35,7 @@ class NAF_Network(nn.Module):
             torch.ones(output_dim, output_dim))).unsqueeze(0)
 
     def _forward_(self, tensor):
+        tensor = self.middleware(tensor)
         mu = self.mu(tensor)
         L = self.P(tensor)
         v = self.v(tensor)
@@ -51,9 +56,11 @@ class NAF_Network(nn.Module):
         return A + v
 
     def maximum_q_value(self, tensor):
+        tensor = self.middleware(tensor)
         return self.v(tensor)
 
     def argmax_action(self, tensor):
+        tensor = self.middleware(tensor)
         return self.mu(tensor)
 
 class DQNAgent(nn.Module):
@@ -67,14 +74,15 @@ class DQNAgent(nn.Module):
         self.gamma = 0.99
         self.memory_size = 200000
         self.memory = []
-        self.batch_size = 1024
+        self.batch_size = 300
         self.learning_rate = 1e-3
         self.tau = 1e-2
         self.reward_normalize = 1
         self.loss = nn.MSELoss()
 
-        # self.action_exploration = OUNoise(action_dim.shape[0], threshold=0.75)
-        self.action_exploration = UniformNoise(action_dim.shape[0], threshold=self.action_max)
+        # self.action_exploration = OUNoise(action_dim.shape[0])
+        self.action_exploration = ZeroNoise()
+        # self.action_exploration = UniformNoise(action_dim.shape[0], threshold=self.action_max)
         self.init_naf_networks()
 
     def init_naf_networks(self):
@@ -113,13 +121,14 @@ class DQNAgent(nn.Module):
         if len(self.memory) >= self.batch_size:
             states, actions, rewards, dones, next_states = self.get_batch()
             target = self.reward_normalize * rewards + (self.gamma * \
-                dones * self.q_target.maximum_q_value(next_states).detach())
+                (1 - dones) * self.q_target.maximum_q_value(next_states).detach())
             loss = self.loss(self.Q(states, actions), target)
             self.opt.zero_grad()
             loss.backward()
-            torch.nn.utils.clip_grad_norm_(self.Q.parameters(), 1)
+            # torch.nn.utils.clip_grad_norm_(self.Q.parameters(), 1)
             self.opt.step()
             self.soft_update(self.tau)
 
             self.action_exploration.decrease()
-            return float(loss)
+            return float(loss), self.action_exploration.threshold
+        return None, self.action_exploration.threshold

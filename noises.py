@@ -14,8 +14,17 @@ class UniformNoise:
         if self.threshold > self.threshold_min:
             self.threshold -= self.threshold_decrease
 
+class ZeroNoise:
+    def __init__(self):
+        self.threshold = 0
+    def noise(self):
+        return 0
+
+    def decrease(self):
+        pass
+
 class OUNoise:
-    def __init__(self, action_dimension, mu=0, theta=0.15, sigma=0.3, threshold=1, threshold_min=0.001, threshold_decrease=0.001):
+    def __init__(self, action_dimension, mu=0, theta=0.15, sigma=0.2, threshold=0.5, threshold_min=0.001, threshold_decrease=0.001):
         self.action_dimension = action_dimension
         self.mu = mu
         self.theta = theta
