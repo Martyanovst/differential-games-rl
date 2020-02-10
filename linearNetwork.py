@@ -28,16 +28,21 @@ class LinearNetwork(nn.Module):
 
     def init_hidden_layers_(self, layers):
         self.hidden_layers = []
+        self.batch_normalizations = []
         for i in range(1, len(layers) - 1):
             previous_layer = layers[i - 1]
             current_layear = layers[i]
             linear = nn.Linear(previous_layer, current_layear)
             self.hidden_layers.append(linear)
+            self.batch_normalizations.append(nn.BatchNorm1d(current_layear))
 
     def forward(self, tensor):
         hidden = tensor
-        for layer in self.hidden_layers:
-            hidden = self.hidden_activation(layer(hidden))
+        for i in range(len(self.hidden_layers)):
+            hidden = self.hidden_layers[i](hidden)
+            if len(hidden.shape) > 1:
+                hidden = self.batch_normalizations[i](hidden)
+            hidden = self.hidden_activation(hidden)
         output = self.output_activation(self.output_layer(hidden))
         return output
 

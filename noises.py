@@ -24,7 +24,7 @@ class ZeroNoise:
         pass
 
 class OUNoise:
-    def __init__(self, action_dimension, mu=0, theta=0.15, sigma=0.2, threshold=0.5, threshold_min=0.001, threshold_decrease=0.001):
+    def __init__(self, action_dimension, mu=0, theta=0.15, sigma=0.3, threshold=1, threshold_min=0.00001, threshold_decrease=0.00005):
         self.action_dimension = action_dimension
         self.mu = mu
         self.theta = theta
@@ -42,8 +42,9 @@ class OUNoise:
         x = self.state
         dx = self.theta * (self.mu - x) + self.sigma * np.random.randn(len(x))
         self.state = x + dx
-        return self.state
+        return self.state * self.threshold
 
     def decrease(self):
+        pass
         if self.threshold > self.threshold_min:
             self.threshold -= self.threshold_decrease

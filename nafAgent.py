@@ -15,17 +15,17 @@ class NAF_Network(nn.Module):
         super().__init__()
         self.output_dim = output_dim
         self.input_dim = input_dim
-        middleware_out_dim = 10
+        middleware_out_dim = 32
         self.middleware = LinearNetwork(layers=[input_dim, 100,  100, middleware_out_dim],
-                                hidden_activation=nn.ReLU(),
-                                output_activation=nn.ReLU())
-        self.mu = LinearNetwork(layers=[middleware_out_dim, 100,  100, output_dim],
+                                hidden_activation=nn.Sigmoid(),
+                                output_activation=nn.Sigmoid())
+        self.mu = LinearNetwork(layers=[middleware_out_dim, 50,  50, output_dim],
                                 hidden_activation=nn.ReLU(),
                                 output_activation=nn.Tanh())
         self.P = LinearNetwork(layers=[middleware_out_dim,  100, 100, output_dim ** 2],
                                hidden_activation=nn.ReLU(),
                                output_activation=Identical())
-        self.v = LinearNetwork(layers=[middleware_out_dim, 100, 100, 1],
+        self.v = LinearNetwork(layers=[middleware_out_dim, 32, 32, 1],
                                hidden_activation=nn.ReLU(), output_activation=Identical())
 
         self.tril_mask = torch.tril(torch.ones(
@@ -61,7 +61,7 @@ class NAF_Network(nn.Module):
 
     def argmax_action(self, tensor):
         tensor = self.middleware(tensor)
-        return self.mu(tensor)
+        return 2 * self.mu(tensor)
 
 class DQNAgent(nn.Module):
 
@@ -72,16 +72,16 @@ class DQNAgent(nn.Module):
         self.action_max = action_dim.high[0]
         self.action_min =  action_dim.low[0]
         self.gamma = 0.99
-        self.memory_size = 200000
+        self.memory_size = 20000
         self.memory = []
-        self.batch_size = 300
+        self.batch_size = 200
         self.learning_rate = 1e-3
         self.tau = 1e-2
         self.reward_normalize = 1
         self.loss = nn.MSELoss()
 
-        # self.action_exploration = OUNoise(action_dim.shape[0])
-        self.action_exploration = ZeroNoise()
+        self.action_exploration = OUNoise(action_dim.shape[0])
+        # self.action_exploration = ZeroNoise()
         # self.action_exploration = UniformNoise(action_dim.shape[0], threshold=self.action_max)
         self.init_naf_networks()
 
