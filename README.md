@@ -9,3 +9,5 @@ Research of usage deep reinfocrement learning to solve differential games proble
 
 
 [Краткое описание архитектуры NAF](https://nervanasystems.github.io/coach/components/agents/value_optimization/naf.html)
+
+[Actor expert a framework for using action value methods in continuous action spaces](https://www.groundai.com/project/actor-expert-a-framework-for-using-action-value-methods-in-continuous-action-spaces/1)
