@@ -40,9 +40,9 @@ class LinearNetwork(nn.Module):
         hidden = tensor
         for i in range(len(self.hidden_layers)):
             hidden = self.hidden_layers[i](hidden)
-            if len(hidden.shape) > 1:
-                hidden = self.batch_normalizations[i](hidden)
             hidden = self.hidden_activation(hidden)
+            # if len(hidden.shape) > 1:
+            #     hidden = self.batch_normalizations[i](hidden)
         output = self.output_activation(self.output_layer(hidden))
         return output
 

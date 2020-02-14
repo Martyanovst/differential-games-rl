@@ -15,17 +15,18 @@ class NAF_Network(nn.Module):
         super().__init__()
         self.output_dim = output_dim
         self.input_dim = input_dim
-        middleware_out_dim = 32
-        self.middleware = LinearNetwork(layers=[input_dim, 100,  100, middleware_out_dim],
-                                hidden_activation=nn.Sigmoid(),
-                                output_activation=nn.Sigmoid())
-        self.mu = LinearNetwork(layers=[middleware_out_dim, 50,  50, output_dim],
+        middleware_out_dim = 100
+        # TODO fix
+        # self.middleware = LinearNetwork(layers=[input_dim, 32,  32, middleware_out_dim],
+        #                         hidden_activation=nn.ReLU(),
+        #                         output_activation=nn.ReLU())
+        self.mu = LinearNetwork(layers=[input_dim, 16,  16, output_dim],
                                 hidden_activation=nn.ReLU(),
                                 output_activation=nn.Tanh())
-        self.P = LinearNetwork(layers=[middleware_out_dim,  100, 100, output_dim ** 2],
+        self.P = LinearNetwork(layers=[input_dim,  32, 32, output_dim ** 2],
                                hidden_activation=nn.ReLU(),
                                output_activation=Identical())
-        self.v = LinearNetwork(layers=[middleware_out_dim, 32, 32, 1],
+        self.v = LinearNetwork(layers=[input_dim, 32, 32, 1],
                                hidden_activation=nn.ReLU(), output_activation=Identical())
 
         self.tril_mask = torch.tril(torch.ones(
@@ -35,7 +36,7 @@ class NAF_Network(nn.Module):
             torch.ones(output_dim, output_dim))).unsqueeze(0)
 
     def _forward_(self, tensor):
-        tensor = self.middleware(tensor)
+        # tensor = self.middleware(tensor)
         mu = self.mu(tensor)
         L = self.P(tensor)
         v = self.v(tensor)
@@ -56,12 +57,12 @@ class NAF_Network(nn.Module):
         return A + v
 
     def maximum_q_value(self, tensor):
-        tensor = self.middleware(tensor)
+        # tensor = self.middleware(tensor)
         return self.v(tensor)
 
     def argmax_action(self, tensor):
-        tensor = self.middleware(tensor)
-        return 2 * self.mu(tensor)
+        # tensor = self.middleware(tensor)
+        return self.mu(tensor) * 2
 
 class DQNAgent(nn.Module):
 
@@ -72,12 +73,12 @@ class DQNAgent(nn.Module):
         self.action_max = action_dim.high[0]
         self.action_min =  action_dim.low[0]
         self.gamma = 0.99
-        self.memory_size = 20000
+        self.memory_size = 200000
         self.memory = []
-        self.batch_size = 200
+        self.batch_size = 32
         self.learning_rate = 1e-3
-        self.tau = 1e-2
-        self.reward_normalize = 1
+        self.tau = 1e-3
+        self.reward_normalize = 0.01
         self.loss = nn.MSELoss()
 
         self.action_exploration = OUNoise(action_dim.shape[0])
@@ -120,8 +121,8 @@ class DQNAgent(nn.Module):
             self.memory.pop(0)
         if len(self.memory) >= self.batch_size:
             states, actions, rewards, dones, next_states = self.get_batch()
-            target = self.reward_normalize * rewards + (self.gamma * \
-                (1 - dones) * self.q_target.maximum_q_value(next_states).detach())
+            target = self.reward_normalize * rewards.reshape(self.batch_size, 1) + (self.gamma * \
+                 self.q_target.maximum_q_value(next_states).detach())
             loss = self.loss(self.Q(states, actions), target)
             self.opt.zero_grad()
             loss.backward()
