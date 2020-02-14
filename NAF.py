@@ -12,7 +12,7 @@ env = gym.make('Pendulum-v0')
 state_dim = env.observation_space
 action_dim = env.action_space
 agent = DQNAgent(state_dim.shape[0], action_dim)
-episode_n = 200
+episode_n = 1000
 rewards = []
 losses = []
 for episode in range(episode_n):
@@ -30,8 +30,9 @@ for episode in range(episode_n):
         total_reward += reward
         if done:
             break
+        mean_reward = sum(rewards[-100:]) / 100
     print(str(episode) + ' : ' + str(total_reward) + ' loss: ' +
-          str(loss) + ' memory: ' + str(len(agent.memory)) + ' noise threshold: ' + str(noise_threshold))
+          str(loss) + ' memory: ' + str(len(agent.memory)) + ' noise threshold: ' + str(noise_threshold) + ' last 100 mean reward: ' + str(mean_reward))
     rewards.append(total_reward)
     losses.append(loss *(-10))
 plt.plot(range(episode_n), rewards)
