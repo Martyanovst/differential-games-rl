@@ -15,16 +15,16 @@ class Identical(nn.Module):
         return input
 
 
-class LinearNetwork(nn.Module):
+class Network(nn.Module):
     def __init__(self, layers, hidden_activation, output_activation):
         super().__init__()
         self.hidden_activation = hidden_activation
         self.output_activation = output_activation
         self.layers_count = len(layers)
-        self.output_layer = nn.Linear(
-            layers[self.layers_count - 2], layers[self.layers_count - 1])
+        self.output_layer = nn.Sequential(nn.Linear(
+            layers[self.layers_count - 2], layers[self.layers_count - 1]), self.output_activation)
         self.init_hidden_layers_(layers)
-        self.apply(self._init_weights_)
+        # self.apply(self._init_weights_)
 
     def init_hidden_layers_(self, layers):
         self.hidden_layers = []
@@ -32,15 +32,15 @@ class LinearNetwork(nn.Module):
         for i in range(1, len(layers) - 1):
             previous_layer = layers[i - 1]
             current_layear = layers[i]
-            linear = nn.Linear(previous_layer, current_layear)
+            linear = nn.Sequential(nn.Linear(previous_layer, current_layear), self.output_activation)
             self.hidden_layers.append(linear)
-            self.batch_normalizations.append(nn.BatchNorm1d(current_layear))
+            # self.batch_normalizations.append(nn.BatchNorm1d(current_layear))
 
     def forward(self, tensor):
         hidden = tensor
         for i in range(len(self.hidden_layers)):
             hidden = self.hidden_layers[i](hidden)
-            hidden = self.hidden_activation(hidden)
+            # hidden = self.hidden_activation(hidden)
             # if len(hidden.shape) > 1:
             #     hidden = self.batch_normalizations[i](hidden)
         output = self.output_activation(self.output_layer(hidden))

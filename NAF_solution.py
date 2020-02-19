@@ -1,13 +1,18 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import gym
+import torch.nn as nn
+from linearNetwork import Network, Identical
 env = gym.make("LunarLanderContinuous-v2").env
 state_shape = env.observation_space.shape
 action_shape = env.action_space.shape
 action_max = 1
 
 from NAF_agent import NAFAgent
-agent = NAFAgent(state_shape, action_shape, action_max)
+mu_model = Network([state_shape[0], 50, 50, 50, action_shape[0]], nn.ReLU(), nn.Tanh())
+p_model = Network([state_shape[0], 100, 100, 100, action_shape[0] ** 2], nn.ReLU(), Identical())
+v_model = Network([state_shape[0], 50, 50, 50, 1], nn.ReLU(), Identical())
+agent = NAFAgent(mu_model, p_model, v_model, state_shape, action_shape, action_max)
 
 def play_and_learn(t_max=200, learn=True):
 
@@ -22,24 +27,22 @@ def play_and_learn(t_max=200, learn=True):
 		
 		if learn:
 			agent.fit(state, action, reward, next_state)
-		# else:
 		env.render()
 
 		state = next_state
-
 
 		if done:
 			break
 
 	return total_reward
 	
-episodes_n = 1000
+episodes_n = 1100
 rewards = np.zeros(episodes_n)
 mean_rewards = np.zeros(episodes_n)
 
 for episode in range(episodes_n):
 
-	if episode < 1100:
+	if episode < 1000:
 		rewards[episode] = play_and_learn()
 	else:
 		agent.noise_threshold = 0
@@ -50,5 +53,3 @@ for episode in range(episodes_n):
 
 plt.plot(range(episodes_n), mean_rewards)
 plt.show()
-	#if np.mean(total_reward) > 500:
-	#	print("You Win! You may stop training now via KeyboardInterrupt.")
