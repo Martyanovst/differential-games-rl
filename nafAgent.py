@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from copy import deepcopy
 from torch.autograd import Variable
 from noises import UniformNoise, OUNoise, ZeroNoise
-from linearNetwork import LinearNetwork, Identical
+from linearNetwork import Network, Identical
 
 class NAF_Network(nn.Module):
 
@@ -20,13 +20,13 @@ class NAF_Network(nn.Module):
         # self.middleware = LinearNetwork(layers=[input_dim, 32,  32, middleware_out_dim],
         #                         hidden_activation=nn.ReLU(),
         #                         output_activation=nn.ReLU())
-        self.mu = LinearNetwork(layers=[input_dim, 16,  16, output_dim],
+        self.mu = Network(layers=[input_dim, 16,  16, output_dim],
                                 hidden_activation=nn.ReLU(),
                                 output_activation=nn.Tanh())
-        self.P = LinearNetwork(layers=[input_dim,  32, 32, output_dim ** 2],
+        self.P = Network(layers=[input_dim,  32, 32, output_dim ** 2],
                                hidden_activation=nn.ReLU(),
                                output_activation=Identical())
-        self.v = LinearNetwork(layers=[input_dim, 32, 32, 1],
+        self.v = Network(layers=[input_dim, 32, 32, 1],
                                hidden_activation=nn.ReLU(), output_activation=Identical())
 
         self.tril_mask = torch.tril(torch.ones(
