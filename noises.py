@@ -25,7 +25,7 @@ class ZeroNoise:
 
 class OUNoise:
     """docstring for OUNoise"""
-    def __init__(self, action_dimension, mu=0, theta=0.15, sigma=0.3, threshold=1, threshold_min=0.01, threshold_decrease=0.000002):
+    def __init__(self, action_dimension, mu=0, theta=0.15, sigma=0.3, threshold=1, threshold_min=0.01, threshold_decrease=0.00001):
         self.action_dimension = action_dimension
         self.mu = mu
         self.theta = theta

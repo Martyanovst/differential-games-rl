@@ -45,7 +45,6 @@ class NAFAgent():
         self.memory = deque(maxlen=200000)
         self.gamma = 0.99
         self.batch_size = 200
-        # self.noise = UniformNoise(action_shape[0])
         self.noise = OUNoise(action_shape[0])
         self.reward_normalize = 1
     

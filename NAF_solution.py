@@ -2,16 +2,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 import gym
 import torch.nn as nn
-from linearNetwork import Network, Identical
+from sequentialNetwork import Seq_Network
 env = gym.make("LunarLanderContinuous-v2").env
 state_shape = env.observation_space.shape
 action_shape = env.action_space.shape
 action_max = 1
 
 from NAF_agent import NAFAgent
-mu_model = Network([state_shape[0], 50, 50, 50, action_shape[0]], nn.ReLU(), nn.Tanh())
-p_model = Network([state_shape[0], 100, 100, 100, action_shape[0] ** 2], nn.ReLU(), Identical())
-v_model = Network([state_shape[0], 50, 50, 50, 1], nn.ReLU(), Identical())
+mu_model = Seq_Network([state_shape[0], 50, 50, 50, action_shape[0]], nn.ReLU(), nn.Tanh())
+p_model = Seq_Network([state_shape[0], 100, 100, 100, action_shape[0] ** 2], nn.ReLU())
+v_model = Seq_Network([state_shape[0], 50, 50, 50, 1], nn.ReLU())
 agent = NAFAgent(mu_model, p_model, v_model, state_shape, action_shape, action_max)
 
 def play_and_learn(t_max=200, learn=True):
