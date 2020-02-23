@@ -13,7 +13,7 @@ action_max = 1
 mu_model = Seq_Network([state_shape[0], 50, 50, 50, action_shape[0]], nn.ReLU(), nn.Tanh())
 p_model = Seq_Network([state_shape[0], 100, 100, 100, action_shape[0] ** 2], nn.ReLU())
 v_model = Seq_Network([state_shape[0], 50, 50, 50, 1], nn.ReLU())
-agent = NAFAgent(mu_model, p_model, v_model, state_shape, action_shape, action_max)
+agent = NAFAgent(mu_model, p_model, v_model, state_shape, action_shape[0], action_max)
 
 
 def play_and_learn(t_max=200, learn=True):
@@ -27,7 +27,7 @@ def play_and_learn(t_max=200, learn=True):
         total_reward += reward
 
         if learn:
-            agent.fit(state, action, reward, next_state)
+            agent.fit(state, action, reward, done, next_state)
         env.render()
 
         state = next_state

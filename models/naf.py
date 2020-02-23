@@ -34,20 +34,20 @@ class Q_model(nn.Module):
 
 class NAFAgent():
 
-    def __init__(self, mu_model, p_model, v_model, state_shape, action_shape, action_max):
+    def __init__(self, mu_model, p_model, v_model, state_shape, action_shape, action_max, batch_size=200):
 
         self.state_shape = state_shape
         self.action_shape = action_shape
         self.action_max = action_max
 
-        self.Q = Q_model(mu_model, p_model, v_model, action_shape[0])
+        self.Q = Q_model(mu_model, p_model, v_model, action_shape)
         self.opt = torch.optim.Adam(self.Q.parameters(), lr=1e-3)
         self.Q_target = deepcopy(self.Q)
         self.tau = 1e-3
         self.memory = deque(maxlen=200000)
         self.gamma = 0.99
-        self.batch_size = 200
-        self.noise = OUNoise(action_shape[0])
+        self.batch_size = batch_size
+        self.noise = OUNoise(action_shape)
         self.reward_normalize = 1
 
     def get_action(self, state):
@@ -63,20 +63,22 @@ class NAFAgent():
 
     def get_batch(self):
         minibatch = random.sample(self.memory, self.batch_size)
-        states, actions, rewards, next_states = map(np.array, zip(*minibatch))
+        states, actions, rewards, dones, next_states = map(np.array, zip(*minibatch))
         states = torch.tensor(states, dtype=torch.float32)
         actions = torch.tensor(actions, dtype=torch.float32)
         rewards = torch.tensor(rewards, dtype=torch.float32)
+        dones = torch.tensor(dones, dtype=torch.int8)
         next_states = torch.tensor(next_states, dtype=torch.float32)
-        return states, actions, rewards, next_states
+        return states, actions, rewards, dones, next_states
 
-    def fit(self, state, action, reward, next_state):
-        self.memory.append([state, action, reward, next_state])
+    def fit(self, state, action, reward, done, next_state):
+        self.memory.append([state, action, reward, done, next_state])
 
         if len(self.memory) >= self.batch_size:
-            states, actions, rewards, next_states = self.get_batch()
+            states, actions, rewards, dones, next_states = self.get_batch()
             self.opt.zero_grad()
-            target = self.reward_normalize * rewards.reshape(self.batch_size, 1) + self.gamma * self.Q_target.v(
+            target = self.reward_normalize * rewards.reshape(self.batch_size, 1) + (
+                        1 - dones) * self.gamma * self.Q_target.v(
                 next_states).detach()
             loss = torch.mean((self.Q(states, actions) - target) ** 2)
             loss.backward()
