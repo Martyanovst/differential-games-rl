@@ -1,15 +1,16 @@
-import numpy as np
 import random
-import torch
-from torch.autograd import Variable
-import torch.nn as nn
-from copy import deepcopy
 from collections import deque
-from noises import UniformNoise, OUNoise
+from copy import deepcopy
+
+import numpy as np
+import torch
+import torch.nn as nn
+
+from utils.noises import OUNoise
 
 
 class Q_model(nn.Module):
-    def __init__(self, mu_model, p_model, v_model, state_shape, action_shape):
+    def __init__(self, mu_model, p_model, v_model, action_shape):
         super().__init__()
         self.P = p_model
         self.mu = mu_model
@@ -30,15 +31,16 @@ class Q_model(nn.Module):
                       action_mu)[:, :, 0]
         return A + self.v(state)
 
+
 class NAFAgent():
-    
+
     def __init__(self, mu_model, p_model, v_model, state_shape, action_shape, action_max):
 
         self.state_shape = state_shape
         self.action_shape = action_shape
         self.action_max = action_max
-        
-        self.Q = Q_model(mu_model, p_model, v_model, state_shape, action_shape[0])
+
+        self.Q = Q_model(mu_model, p_model, v_model, action_shape[0])
         self.opt = torch.optim.Adam(self.Q.parameters(), lr=1e-3)
         self.Q_target = deepcopy(self.Q)
         self.tau = 1e-3
@@ -47,18 +49,18 @@ class NAFAgent():
         self.batch_size = 200
         self.noise = OUNoise(action_shape[0])
         self.reward_normalize = 1
-    
+
     def get_action(self, state):
         state = torch.tensor(np.array([state]), dtype=torch.float)
         mu_value = self.Q.mu(state).detach().data.numpy()[0]
         noise = self.noise.noise()
         action = self.action_max * (mu_value + noise)
         return np.clip(action, - self.action_max, self.action_max)
-    
+
     def update_targets(self, target, original):
         for target_param, original_param in zip(target.parameters(), original.parameters()):
             target_param.data.copy_((1 - self.tau) * target_param.data + self.tau * original_param.data)
-    
+
     def get_batch(self):
         minibatch = random.sample(self.memory, self.batch_size)
         states, actions, rewards, next_states = map(np.array, zip(*minibatch))
@@ -67,17 +69,18 @@ class NAFAgent():
         rewards = torch.tensor(rewards, dtype=torch.float32)
         next_states = torch.tensor(next_states, dtype=torch.float32)
         return states, actions, rewards, next_states
-    
+
     def fit(self, state, action, reward, next_state):
         self.memory.append([state, action, reward, next_state])
-        
+
         if len(self.memory) >= self.batch_size:
             states, actions, rewards, next_states = self.get_batch()
             self.opt.zero_grad()
-            target = self.reward_normalize * rewards.reshape(self.batch_size, 1) + self.gamma * self.Q_target.v(next_states).detach()
+            target = self.reward_normalize * rewards.reshape(self.batch_size, 1) + self.gamma * self.Q_target.v(
+                next_states).detach()
             loss = torch.mean((self.Q(states, actions) - target) ** 2)
             loss.backward()
             self.opt.step()
             self.update_targets(self.Q_target, self.Q)
-            
+
             self.noise.decrease()

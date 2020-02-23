@@ -1,6 +1,3 @@
-import numpy as np
-
-
 class OptimalUAgent:
     def __init__(self, env):
         super().__init__()

@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from unequal_game_env import UnequalGame
-from optimal_agents import OptimalUAgent, OptimalVAgent
+from problems.paratrooper.unequal_game_env import UnequalGame
+from problems.paratrooper.optimal_agents import OptimalUAgent, OptimalVAgent
 
 env = UnequalGame()
 u_agent = OptimalUAgent(env)
