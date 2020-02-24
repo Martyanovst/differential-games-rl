@@ -28,3 +28,12 @@ class OptimalVAgent:
             return - self.v_action_max
         else:
             return 0
+
+
+class DummyVAgent:
+    def __init__(self, value):
+        super().__init__()
+        self.value = value
+
+    def get_action(self, state):
+        return self.value

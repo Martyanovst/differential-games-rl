@@ -78,7 +78,7 @@ class NAFAgent():
             states, actions, rewards, dones, next_states = self.get_batch()
             self.opt.zero_grad()
             target = self.reward_normalize * rewards.reshape(self.batch_size, 1) + (
-                        1 - dones) * self.gamma * self.Q_target.v(
+                    1 - dones) * self.gamma * self.Q_target.v(
                 next_states).detach()
             loss = torch.mean((self.Q(states, actions) - target) ** 2)
             loss.backward()
