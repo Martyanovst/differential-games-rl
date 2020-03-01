@@ -29,4 +29,4 @@ class UnequalGame:
             reward = x ** 2
             self.done = True
 
-        return self.state, reward, self.done, None
+        return self.state, reward, int(self.done), None

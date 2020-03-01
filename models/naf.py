@@ -6,7 +6,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from utils.noises import OUNoise
+from utilities.noises import OUNoise
 
 
 class Q_model(nn.Module):
@@ -34,7 +34,7 @@ class Q_model(nn.Module):
 
 class NAFAgent():
 
-    def __init__(self, mu_model, p_model, v_model, state_shape, action_shape, action_max, batch_size=200):
+    def __init__(self, mu_model, p_model, v_model, noise, state_shape, action_shape, action_max, batch_size=200):
 
         self.state_shape = state_shape
         self.action_shape = action_shape
@@ -47,7 +47,7 @@ class NAFAgent():
         self.memory = deque(maxlen=200000)
         self.gamma = 0.99
         self.batch_size = batch_size
-        self.noise = OUNoise(action_shape)
+        self.noise = noise
         self.reward_normalize = 1
 
     def get_action(self, state):
@@ -67,7 +67,7 @@ class NAFAgent():
         states = torch.tensor(states, dtype=torch.float32)
         actions = torch.tensor(actions, dtype=torch.float32)
         rewards = torch.tensor(rewards, dtype=torch.float32)
-        dones = torch.tensor(dones, dtype=torch.int8)
+        dones = torch.tensor(dones, dtype=torch.float32)
         next_states = torch.tensor(next_states, dtype=torch.float32)
         return states, actions, rewards, dones, next_states
 

@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import gym
 import torch.nn as nn
-from utils.sequentialNetwork import Seq_Network
+from utilities.sequentialNetwork import Seq_Network
 from models.naf import NAFAgent
 
 env = gym.make("LunarLanderContinuous-v2").env

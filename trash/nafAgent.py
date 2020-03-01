@@ -126,7 +126,7 @@ class DQNAgent(nn.Module):
             loss = self.loss(self.Q(states, actions), target)
             self.opt.zero_grad()
             loss.backward()
-            # torch.nn.utils.clip_grad_norm_(self.Q.parameters(), 1)
+            # torch.nn.utilities.clip_grad_norm_(self.Q.parameters(), 1)
             self.opt.step()
             self.soft_update(self.tau)
 
