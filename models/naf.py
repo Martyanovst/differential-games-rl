@@ -32,7 +32,7 @@ class Q_model(nn.Module):
         return A + self.v(state)
 
 
-class NAFAgent():
+class NAFAgent:
 
     def __init__(self, mu_model, p_model, v_model, noise, state_shape, action_shape, action_max, batch_size=200):
 

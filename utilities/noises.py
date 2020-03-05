@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class UniformNoise:
     def __init__(self, action_dimension, threshold=1, threshold_min=0.01, threshold_decrease=0.00001):
         self.action_dimension = action_dimension
@@ -14,18 +15,23 @@ class UniformNoise:
         if self.threshold > self.threshold_min:
             self.threshold -= self.threshold_decrease
 
+
 class ZeroNoise:
     def __init__(self):
         self.threshold = 0
+
     def noise(self):
         return 0
 
     def decrease(self):
         pass
 
+
 class OUNoise:
     """docstring for OUNoise"""
-    def __init__(self, action_dimension, mu=0, theta=0.15, sigma=0.3, threshold=1, threshold_min=0.01, threshold_decrease=0.00001):
+
+    def __init__(self, action_dimension, mu=0, theta=0.15, sigma=0.3, threshold=1, threshold_min=0.01,
+                 threshold_decrease=0.00001):
         self.action_dimension = action_dimension
         self.mu = mu
         self.theta = theta
@@ -46,6 +52,5 @@ class OUNoise:
         return self.state
 
     def decrease(self):
-        pass
         if self.threshold > self.threshold_min:
-            self.threshold -= self.threshold_decrease   
+            self.threshold -= self.threshold_decrease

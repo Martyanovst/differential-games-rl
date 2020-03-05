@@ -47,7 +47,7 @@ for episode in range(episodes_n):
     if episode < 1000:
         rewards[episode] = play_and_learn()
     else:
-        agent.noise_threshold = 0
+        agent.noise.threshold = 0
         rewards[episode] = play_and_learn(learn=False)
     mean_reward = np.mean(rewards[max(0, episode - 50):episode + 1])
     mean_rewards[episode] = mean_reward
