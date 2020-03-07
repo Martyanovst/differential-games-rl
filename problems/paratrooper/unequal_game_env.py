@@ -1,4 +1,5 @@
 import numpy as np
+import pygame
 
 
 class UnequalGame:
@@ -12,6 +13,7 @@ class UnequalGame:
         self.initial_x = initial_x
         self.steps_count = int(terminal_time / dt)
         self.state = self.reset()
+        # self.init_rendering()
 
     def reset(self):
         self.done = False
@@ -23,10 +25,16 @@ class UnequalGame:
         x = x + (u_action - v_action) * self.dt
         t += self.dt
         self.state = np.array([t, x])
-
+        # self.screen.blit(self.point, (x + 300, int(t * 100)))
+        # pygame.display.update()
+        # pygame.time.delay(100)
         reward = 0
         if t >= self.terminal_time:
             reward = x ** 2
             self.done = True
 
         return self.state, reward, int(self.done), None
+
+    def init_rendering(self):
+        self.screen = pygame.display.set_mode((640, 480))
+        self.point = pygame.image.load('point.png')

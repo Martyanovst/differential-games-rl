@@ -2,22 +2,24 @@ import numpy as np
 import torch.nn as nn
 import matplotlib.pyplot as plt
 from models.naf import NAFAgent
-from problems.paratrooper.optimal_agents import OptimalVAgent, DummyVAgent
+from problems.paratrooper.optimal_agents import OptimalVAgent, DummyVAgent, OptimalUAgent
 from problems.paratrooper.unequal_game_env import UnequalGame
 from utilities.noises import OUNoise
 from utilities.sequentialNetwork import Seq_Network
 
 state_shape = 2
 action_shape = 1
-episode_n = 300
+episode_n = 150
 
 
 def init_u_agent(state_shape, action_shape, action_max, batch_size):
     mu_model = Seq_Network([state_shape, 16, 16, 1], nn.ReLU(), nn.Tanh())
     p_model = Seq_Network([state_shape, 16, 16, action_shape ** 2], nn.ReLU())
     v_model = Seq_Network([state_shape, 16, 16, 1], nn.ReLU())
+    # mu_model = Seq_Network([state_shape, 50, 50, 50, action_shape], nn.ReLU(), nn.Tanh())
+    # p_model = Seq_Network([state_shape, 100, 100, 100, action_shape ** 2], nn.ReLU())
+    # v_model = Seq_Network([state_shape, 50, 50, 50, 1], nn.ReLU())
     noise = OUNoise(1, threshold=1, threshold_min=0.0000001, threshold_decrease=0.000005)
-    # noise = OUNoise(1)
     agent = NAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape, action_max, batch_size)
     return agent
 
@@ -26,6 +28,9 @@ def init_v_agent(state_shape, action_shape, action_max, batch_size):
     mu_model = Seq_Network([state_shape, 16, 16, 1], nn.ReLU(), nn.Tanh())
     p_model = Seq_Network([state_shape, 16, 16, action_shape ** 2], nn.ReLU())
     v_model = Seq_Network([state_shape, 16, 16, 1], nn.ReLU())
+    # mu_model = Seq_Network([state_shape, 50, 50, 50, action_shape], nn.ReLU(), nn.Tanh())
+    # p_model = Seq_Network([state_shape, 100, 100, 100, action_shape ** 2], nn.ReLU())
+    # v_model = Seq_Network([state_shape, 50, 50, 50, 1], nn.ReLU())
     noise = OUNoise(1, threshold=1, threshold_min=0.0000001, threshold_decrease=0.000005)
     agent = NAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape, action_max, batch_size)
     return agent
@@ -40,16 +45,20 @@ def fit_agents(env, episode_n, u_agent, v_agent, learning_q=1):
     for episode in range(episode_n):
         state = get_state(*env.reset())
         total_reward = 0
+        counter = 0
         while not env.done:
             u_action = u_agent.get_action(state)
             v_action = v_agent.get_action(state)
-            # v_action = 0
             next_state, reward, done, _ = env.step(u_action, v_action)
             next_state = get_state(*next_state)
             reward = float(reward)
             total_reward += reward
-            u_agent.fit(state, u_action, -reward, done, next_state)
-            v_agent.fit(state, v_action, reward, done, next_state)
+            if counter // 10 % 2 == 0:
+                u_agent.fit(state, u_action, -reward, done, next_state)
+                v_agent.memory.append([state, v_action, reward, done, next_state])
+            else:
+                v_agent.fit(state, v_action, reward, done, next_state)
+                u_agent.memory.append([state, u_action, -reward, done, next_state])
             state = next_state
         print("episode=%.0f, total reward=%.3f, u-threshold=%0.3f" % (episode, total_reward, u_agent.noise.threshold))
         rewards.append(total_reward)
@@ -83,9 +92,10 @@ def test_agents(u_agent, v_agent, tests_count, title):
 
 if __name__ == '__main__':
     env = UnequalGame()
-    u_agent = init_u_agent(state_shape, action_shape, env.u_action_max, 200)
-    v_agent = init_v_agent(state_shape, action_shape, env.v_action_max, 200)
+    u_agent = init_u_agent(state_shape, action_shape, env.u_action_max, 300)
+    v_agent = init_v_agent(state_shape, action_shape, env.v_action_max, 300)
     rewards = fit_agents(env, episode_n, u_agent, v_agent)
+    u_agent.noise.threshold = 0
     # rewards = fit_agents(env, episode_n, u_agent, OptimalVAgent(env))
     plt.plot(range(episode_n), rewards)
     plt.title('fit')
