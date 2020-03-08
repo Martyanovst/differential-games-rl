@@ -6,8 +6,6 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from utilities.noises import OUNoise
-
 
 class Q_model(nn.Module):
     def __init__(self, mu_model, p_model, v_model, action_shape):
