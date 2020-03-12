@@ -8,11 +8,12 @@ import torch.nn as nn
 
 
 class Q_model(nn.Module):
-    def __init__(self, mu_model, p_model, v_model, action_shape):
+    def __init__(self, mu_model, p_model, v_model, action_shape, action_max=1):
         super().__init__()
         self.P = p_model
         self.mu = mu_model
         self.v = v_model
+        self.action_max = action_max
         self.action_shape = action_shape
         self.tril_mask = torch.tril(torch.ones(
             action_shape, action_shape), diagonal=-1).unsqueeze(0)
@@ -23,7 +24,8 @@ class Q_model(nn.Module):
         L = self.P(state).view(-1, self.action_shape, self.action_shape)
         L = L * self.tril_mask.expand_as(L) + torch.exp(L) * self.diag_mask.expand_as(L)
         P = torch.bmm(L, L.transpose(2, 1))
-        action_mu = (action - self.mu(state)).unsqueeze(2)
+        mu = self.mu(state) * self.action_max
+        action_mu = (action - mu).unsqueeze(2)
         A = -0.5 * \
             torch.bmm(torch.bmm(action_mu.transpose(2, 1), P),
                       action_mu)[:, :, 0]
@@ -52,7 +54,7 @@ class NAFAgent:
         state = torch.tensor(np.array([state]), dtype=torch.float)
         mu_value = self.Q.mu(state).detach().data.numpy()[0]
         noise = self.noise.noise()
-        action = self.action_max * (mu_value + noise)
+        action = mu_value + noise
         return np.clip(action, - self.action_max, self.action_max)
 
     def update_targets(self, target, original):
