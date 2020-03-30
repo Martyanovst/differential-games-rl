@@ -49,7 +49,7 @@ class OUNoise:
         x = self.state
         dx = self.theta * (self.mu - x) + self.sigma * np.random.randn(len(x))
         self.state = x + dx
-        return self.state
+        return self.state * self.threshold
 
     def decrease(self):
         if self.threshold > self.threshold_min:

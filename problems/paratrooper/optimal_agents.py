@@ -37,3 +37,11 @@ class DummyVAgent:
 
     def get_action(self, state):
         return self.value
+
+
+class DummyUAgent:
+    def __init__(self, env):
+        self.step = env.initial_x / env.terminal_time
+
+    def get_action(self, state):
+        return self.step
