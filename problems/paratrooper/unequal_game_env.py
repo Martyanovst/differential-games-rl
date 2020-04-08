@@ -1,5 +1,4 @@
 import numpy as np
-import pygame
 
 
 class UnequalGame:
@@ -35,6 +34,3 @@ class UnequalGame:
 
         return self.state, reward, int(self.done), None
 
-    def init_rendering(self):
-        self.screen = pygame.display.set_mode((640, 480))
-        self.point = pygame.image.load('point.png')

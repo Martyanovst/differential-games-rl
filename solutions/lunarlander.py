@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import gym
 import torch.nn as nn
+
+from utilities.noises import OUNoise
 from utilities.sequentialNetwork import Seq_Network
 from models.naf import NAFAgent
 
@@ -13,7 +15,9 @@ action_max = 1
 mu_model = Seq_Network([state_shape[0], 50, 50, 50, action_shape[0]], nn.ReLU(), nn.Tanh())
 p_model = Seq_Network([state_shape[0], 100, 100, 100, action_shape[0] ** 2], nn.ReLU())
 v_model = Seq_Network([state_shape[0], 50, 50, 50, 1], nn.ReLU())
-agent = NAFAgent(mu_model, p_model, v_model, state_shape, action_shape[0], action_max)
+noise = OUNoise(action_shape, threshold=1, threshold_min=0.0000001, threshold_decrease=0.000005)
+batch_size = 128
+agent = NAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape[0], action_max, batch_size)
 
 
 def play_and_learn(t_max=200, learn=True):
