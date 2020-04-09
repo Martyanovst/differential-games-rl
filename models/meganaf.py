@@ -55,21 +55,24 @@ class MegaNafAgent:
         self.Q_target = deepcopy(self.Q)
         self.tau = 1e-3
         self.memory = deque(maxlen=20000)
-        self.gamma = 0.99
+        self.gamma = 0.9999
         self.batch_size = batch_size
         self.noise = noise
         self.reward_normalize = 1
 
+    def get_action(self, state):
+        return self.get_u_action(state)
+
     def get_u_action(self, state):
         state = torch.tensor(np.array([state]), dtype=torch.float)
-        mu_value = self.Q.u_model.mu(state).detach().data.numpy()[0]
+        mu_value = self.Q.u_model.mu(state).detach().data.numpy()[0] * self.u_max
         noise = self.noise.noise()
         action = mu_value + noise
         return np.clip(action, - self.u_max, self.u_max)
 
     def get_v_action(self, state):
         state = torch.tensor(np.array([state]), dtype=torch.float)
-        mu_value = self.Q.v_model.mu(state).detach().data.numpy()[0]
+        mu_value = self.Q.v_model.mu(state).detach().data.numpy()[0] * self.v_max
         noise = self.noise.noise()
         action = mu_value + noise
         return np.clip(action, - self.v_max, self.v_max)

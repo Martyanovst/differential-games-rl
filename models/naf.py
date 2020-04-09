@@ -45,16 +45,15 @@ class NAFAgent:
         self.Q_target = deepcopy(self.Q)
         self.tau = 1e-3
         self.memory = deque(maxlen=200000)
-        self.gamma = 0.9995
+        self.gamma = 0.9999
         self.batch_size = batch_size
         self.noise = noise
         self.reward_normalize = 1
 
-    def get_action(self, state):
-        # state = torch.tensor(np.array([state]), dtype=torch.float)
+    def get_action(self, state, with_noise=True):
         state = torch.tensor(state, dtype=torch.float)
-        mu_value = self.Q.mu(state).detach().data.numpy()
-        noise = self.noise.noise()
+        mu_value = self.Q.mu(state).detach().data.numpy() * self.action_max
+        noise = self.noise.noise() * with_noise
         action = mu_value + noise
         return np.clip(action, - self.action_max, self.action_max)
 
@@ -85,5 +84,3 @@ class NAFAgent:
             loss.backward()
             self.opt.step()
             self.update_targets(self.Q_target, self.Q)
-
-            self.noise.decrease()

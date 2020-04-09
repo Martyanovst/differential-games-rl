@@ -3,7 +3,7 @@ import numpy as np
 
 class TwoPointsOnParallelLines:
     def __init__(self, initial_x=np.array([4.5, 0, 0, 0]), alpha=1, m1=0.01, m2=1, theta=10,
-                 u_action_max=2.5, v_action_max=1, dt=0.02):
+                 u_action_max=2.5, v_action_max=1, dt=0.01):
         self.initial_x = initial_x
         self.alpha = alpha
         self.m1 = m1
