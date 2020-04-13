@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch.nn as nn
 
-import models.meganaf
+import models.minmaxnaf
 from problems.paratrooper.optimal_agents import OptimalVAgent, DummyVAgent
 from problems.paratrooper.unequal_game_env import UnequalGame
 from utilities.noises import OUNoise, UniformNoise
@@ -10,31 +10,31 @@ from utilities.sequentialNetwork import Seq_Network
 
 state_shape = 2
 action_shape = 1
-episode_n = 300
+episode_n = 500
 
 
 def init_u_agent(state_shape, action_shape, action_max):
-    mu_model = Seq_Network([state_shape, 16, 16, action_shape], nn.ReLU(), nn.Tanh())
-    p_model = Seq_Network([state_shape, 16, 16, action_shape ** 2], nn.ReLU())
-    model = models.meganaf.SmallQModel(mu_model, p_model, action_shape, action_max)
+    mu_model = Seq_Network([state_shape, 32, 32, action_shape], nn.ReLU(), nn.Tanh())
+    p_model = Seq_Network([state_shape, 32, 32, action_shape ** 2], nn.ReLU())
+    model = models.minmaxnaf.QModel(mu_model, p_model, action_shape, action_max)
     return model
 
 
 def init_v_agent(state_shape, action_shape, action_max):
-    mu_model = Seq_Network([state_shape, 16, 16, action_shape], nn.ReLU(), nn.Tanh())
-    p_model = Seq_Network([state_shape, 16, 16, action_shape ** 2], nn.ReLU())
-    model = models.meganaf.SmallQModel(mu_model, p_model, action_shape, action_max)
+    mu_model = Seq_Network([state_shape, 32, 32, action_shape], nn.ReLU(), nn.Tanh())
+    p_model = Seq_Network([state_shape, 32, 32, action_shape ** 2], nn.ReLU())
+    model = models.minmaxnaf.QModel(mu_model, p_model, action_shape, action_max)
     return model
 
 
 def init_agent(state_shape, action_shape, u_max, v_max, batch_size):
     u_model = init_u_agent(state_shape, action_shape, u_max)
     v_model = init_v_agent(state_shape, action_shape, v_max)
-    v_network = Seq_Network([state_shape, 8, 8, 1], nn.ReLU())
-    # noise = OUNoise(1, threshold=1, threshold_min=0.0000001, threshold_decrease=0.000003)
-    noise = UniformNoise(1, threshold=1, threshold_min=0.0000001, threshold_decrease=0.000003)
-    agent = models.meganaf.MegaNafAgent(u_model, v_model, v_network, noise, state_shape, action_shape, u_max, v_max,
-                                        batch_size)
+    v_network = Seq_Network([state_shape, 16, 16, 1], nn.ReLU())
+    noise = OUNoise(1, threshold=1, threshold_min=0.0000001, threshold_decrease=0.000003)
+    # noise = UniformNoise(1, threshold=1, threshold_min=0.0000001, threshold_decrease=0.000003)
+    agent = models.minmaxnaf.MinmaxNafAgent(u_model, v_model, v_network, noise, state_shape, action_shape, u_max, v_max,
+                                            batch_size)
     return agent
 
 

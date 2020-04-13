@@ -51,10 +51,8 @@ def fit_agents(env, episode_n, u_agent, v_agent):
             total_reward += -reward
             if is_u_agent_fit:
                 u_agent.fit(state, u_action, -reward, done, next_state)
-                # v_agent.memory.append([state, v_action, reward, done, next_state])
             else:
                 v_agent.fit(state, v_action, reward, done, next_state)
-                # u_agent.memory.append([state, u_action, -reward, done, next_state])
             state = next_state
         if is_u_agent_fit:
             u_agent.noise.decrease()
@@ -71,7 +69,6 @@ def fit_agents(env, episode_n, u_agent, v_agent):
 
 
 def play(u_agent, v_agent, env):
-    # state = get_state(*env.reset())
     state = env.reset()
     total_reward = 0
     while not env.done:

@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 
 
-class SmallQModel(nn.Module):
+class QModel(nn.Module):
     def __init__(self, mu_model, p_model, action_shape, action_max=1):
         super().__init__()
         self.P = p_model
@@ -30,7 +30,7 @@ class SmallQModel(nn.Module):
         return 1 / 2 * A
 
 
-class MegaQModel(nn.Module):
+class MinmaxQModel(nn.Module):
     def __init__(self, u_model, v_model, v_network):
         super().__init__()
         self.u_model = u_model
@@ -41,7 +41,7 @@ class MegaQModel(nn.Module):
         return self.v(state) + self.u_model(state, u_action) - self.v_model(state, v_action)
 
 
-class MegaNafAgent:
+class MinmaxNafAgent:
 
     def __init__(self, u_model, v_model, value_model, noise, state_shape, action_shape, u_max, v_max, batch_size=200):
 
@@ -50,7 +50,7 @@ class MegaNafAgent:
         self.u_max = u_max
         self.v_max = v_max
 
-        self.Q = MegaQModel(u_model, v_model, value_model)
+        self.Q = MinmaxQModel(u_model, v_model, value_model)
         self.opt = torch.optim.Adam(self.Q.parameters(), lr=1e-3)
         self.Q_target = deepcopy(self.Q)
         self.tau = 1e-3
