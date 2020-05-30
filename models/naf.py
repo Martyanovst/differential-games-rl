@@ -34,25 +34,25 @@ class Q_model(nn.Module):
 
 class NAFAgent:
 
-    def __init__(self, mu_model, p_model, v_model, noise, state_shape, action_shape, action_max, batch_size=200):
-
+    def __init__(self, mu_model, p_model, v_model, noise, state_shape, action_shape, action_max, batch_size=200, gamma=0.9999):
         self.state_shape = state_shape
         self.action_shape = action_shape
         self.action_max = action_max
 
         self.Q = Q_model(mu_model, p_model, v_model, action_shape)
-        self.opt = torch.optim.Adam(self.Q.parameters(), lr=1e-3)
+        self.opt = torch.optim.Adam(self.Q.parameters(), lr=1e-4)
         self.Q_target = deepcopy(self.Q)
         self.tau = 1e-3
         self.memory = deque(maxlen=200000)
-        self.gamma = 0.9999
+        self.gamma = gamma
+
         self.batch_size = batch_size
         self.noise = noise
         self.reward_normalize = 1
 
     def get_action(self, state, with_noise=True):
         state = torch.tensor(state, dtype=torch.float)
-        mu_value = self.Q.mu(state).detach().data.numpy() * self.action_max
+        mu_value = self.Q.mu.inference(state).detach().data.numpy() * self.action_max
         noise = self.noise.noise() * with_noise
         action = mu_value + noise
         return np.clip(action, - self.action_max, self.action_max)
@@ -67,7 +67,7 @@ class NAFAgent:
         states = torch.tensor(states, dtype=torch.float32)
         actions = torch.tensor(actions, dtype=torch.float32)
         rewards = torch.tensor(rewards, dtype=torch.float32)
-        dones = torch.tensor(dones, dtype=torch.float32)
+        dones = torch.from_numpy(dones.astype(np.float32))
         next_states = torch.tensor(next_states, dtype=torch.float32)
         return states, actions, rewards, dones, next_states
 

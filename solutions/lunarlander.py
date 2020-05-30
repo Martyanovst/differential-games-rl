@@ -15,9 +15,9 @@ action_max = 1
 mu_model = Seq_Network([state_shape[0], 50, 50, 50, action_shape[0]], nn.ReLU(), nn.Tanh())
 p_model = Seq_Network([state_shape[0], 100, 100, 100, action_shape[0] ** 2], nn.ReLU())
 v_model = Seq_Network([state_shape[0], 50, 50, 50, 1], nn.ReLU())
-noise = OUNoise(action_shape, threshold=1, threshold_min=0.0000001, threshold_decrease=0.000005)
-batch_size = 128
-agent = NAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape[0], action_max, batch_size)
+noise = OUNoise(action_shape, threshold=1, threshold_min=0.001, threshold_decrease=0.00001)
+batch_size = 200
+agent = NAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape[0], action_max, batch_size, 0.999)
 
 
 def play_and_learn(t_max=200, learn=True):
@@ -32,7 +32,8 @@ def play_and_learn(t_max=200, learn=True):
 
         if learn:
             agent.fit(state, action, reward, done, next_state)
-        env.render()
+            agent.noise.decrease()
+        # env.render()
 
         state = next_state
 
@@ -42,7 +43,7 @@ def play_and_learn(t_max=200, learn=True):
     return total_reward
 
 
-episodes_n = 1100
+episodes_n = 500
 rewards = np.zeros(episodes_n)
 mean_rewards = np.zeros(episodes_n)
 
