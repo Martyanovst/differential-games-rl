@@ -1,13 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import gym
+from gym import wrappers
 import torch.nn as nn
 
 from utilities.noises import OUNoise
 from utilities.sequentialNetwork import Seq_Network
 from models.naf import NAFAgent
 
-env = gym.make("LunarLanderContinuous-v2").env
+env_to_wrap = gym.make("LunarLanderContinuous-v2").env
+env = wrappers.Monitor(env_to_wrap, './videos/' + 'lunarLander' + '/')
 state_shape = env.observation_space.shape
 action_shape = env.action_space.shape
 action_max = 1
@@ -29,11 +31,11 @@ def play_and_learn(t_max=200, learn=True):
         action = np.nan_to_num(agent.get_action(state))
         next_state, reward, done, _ = env.step(action)
         total_reward += reward
-
+        env.render()
         if learn:
             agent.fit(state, action, reward, done, next_state)
             agent.noise.decrease()
-        # env.render()
+        env.render()
 
         state = next_state
 
@@ -61,3 +63,8 @@ for episode in range(episodes_n):
 
 plt.plot(range(episodes_n), mean_rewards)
 plt.show()
+while True:
+    agent.noise.threshold = 0
+    play_and_learn(learn=False)
+env.close()
+env_to_wrap.close()
