@@ -43,7 +43,7 @@ if __name__ == '__main__':
     env = TwoPointsOnParallelLines()
     resolver = DiffGamesCentralizedResolver()
     agent = init_agent(state_shape, action_shape, env.u_action_max, env.v_action_max, 64)
-    rewards = resolver.fit_agent(env, episode_n, agent)
+    resolver.fit_agent(env, episode_n, agent)
     agent.noise.threshold = 0
 
     print(OptimalConstantCounterVAgent(env, agent).beta)

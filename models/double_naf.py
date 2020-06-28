@@ -4,49 +4,25 @@ from copy import deepcopy
 
 import numpy as np
 import torch
-import torch.nn as nn
+from torch.nn import MSELoss
+
+from models.naf import Q_model
 
 
-class Q_model(nn.Module):
-    def __init__(self, mu_model, p_model,
-                 v_model, action_shape, action_max=1):
-        super().__init__()
-        self.P = p_model
-        self.mu = mu_model
-        self.v = v_model
-        self.action_max = action_max
-        self.action_shape = action_shape
-        self.tril_mask = torch.tril(torch.ones(
-            action_shape, action_shape), diagonal=-1).unsqueeze(0)
-        self.diag_mask = torch.diag(torch.diag(
-            torch.ones(action_shape, action_shape))).unsqueeze(0)
-
-    def forward(self, state, action):
-        L = self.P(state).view(-1, self.action_shape, self.action_shape)
-        L = L * self.tril_mask.expand_as(L) + torch.exp(L) * self.diag_mask.expand_as(L)
-        P = torch.bmm(L, L.transpose(2, 1))
-        mu = self.mu(state) * self.action_max
-        action_mu = (action - mu).unsqueeze(2)
-        A = -0.5 * \
-            torch.bmm(torch.bmm(action_mu.transpose(2, 1), P),
-                      action_mu)[:, :, 0]
-        return A + self.v(state)
-
-
-class NAFAgent:
+class DoubleNAFAgent:
 
     def __init__(self, mu_model, p_model, v_model,
                  noise, state_shape, action_shape,
-                 action_max, batch_size=200, gamma=0.9999):
+                 action_max, batch_size=200, gamma=0.99):
         self.state_shape = state_shape
         self.action_shape = action_shape
         self.action_max = action_max
 
         self.Q = Q_model(mu_model, p_model, v_model, action_shape)
         self.opt = torch.optim.Adam(self.Q.parameters(), lr=1e-3)
-        self.loss = nn.MSELoss()
+        self.loss = MSELoss()
         self.Q_target = deepcopy(self.Q)
-        self.tau = 1e-2
+        self.tau = 1e-3
         self.memory = deque(maxlen=100000)
         self.gamma = gamma
 
@@ -85,9 +61,10 @@ class NAFAgent:
             states, actions, rewards, dones, next_states = self.get_batch()
             self.opt.zero_grad()
             target = self.reward_normalize * rewards.reshape(self.batch_size, 1) + (
-                    1 - dones) * self.gamma * self.Q_target.v(
-                next_states).detach()
-            loss = self.loss(self.Q(states, actions), target)
+                        1 - dones).reshape(self.batch_size, 1) * self.gamma * self.Q_target(
+                    next_states, self.Q.mu(next_states).detach()).detach()
+            find = self.Q(states, actions)
+            loss = self.loss(find, target)
             loss.backward()
             self.opt.step()
             self.update_targets(self.Q_target, self.Q)

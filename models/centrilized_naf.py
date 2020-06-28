@@ -52,6 +52,7 @@ class CentralizedNafAgent:
 
         self.Q = CentralizedQModel(u_model, v_model, value_model)
         self.opt = torch.optim.Adam(self.Q.parameters(), lr=1e-3)
+        self.loss = nn.MSELoss()
         self.Q_target = deepcopy(self.Q)
         self.tau = 1e-2
         self.memory = deque(maxlen=20000)
@@ -101,7 +102,8 @@ class CentralizedNafAgent:
             target = self.reward_normalize * rewards.reshape(self.batch_size, 1) + (
                     1 - dones) * self.gamma * self.Q_target.v(
                 next_states).detach()
-            loss = torch.mean((self.Q(states, u_actions, v_actions) - target) ** 2)
+            loss = self.loss(self.Q(states, u_actions, v_actions), target)
+
             loss.backward()
             self.opt.step()
             self.update_targets(self.Q_target, self.Q)
