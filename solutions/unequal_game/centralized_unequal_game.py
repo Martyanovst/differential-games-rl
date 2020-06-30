@@ -1,6 +1,7 @@
 import torch.nn as nn
 
 import models.centrilized_naf
+from models.centralized_double_naf import CentralizedDoubleNafAgent
 from problems.unequal_game.optimal_agents import OptimalVAgent, DummyVAgent
 from problems.unequal_game.unequal_game_env import UnequalGame
 from utilities.DiffGamesCentralizedResolver import DiffGamesCentralizedResolver
@@ -9,7 +10,7 @@ from utilities.sequentialNetwork import Seq_Network
 
 state_shape = 2
 action_shape = 1
-episode_n = 150
+episode_n = 100
 
 
 def init_u_agent(state_shape, action_shape, action_max):
@@ -30,8 +31,8 @@ def init_agent(state_shape, action_shape, u_max, v_max, batch_size):
     u_model = init_u_agent(state_shape, action_shape, u_max)
     v_model = init_v_agent(state_shape, action_shape, v_max)
     v_network = Seq_Network([state_shape, 16, 16, 1], nn.ReLU())
-    noise = OUNoise(1, threshold=1, threshold_min=0.0000001, threshold_decrease=0.000005)
-    agent = models.centrilized_naf.CentralizedNafAgent(u_model, v_model, v_network, noise, state_shape, action_shape,
+    noise = OUNoise(1, threshold=1, threshold_min=0.0000001, threshold_decrease=0.01)
+    agent = CentralizedDoubleNafAgent(u_model, v_model, v_network, noise, state_shape, action_shape,
                                                        u_max, v_max,
                                                        batch_size)
     return agent
