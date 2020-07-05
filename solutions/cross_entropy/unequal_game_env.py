@@ -22,7 +22,7 @@ class UnequalGame:
 
     def step(self, u_action, v_action):
         t, x = self.state
-        x = x + (u_action[0] - v_action[0]) * self.dt
+        x = x + (u_action - v_action) * self.dt
         t += self.dt
         self.state = np.array([t, x])
 
