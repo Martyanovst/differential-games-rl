@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch.nn as nn
 
+from models.double_naf import DoubleNAFAgent
 from models.naf import NAFAgent
 from problems.boundary_problem.boundary_problem_env import BoundaryProblem
 from problems.boundary_problem.optimal_agent import OptimalAgent
@@ -14,12 +15,12 @@ action_max = 1.5
 action_shape = 1
 episodes_n = 500
 
-mu_model = Seq_Network([state_shape, 100, 100, action_shape], nn.Sigmoid(), nn.Tanh())
-p_model = Seq_Network([state_shape, 100, 100, action_shape ** 2], nn.Sigmoid())
-v_model = Seq_Network([state_shape, 100, 100, 1], nn.Sigmoid())
+mu_model = Seq_Network([state_shape, 100, 100, action_shape], nn.ReLU(), nn.Tanh())
+p_model = Seq_Network([state_shape, 100, 100, action_shape ** 2], nn.ReLU())
+v_model = Seq_Network([state_shape, 100, 100, 1], nn.ReLU())
 noise = OUNoise(action_shape, threshold=1, threshold_min=0.001, threshold_decrease=0.00001)
 batch_size = 200
-agent = NAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape, action_max, batch_size, 0.999)
+agent = DoubleNAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape, action_max, batch_size, 0.99)
 
 def play_and_learn(env, learn=True):
     total_reward = 0
@@ -68,6 +69,8 @@ for episode in range(episodes_n):
 agent.noise.threshold = 0
 reward = agent_play(env, agent)
 optimal_reward = agent_play(env, OptimalAgent(env))
+plt.title('track')
+plt.legend(['NAF', 'Optimal'])
 plt.show()
 print('optimal', optimal_reward)
 print('fitted', reward)
