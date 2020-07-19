@@ -9,6 +9,7 @@ class NonlinearProblem:
         self.initial_x2 = x2
         self.dt = dt
         self.optimal_v = 0.5 * (x1 ** 2) + x2 ** 2
+        print(self.optimal_v)
 
     def reset(self):
         self.state = hstack((0, self.initial_x1, self.initial_x2))
