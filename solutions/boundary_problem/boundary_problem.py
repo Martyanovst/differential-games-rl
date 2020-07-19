@@ -4,6 +4,7 @@ import torch.nn as nn
 
 from models.double_naf import DoubleNAFAgent
 from models.naf import NAFAgent
+from models.unlimited_naf import UnlimitedNAFAgent
 from problems.boundary_problem.boundary_problem_env import BoundaryProblem
 from problems.boundary_problem.optimal_agent import OptimalAgent
 from utilities.noises import OUNoise
@@ -13,14 +14,14 @@ env = BoundaryProblem(-1, 3)
 state_shape = 3
 action_max = 1.5
 action_shape = 1
-episodes_n = 500
+episodes_n = 1000
 
-mu_model = Seq_Network([state_shape, 100, 100, action_shape], nn.ReLU(), nn.Tanh())
+mu_model = Seq_Network([state_shape, 100, 100, action_shape], nn.ReLU())
 p_model = Seq_Network([state_shape, 100, 100, action_shape ** 2], nn.ReLU())
 v_model = Seq_Network([state_shape, 100, 100, 1], nn.ReLU())
-noise = OUNoise(action_shape, threshold=1, threshold_min=0.001, threshold_decrease=0.00001)
+noise = OUNoise(action_shape, threshold=1, threshold_min=0.001, threshold_decrease=0.000005)
 batch_size = 200
-agent = DoubleNAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape, action_max, batch_size, 0.99)
+agent = UnlimitedNAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape, batch_size, 1)
 
 def play_and_learn(env, learn=True):
     total_reward = 0
