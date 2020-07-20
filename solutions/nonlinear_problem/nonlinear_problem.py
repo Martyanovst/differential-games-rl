@@ -9,16 +9,16 @@ from utilities.noises import OUNoise
 from utilities.sequentialNetwork import Seq_Network
 
 env = NonlinearProblem()
-state_shape = 3
+state_shape = 2
 action_shape = 1
-episodes_n = 1000
+episodes_n = 250
 
-mu_model = Seq_Network([state_shape, 100, 100, action_shape], nn.ReLU())
-p_model = Seq_Network([state_shape, 100, 100, action_shape ** 2], nn.ReLU())
-v_model = Seq_Network([state_shape, 100, 100, 1], nn.ReLU())
-noise = OUNoise(action_shape, threshold=1, threshold_min=0.001, threshold_decrease=0.001)
+mu_model = Seq_Network([state_shape, 100, 100, action_shape], nn.Sigmoid())
+p_model = Seq_Network([state_shape, 100, 100, action_shape ** 2], nn.Sigmoid())
+v_model = Seq_Network([state_shape, 100, 100, 1], nn.Sigmoid())
+noise = OUNoise(action_shape, threshold=1, threshold_min=0.01, threshold_decrease=0.004)
 batch_size = 200
-agent = UnlimitedNAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape, batch_size, 0.9)
+agent = UnlimitedNAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape, batch_size, 1)
 
 
 def play_and_learn(env):
@@ -30,12 +30,13 @@ def play_and_learn(env):
         action = agent.get_action(state)
         next_state, reward, done, _ = env.step(action)
         total_reward += reward
-        # done = total_reward >= env.optimal_v
-        done = step >= 1000
+        done = total_reward >= env.optimal_v
+        # done = step >= 1000
         agent.fit(state, action, -reward, done, next_state)
         state = next_state
         step += 1
-    t, x1, x2 = env.state
+    x1, x2 = env.state
+    t = env.t
     agent.noise.decrease()
     return total_reward, t, x1, x2
 
@@ -50,14 +51,13 @@ def agent_play(env, agent):
     step = 0
     while not done:
         action = agent.get_action(state)
+        ts.append(env.t)
         next_state, reward, done, _ = env.step(action)
         total_reward += reward
-        ts.append(state[0])
         us.append(action[0])
         state = next_state
-        done = step >= 1000
-        # if state[0] >= terminal_time:
-        #     done = True
+        # done = step >= 1000
+        done = env.t >= terminal_time
         step += 1
     plt.plot(ts, us)
     return total_reward
