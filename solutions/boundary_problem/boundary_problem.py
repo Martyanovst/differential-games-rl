@@ -2,8 +2,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch.nn as nn
 
-from models.double_naf import DoubleNAFAgent
-from models.naf import NAFAgent
 from models.unlimited_naf import UnlimitedNAFAgent
 from problems.boundary_problem.boundary_problem_env import BoundaryProblem
 from problems.boundary_problem.optimal_agent import OptimalAgent

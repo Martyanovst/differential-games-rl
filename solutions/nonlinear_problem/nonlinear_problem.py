@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import torch
 import torch.nn as nn
 
 from models.unlimited_naf import UnlimitedNAFAgent
@@ -11,12 +12,12 @@ from utilities.sequentialNetwork import Seq_Network
 env = NonlinearProblem()
 state_shape = 2
 action_shape = 1
-episodes_n = 250
+episodes_n = 1000
 
-mu_model = Seq_Network([state_shape, 100, 100, action_shape], nn.Sigmoid())
-p_model = Seq_Network([state_shape, 100, 100, action_shape ** 2], nn.Sigmoid())
-v_model = Seq_Network([state_shape, 100, 100, 1], nn.Sigmoid())
-noise = OUNoise(action_shape, threshold=1, threshold_min=0.01, threshold_decrease=0.004)
+mu_model = Seq_Network([state_shape, 100, 100, 100, action_shape], nn.Sigmoid())
+p_model = Seq_Network([state_shape, 100, 100, 100, action_shape ** 2], nn.Sigmoid())
+v_model = Seq_Network([state_shape, 100, 100, 100, 1], nn.Sigmoid())
+noise = OUNoise(action_shape, threshold=1, threshold_min=0.001, threshold_decrease=0.001)
 batch_size = 200
 agent = UnlimitedNAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape, batch_size, 1)
 
@@ -30,8 +31,7 @@ def play_and_learn(env):
         action = agent.get_action(state)
         next_state, reward, done, _ = env.step(action)
         total_reward += reward
-        done = total_reward >= env.optimal_v
-        # done = step >= 1000
+        done = step >= 500 and total_reward >= env.optimal_v
         agent.fit(state, action, -reward, done, next_state)
         state = next_state
         step += 1
@@ -56,7 +56,6 @@ def agent_play(env, agent):
         total_reward += reward
         us.append(action[0])
         state = next_state
-        # done = step >= 1000
         done = env.t >= terminal_time
         step += 1
     plt.plot(ts, us)
@@ -95,3 +94,4 @@ plt.plot(range(episodes_n), mean_times)
 plt.title('times')
 plt.legend(['NAF'])
 plt.show()
+torch.save(agent.Q.state_dict(), './result')
