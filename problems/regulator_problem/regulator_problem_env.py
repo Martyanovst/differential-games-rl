@@ -1,29 +1,31 @@
 from numpy import hstack
+import numpy as np
 
 
-class NonlinearProblem:
-    def __init__(self, x1=1, x2=1, dt=0.005):
-        self.state = hstack((0, x1, x2))
+class RegulatorProblem:
+    def __init__(self, dt=0.005):
         self.done = False
-        self.initial_x1 = x1
-        self.initial_x2 = x2
+        self.x_matrix = np.array(
+            [[-0.2, 0.5, 0, 0, 0],
+             [0, -0.5, 1.6, 0, 0],
+             [0, 0, -1 / 7, 6 / 7, 0],
+             [0, 0, 0, -0.25, 7.5],
+             [0, 0, 0, 0, -0.1]])
+        self.state = np.ones(5)
+        self.u_vector = np.array([0, 0, 0, 0, 0.3])
         self.dt = dt
         self.t = 0
-        self.optimal_v = 0.5 * (x1 ** 2) + x2 ** 2
-        print(self.optimal_v)
 
     def reset(self):
         self.t = 0
-        self.state = hstack((self.initial_x1, self.initial_x2))
+        self.state = np.ones(5)
         self.done = False
         return self.state
 
     def step(self, u_action):
         u = u_action[0]
-        x1, x2 = self.state
-        x1 = x1 + (-x1 + x2) * self.dt
-        x2 = x2 + (-0.5 * (x1 + x2) + 0.5 * (x1 ** 2) * x2 + x1 * u) * self.dt
-        reward = (x1 ** 2 + x2 ** 2 + u ** 2) * self.dt
+        dx = self.x_matrix.dot(self.state) + self.u_vector * u
+        self.state = self.state + dx * self.dt
         self.t += self.dt
-        self.state = hstack((x1, x2))
+        reward = (self.state[0] ** 2 + u ** 2) * self.dt
         return self.state, reward, int(self.done), None
