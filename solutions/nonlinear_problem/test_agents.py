@@ -35,8 +35,7 @@ def agent_play(env, agent, title):
         done = env.t >= terminal_time
         step += 1
 
-    mpl.rcParams['legend.fontsize'] = 10
-
+    print(total_reward)
     return x1s, x2s, us
 
 
@@ -52,27 +51,34 @@ batch_size = 200
 agent = UnlimitedNAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape, batch_size, 1)
 agent.noise.threshold = 0
 agent.Q.load_state_dict(torch.load('./result'))
-env = NonlinearProblem()
-
+env = NonlinearProblem(1, 1)
 optx1, optx2, optu = agent_play(env, OptimalAgent(), 'optimal agent')
 x1, x2, u = agent_play(env, agent, 'naf agent')
-
-X1 = np.arange(-1, 1, 0.1)
-X2 = np.arange(-1, 1, 0.1)
-X1, X2 = np.meshgrid(X1, X2)
-Z = -X1 * X2
-fig = plt.figure()
-ax = fig.gca(projection='3d')
-# Plot the surface.
-surf = ax.plot_surface(X1, X2, Z, cmap=cm.coolwarm,
-                       linewidth=0, antialiased=False)
-
-# Customize the z axis.
-ax.set_zlim(-1, 1)
-ax.zaxis.set_major_locator(LinearLocator(10))
-ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
-
-# Add a color bar which maps values to colors.
-fig.colorbar(surf, shrink=0.5, aspect=5)
-
+plt.plot(optx1, optx2)
+plt.plot(x1, x2)
 plt.show()
+#
+# X1 = np.arange(-1, 1, 0.1)
+# X2 = np.arange(-1, 1, 0.1)
+# Z = []
+# for i in range(X1.shape[0]):
+#     Z.append([])
+#     for j in range(X2.shape[0]):
+#         state = torch.tensor(np.array([X1[i], X2[j]]), dtype=torch.float32)
+#         Z[i].append(agent.Q.v(state).detach().data.numpy()[0])
+# X1, X2 = np.meshgrid(X1, X2)
+# # Z = 0.5 * (X1 ** 2) + (X2 ** 2)
+# fig = plt.figure()
+# ax = fig.gca(projection='3d')
+# # surf = ax.plot_surface(X1, X2, Z, cmap=cm.coolwarm,
+# #                        linewidth=0, antialiased=False)
+# surf = ax.plot_surface(X1, X2, np.array(Z).T, cmap=cm.coolwarm,
+#                        linewidth=0, antialiased=False)
+#
+# ax.set_zlim(0, -1)
+# ax.zaxis.set_major_locator(LinearLocator(10))
+# ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+#
+# fig.colorbar(surf, shrink=0.5, aspect=5)
+#
+# plt.show()

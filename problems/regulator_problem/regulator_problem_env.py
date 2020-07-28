@@ -11,14 +11,14 @@ class RegulatorProblem:
              [0, 0, -1 / 7, 6 / 7, 0],
              [0, 0, 0, -0.25, 7.5],
              [0, 0, 0, 0, -0.1]])
-        self.state = np.ones(5)
+        self.state = np.ones(5) * 10
         self.u_vector = np.array([0, 0, 0, 0, 0.3])
         self.dt = dt
         self.t = 0
 
     def reset(self):
         self.t = 0
-        self.state = np.ones(5)
+        self.state = np.ones(5) * 10
         self.done = False
         return self.state
 
