@@ -20,7 +20,7 @@ p_model = Seq_Network([state_shape, 100, 100, 100, action_shape ** 2], nn.Sigmoi
 v_model = Seq_Network([state_shape, 100, 100, 100, 1], nn.Sigmoid())
 noise = OUNoise(action_shape, threshold=1, threshold_min=0.001, threshold_decrease=0.002)
 batch_size = 200
-agent = UnlimitedNAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape, batch_size, 1)
+agent = SimpleNaf(mu_model, v_model, noise, state_shape, action_shape, batch_size, 1, env.dt)
 
 
 def play_and_learn(env):

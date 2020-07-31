@@ -9,16 +9,17 @@ import torch.nn as nn
 
 class Q_model(nn.Module):
     def __init__(self, mu_model,
-                 v_model, action_shape):
+                 v_model, action_shape, dt):
         super().__init__()
         self.mu = mu_model
         self.v = v_model
+        self.dt = dt
         self.action_shape = action_shape
 
     def forward(self, state, action):
         mu = self.mu(state)
         action_mu = (action - mu).unsqueeze(2)
-        A = -0.5 * \
+        A = -self.dt * \
             torch.bmm(action_mu.transpose(2, 1),
                       action_mu)[:, :, 0]
         return A + self.v(state)
@@ -28,11 +29,11 @@ class SimpleNaf:
 
     def __init__(self, mu_model, v_model,
                  noise, state_shape, action_shape,
-                 batch_size=200, gamma=0.9999):
+                 batch_size=200, gamma=0.9999, dt=0.005):
         self.state_shape = state_shape
         self.action_shape = action_shape
 
-        self.Q = Q_model(mu_model, v_model, action_shape)
+        self.Q = Q_model(mu_model, v_model, action_shape, dt)
         self.opt = torch.optim.Adam(self.Q.parameters(), lr=1e-3)
         self.loss = nn.MSELoss()
         self.Q_target = deepcopy(self.Q)
