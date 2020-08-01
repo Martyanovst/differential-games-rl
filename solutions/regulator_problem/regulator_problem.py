@@ -12,12 +12,12 @@ from utilities.sequentialNetwork import Seq_Network
 env = RegulatorProblem()
 state_shape = 5
 action_shape = 1
-episodes_n = 250
+episodes_n = 500
 
 mu_model = Seq_Network([state_shape, 100, 100, 100, action_shape], nn.Sigmoid())
 p_model = Seq_Network([state_shape, 100, 100, 100, action_shape ** 2], nn.Sigmoid())
 v_model = Seq_Network([state_shape, 100, 100, 100, 1], nn.Sigmoid())
-noise = OUNoise(action_shape, threshold=1, threshold_min=0.001, threshold_decrease=0.004)
+noise = OUNoise(action_shape, threshold=1, threshold_min=0.001, threshold_decrease=0.002)
 batch_size = 200
 agent = UnlimitedNAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape, batch_size, 1)
 
@@ -73,7 +73,7 @@ for episode in range(episodes_n):
     mean_time = np.mean(times[max(0, episode - 50):episode + 1])
     mean_rewards[episode] = mean_reward
     mean_times[episode] = mean_time
-    print("episode=%.0f, noise_threshold=%.3f, total reward=%.3f, mean reward=%.3f, t=%.3f" % (
+    print("episode=%.0f, noise_threshol%.3f, total reward=%.3f, mean reward=%.3f, t=%.3f" % (
         episode, agent.noise.threshold, rewards[episode], mean_reward, mean_time))
 
 agent.noise.threshold = 0

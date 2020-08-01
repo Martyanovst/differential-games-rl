@@ -20,10 +20,12 @@ class BoundaryProblem:
         t, x1, x2 = self.state
         x1 = x1 + x2 * self.dt
         x2 = x2 + u * self.dt
-        reward = (x1 ** 2 + u ** 2) * self.dt
+        reward1 = (x1 ** 2 + u ** 2) * self.dt
+        reward2 = 0
         t = t + self.dt
         if t >= self.terminal_t:
-            reward += x1 + x2
+            reward2 += x1 + x2
             self.done = True
+        reward = reward1 + reward2
         self.state = hstack((t, x1, x2))
-        return self.state, reward, int(self.done), None
+        return self.state, reward, reward1, reward2, int(self.done), None

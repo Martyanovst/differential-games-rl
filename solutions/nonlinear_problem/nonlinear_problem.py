@@ -13,14 +13,14 @@ from utilities.sequentialNetwork import Seq_Network
 env = NonlinearProblem()
 state_shape = 2
 action_shape = 1
-episodes_n = 250
+episodes_n = 500
 
 mu_model = Seq_Network([state_shape, 100, 100, 100, action_shape], nn.Sigmoid())
 p_model = Seq_Network([state_shape, 100, 100, 100, action_shape ** 2], nn.Sigmoid())
 v_model = Seq_Network([state_shape, 100, 100, 100, 1], nn.Sigmoid())
-noise = OUNoise(action_shape, threshold=1, threshold_min=0.001, threshold_decrease=0.004)
+noise = OUNoise(action_shape, threshold=1, threshold_min=0.001, threshold_decrease=0.002)
 batch_size = 200
-agent = SimpleNaf(mu_model, v_model, noise, state_shape, action_shape, batch_size, 1)
+agent = SimpleNaf(mu_model, v_model, noise, state_shape, action_shape, batch_size, 1, env.dt)
 
 
 def play_and_learn(env):
