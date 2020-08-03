@@ -26,7 +26,7 @@ class RegulatorProblem:
         state = self.state[np.newaxis].T
         dx = self.x_matrix.dot(state) + self.u_vector * u
         state = state + dx * self.dt
-        self.t += self.dt
+        self.t = self.t + self.dt
         self.state = state.reshape(state.shape[0])
         reward = (self.state[0] ** 2 + u ** 2) * self.dt
         return self.state, reward, int(self.done), None
