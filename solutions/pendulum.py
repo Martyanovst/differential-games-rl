@@ -21,15 +21,17 @@ def play_and_learn(env, agent, delta):
     total_reward = 0
     state = env.reset()
     done = False
-    while not done:
+    step = 0
+    while not done and step > 200:
         th, thdot = env.state
         action = agent.get_action(state)
         next_state, reward, done, _ = env.step(action)
         total_reward += reward
         u = np.clip(action, -action_max, action_max)[0]
         reward = angle_normalize(th) ** 2 + .1 * thdot ** 2 + delta * (u ** 2)
-        agent.fit(state, action, reward, done, next_state)
+        agent.fit(state, action, -reward, done, next_state)
         state = next_state
+        step += 1
     agent.noise.decrease()
     return total_reward
 
