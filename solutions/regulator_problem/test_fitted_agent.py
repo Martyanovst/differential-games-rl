@@ -13,7 +13,7 @@ def agent_play(env, agent, title):
     total_reward = 0
     xs = []
     us = []
-    terminal_time = 2000
+    terminal_time = 2500
     done = False
     step = 0
     while not done:

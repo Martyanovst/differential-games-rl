@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import torch
 import torch.nn as nn
 
 from models.unlimited_naf import UnlimitedNAFAgent
@@ -16,7 +17,7 @@ episodes_n = 500
 mu_model = Seq_Network([state_shape, 100, 100, action_shape], nn.Sigmoid())
 p_model = Seq_Network([state_shape, 100, 100, action_shape ** 2], nn.Sigmoid())
 v_model = Seq_Network([state_shape, 100, 100, 1], nn.Sigmoid())
-noise = OUNoise(action_shape, threshold=10, threshold_min=0.2, threshold_decrease=0.02)
+noise = OUNoise(action_shape, threshold=1, threshold_min=0.02, threshold_decrease=0.002)
 batch_size = 200
 agent = UnlimitedNAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape, batch_size, 0.9999)
 
@@ -30,7 +31,7 @@ def play_and_learn(env):
         action = agent.get_action(state)
         next_state, reward, done, _ = env.step(action)
         total_reward += reward
-        done = total_reward > 67 and step >= 500
+        done = total_reward > 73 and step >= 500
         agent.fit(state, action, -reward, done, next_state)
         state = next_state
         step += 1
@@ -44,7 +45,7 @@ def agent_play(env, agent):
     total_reward = 0
     ts = []
     us = []
-    terminal_time = 500
+    terminal_time = 2500
     done = False
     step = 0
     while not done:
@@ -88,4 +89,4 @@ plt.plot(range(episodes_n), optimal_reward * np.ones(episodes_n))
 plt.title('fit')
 plt.legend(['NAF', 'Optimal'])
 plt.show()
-# torch.save(agent.Q.state_dict(), './result')
+torch.save(agent.Q.state_dict(), './result')
