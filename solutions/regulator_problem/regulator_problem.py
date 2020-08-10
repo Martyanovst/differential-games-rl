@@ -3,7 +3,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from models.unlimited_naf import UnlimitedNAFAgent
+from models.simple_naf import SimpleNaf
 from problems.regulator_problem.optimal_agent import OptimalAgent
 from problems.regulator_problem.regulator_problem_env import RegulatorProblem
 from utilities.noises import OUNoise
@@ -13,13 +13,14 @@ env = RegulatorProblem()
 state_shape = 5
 action_shape = 1
 episodes_n = 500
+step_count = 500
 
-mu_model = Seq_Network([state_shape, 100, 100, action_shape], nn.Sigmoid())
-p_model = Seq_Network([state_shape, 100, 100, action_shape ** 2], nn.Sigmoid())
-v_model = Seq_Network([state_shape, 100, 100, 1], nn.Sigmoid())
+mu_model = Seq_Network([state_shape, 150, 150, 150, action_shape], nn.ReLU())
+p_model = Seq_Network([state_shape, 150, 150, 150, action_shape ** 2], nn.ReLU())
+v_model = Seq_Network([state_shape, 150, 150, 150, 1], nn.ReLU())
 noise = OUNoise(action_shape, threshold=1, threshold_min=0.02, threshold_decrease=0.002)
 batch_size = 200
-agent = UnlimitedNAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape, batch_size, 0.9999)
+agent = SimpleNaf(mu_model, v_model, noise, state_shape, action_shape, batch_size, 0.9999)
 
 
 def play_and_learn(env):
@@ -31,10 +32,10 @@ def play_and_learn(env):
         action = agent.get_action(state)
         next_state, reward, done, _ = env.step(action)
         total_reward += reward
-        done = total_reward > 73 and step >= 500
+        step += 1
+        done = step >= step_count
         agent.fit(state, action, -reward, done, next_state)
         state = next_state
-        step += 1
     t = env.t
     agent.noise.decrease()
     return total_reward, t
@@ -45,7 +46,6 @@ def agent_play(env, agent):
     total_reward = 0
     ts = []
     us = []
-    terminal_time = 2500
     done = False
     step = 0
     while not done:
@@ -55,8 +55,8 @@ def agent_play(env, agent):
         total_reward += reward
         us.append(action[0])
         state = next_state
-        done = step == terminal_time
         step += 1
+        done = step >= step_count
     plt.plot(ts, us)
     return total_reward
 

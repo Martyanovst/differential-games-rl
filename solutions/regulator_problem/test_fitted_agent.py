@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 
+from models.simple_naf import SimpleNaf
 from models.unlimited_naf import UnlimitedNAFAgent
 from problems.regulator_problem.optimal_agent import OptimalAgent
 from problems.regulator_problem.regulator_problem_env import RegulatorProblem
@@ -33,12 +34,12 @@ def agent_play(env, agent, title):
 state_shape = 5
 action_shape = 1
 
-mu_model = Seq_Network([state_shape, 100, 100, action_shape], nn.Sigmoid())
-p_model = Seq_Network([state_shape, 100, 100, action_shape ** 2], nn.Sigmoid())
-v_model = Seq_Network([state_shape, 100, 100, 1], nn.Sigmoid())
+mu_model = Seq_Network([state_shape, 100, 100, 100, action_shape], nn.ReLU())
+p_model = Seq_Network([state_shape, 100, 100, 100, action_shape ** 2], nn.ReLU())
+v_model = Seq_Network([state_shape, 100, 100, 100, 1], nn.ReLU())
 noise = OUNoise(action_shape, threshold=1, threshold_min=0.001, threshold_decrease=0.001)
 batch_size = 200
-agent = UnlimitedNAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape, batch_size, 1)
+agent = SimpleNaf(mu_model, v_model, noise, state_shape, action_shape, batch_size, 1)
 agent.noise.threshold = 0
 agent.Q.load_state_dict(torch.load('./result'))
 env = RegulatorProblem()
