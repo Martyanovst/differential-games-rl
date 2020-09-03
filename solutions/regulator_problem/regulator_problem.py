@@ -13,14 +13,14 @@ env = RegulatorProblem()
 state_shape = 5
 action_shape = 1
 episodes_n = 500
-step_count = 500
+step_count = 1500
 
 mu_model = Seq_Network([state_shape, 150, 150, 150, action_shape], nn.ReLU())
 p_model = Seq_Network([state_shape, 150, 150, 150, action_shape ** 2], nn.ReLU())
 v_model = Seq_Network([state_shape, 150, 150, 150, 1], nn.ReLU())
 noise = OUNoise(action_shape, threshold=1, threshold_min=0.02, threshold_decrease=0.002)
 batch_size = 200
-agent = SimpleNaf(mu_model, v_model, noise, state_shape, action_shape, batch_size, 0.9999)
+agent = SimpleNaf(mu_model, v_model, noise, state_shape, action_shape, batch_size, 1, env.dt)
 
 
 def play_and_learn(env):
@@ -33,8 +33,8 @@ def play_and_learn(env):
         next_state, reward, done, _ = env.step(action)
         total_reward += reward
         step += 1
-        done = step >= step_count
         agent.fit(state, action, -reward, done, next_state)
+        done = step >= step_count
         state = next_state
     t = env.t
     agent.noise.decrease()

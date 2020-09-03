@@ -12,14 +12,14 @@ env = BoundaryProblem(-1, 3)
 state_shape = 3
 action_max = 1.5
 action_shape = 1
-episodes_n = 1000
+episodes_n = 500
 
-mu_model = Seq_Network([state_shape, 100, 100, action_shape], nn.ReLU())
-p_model = Seq_Network([state_shape, 100, 100, action_shape ** 2], nn.ReLU())
-v_model = Seq_Network([state_shape, 100, 100, 1], nn.ReLU())
-noise = OUNoise(action_shape, threshold=1, threshold_min=0.001, threshold_decrease=0.000005)
+mu_model = Seq_Network([state_shape, 150, 150, action_shape], nn.ReLU())
+p_model = Seq_Network([state_shape, 150, 150, action_shape ** 2], nn.ReLU())
+v_model = Seq_Network([state_shape, 150, 150, 1], nn.ReLU())
+noise = OUNoise(action_shape, threshold=1, threshold_min=0.001, threshold_decrease=0.002)
 batch_size = 200
-agent = UnlimitedNAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape, batch_size, 1)
+agent = UnlimitedNAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape, batch_size, 0.999)
 
 
 def play_and_learn(env, learn=True):
@@ -36,8 +36,8 @@ def play_and_learn(env, learn=True):
         total_reward2 += reward2
         if learn:
             agent.fit(state, action, -reward, done, next_state)
-            agent.noise.decrease()
         state = next_state
+    agent.noise.decrease()
     t, x1, x2 = env.state
     return total_reward, total_reward1, total_reward2, x1, x2
 

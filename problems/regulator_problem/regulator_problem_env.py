@@ -2,7 +2,7 @@ import numpy as np
 
 
 class RegulatorProblem:
-    def __init__(self, dt=0.005):
+    def __init__(self, dt=0.001):
         self.done = False
         self.x_matrix = np.array(
             [[-0.2, 0.5, 0, 0, 0],
