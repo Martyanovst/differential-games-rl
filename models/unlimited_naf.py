@@ -8,12 +8,12 @@ import torch.nn as nn
 
 
 class Q_model(nn.Module):
-    def __init__(self, mu_model, p_model,
-                 v_model, action_shape):
+    def __init__(self, mu_model,
+                 v_model, action_shape, dt):
         super().__init__()
-        self.P = p_model
         self.mu = mu_model
         self.v = v_model
+        self.dt = dt
         self.action_shape = action_shape
         self.tril_mask = torch.tril(torch.ones(
             action_shape, action_shape), diagonal=-1).unsqueeze(0)
@@ -21,26 +21,23 @@ class Q_model(nn.Module):
             torch.ones(action_shape, action_shape))).unsqueeze(0)
 
     def forward(self, state, action):
-        L = self.P(state).view(-1, self.action_shape, self.action_shape)
-        L = L * self.tril_mask.expand_as(L) + torch.exp(L) * self.diag_mask.expand_as(L)
-        P = torch.bmm(L, L.transpose(2, 1))
         mu = self.mu(state)
         action_mu = (action - mu).unsqueeze(2)
-        A = -0.5 * \
-            torch.bmm(torch.bmm(action_mu.transpose(2, 1), P),
+        A = -self.dt * \
+            torch.bmm(action_mu.transpose(2, 1),
                       action_mu)[:, :, 0]
         return A + self.v(state)
 
 
 class UnlimitedNAFAgent:
 
-    def __init__(self, mu_model, p_model, v_model,
+    def __init__(self, mu_model, v_model,
                  noise, state_shape, action_shape,
-                 batch_size=200, gamma=0.9999):
+                 batch_size=200, gamma=0.9999, dt=0.005):
         self.state_shape = state_shape
         self.action_shape = action_shape
 
-        self.Q = Q_model(mu_model, p_model, v_model, action_shape)
+        self.Q = Q_model(mu_model, v_model, action_shape, dt)
         self.opt = torch.optim.Adam(self.Q.parameters(), lr=1e-3)
         self.loss = nn.MSELoss()
         self.Q_target = deepcopy(self.Q)
