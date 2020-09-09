@@ -32,8 +32,8 @@ class DiffGamesResolver:
             mean_reward = np.mean(rewards[max(0, episode - 50):episode + 1])
             mean_rewards[episode] = mean_reward
             print(
-                "episode=%.0f, mean reward=%.3f, u-threshold=%0.3f, v-threshold=%0.3f" % (
-                    episode, mean_reward,
+                "episode=%.0f, total reward=%.3f, u-threshold=%0.3f, v-threshold=%0.3f" % (
+                    episode, total_reward,
                     u_agent.noise.threshold,
                     v_agent.noise.threshold))
         plt.plot(range(episode_n), mean_rewards)
