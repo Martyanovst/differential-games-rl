@@ -42,7 +42,7 @@ noise = OUNoise(action_shape, threshold=1, threshold_min=0.001, threshold_decrea
 batch_size = 200
 agent = SimpleNaf(mu_model, v_model, noise, state_shape, action_shape, batch_size, 1)
 agent.noise.threshold = 0
-agent.Q.load_state_dict(torch.load('./result'))
+agent.Q.load_state_dict(torch.load('./result13'))
 env = RegulatorProblem()
 xs, optu = agent_play(env, OptimalAgent(), 'optimal agent')
 xs, u = agent_play(env, agent, 'naf agent')

@@ -67,7 +67,7 @@ if __name__ == '__main__':
     v_model = init_v_model(state_shape)
     agent = Agent(env, v_model, batch_size=64)
     fit_agent(env, episode_n, agent)
-    torch.save(agent.state_dict(), './result')
+    torch.save(agent.state_dict(), './result13')
     agent.epsilon = 0
 
     test_agents(env, agent, OptimalVAgent(env), 'Optimal V-agent')

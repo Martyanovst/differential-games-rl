@@ -67,14 +67,14 @@ class CentralizedNafAgent:
     def get_u_action(self, state):
         state = torch.tensor(state, dtype=torch.float)
         mu_value = self.Q.u_model.mu(state).detach().data.numpy() * self.u_max
-        noise = self.noise.noise()
+        noise = self.noise.noise() * self.u_max
         action = mu_value + noise
         return np.clip(action, - self.u_max, self.u_max)
 
     def get_v_action(self, state):
         state = torch.tensor(state, dtype=torch.float)
         mu_value = self.Q.v_model.mu(state).detach().data.numpy() * self.v_max
-        noise = self.noise.noise()
+        noise = self.noise.noise() * self.v_max
         action = mu_value + noise
         return np.clip(action, - self.v_max, self.v_max)
 
@@ -100,7 +100,7 @@ class CentralizedNafAgent:
             states, u_actions, v_actions, rewards, dones, next_states = self.get_batch()
             self.opt.zero_grad()
             target = self.reward_normalize * rewards.reshape(self.batch_size, 1) + (
-                    1 - dones) * self.gamma * self.Q_target.v(
+                    1 - dones).reshape(self.batch_size, 1) * self.gamma * self.Q_target.v(
                 next_states).detach()
             loss = self.loss(self.Q(states, u_actions, v_actions), target)
 

@@ -50,7 +50,7 @@ noise = OUNoise(action_shape, threshold=1, threshold_min=0.001, threshold_decrea
 batch_size = 200
 agent = UnlimitedNAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape, batch_size, 1)
 agent.noise.threshold = 0
-agent.Q.load_state_dict(torch.load('./result'))
+agent.Q.load_state_dict(torch.load('./result13'))
 env = NonlinearProblem(1, 1)
 optx1, optx2, optu = agent_play(env, OptimalAgent(), 'optimal agent')
 x1, x2, u = agent_play(env, agent, 'naf agent')

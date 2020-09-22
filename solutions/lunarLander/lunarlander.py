@@ -23,7 +23,7 @@ batch_size = 200
 agent = NAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape[0], action_max, batch_size, 0.99)
 
 
-# agent.Q.load_state_dict(torch.load('./result'))
+# agent.Q.load_state_dict(torch.load('./result13'))
 
 def play_and_learn(env, learn=True):
     total_reward = 0
@@ -71,4 +71,4 @@ play_and_learn(env, learn=False)
 play_and_learn(env, learn=False)
 env.close()
 env_to_wrap.close()
-torch.save(agent.state_dict(), './result')
+torch.save(agent.state_dict(), './result13')

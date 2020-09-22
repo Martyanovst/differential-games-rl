@@ -46,8 +46,8 @@ class NAFAgent:
         self.opt = torch.optim.Adam(self.Q.parameters(), lr=1e-3)
         self.loss = nn.MSELoss()
         self.Q_target = deepcopy(self.Q)
-        self.tau = 1e-2
-        self.memory = deque(maxlen=100000)
+        self.tau = 1e-3
+        self.memory = deque(maxlen=2500)
         self.gamma = gamma
 
         self.batch_size = batch_size

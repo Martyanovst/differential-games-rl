@@ -73,7 +73,7 @@ def fit(env, delta):
         print("episode=%.0f, noise_threshold=%.3f, total reward=%.3f, mean reward=%.3f, delta=%.4f" % (
             episode, agent.noise.threshold, rewards[episode], mean_reward, delta))
     plt.plot(range(episodes_n), mean_rewards)
-    # torch.save(agent.Q.state_dict(), './result')
+    # torch.save(agent.Q.state_dict(), './result13')
     # while True:
     #     play(env,agent)
 

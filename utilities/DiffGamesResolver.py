@@ -7,8 +7,12 @@ class DiffGamesResolver:
         rewards = np.zeros(episode_n)
         mean_rewards = np.zeros(episode_n)
         is_u_agent_fit = True
+        xs = []
+        ys = []
         for episode in range(episode_n):
             state = env.reset()
+            x = 0
+            y = 0
             total_reward = 0
             while not env.done:
                 u_action = u_agent.get_action(state, is_u_agent_fit)
@@ -23,19 +27,24 @@ class DiffGamesResolver:
                     v_agent.fit(state, v_action, reward, done, next_state)
                     u_agent.memory.append([state, u_action, -reward, done, next_state])
                 state = next_state
+                x = state[1]
+                y = state[2]
             if is_u_agent_fit:
                 u_agent.noise.decrease()
             else:
                 v_agent.noise.decrease()
             is_u_agent_fit = episode // fit_step % 2 == 0
             rewards[episode] = total_reward
+            xs.append(x)
+            ys.append(y)
             mean_reward = np.mean(rewards[max(0, episode - 50):episode + 1])
             mean_rewards[episode] = mean_reward
             print(
-                "episode=%.0f, total reward=%.3f, u-threshold=%0.3f, v-threshold=%0.3f" % (
+                "episode=%.0f, total reward=%.3f, u-threshold=%0.3f, v-threshold=%0.3f, x=%0.3f, y=%0.3f" % (
                     episode, total_reward,
                     u_agent.noise.threshold,
-                    v_agent.noise.threshold))
+                    v_agent.noise.threshold,
+                    x, y))
         plt.plot(range(episode_n), mean_rewards)
         plt.title(title)
         plt.show()
