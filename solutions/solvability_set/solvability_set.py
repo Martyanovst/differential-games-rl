@@ -74,24 +74,24 @@ def test_agent(env, u_agent, v_agent):
 
 
 if __name__ == '__main__':
-    env = SolvabilitySet(initial_x=0, initial_y=-2)
+    env = SolvabilitySet(initial_x=0, initial_y=0)
     resolver = DiffGamesResolver()
     u_agent = init_u_agent(state_shape, action_shape, env.u_action_max, 128)
     v_agent = init_v_agent(state_shape, action_shape, env.v_action_max, 128)
-    # u_agent.Q.load_state_dict(torch.load('./u_result00'))
+    # u_agent.Q.load_state_dict(torch.load('./u_result' + str(env.initial_x) + str(env.initial_y)))
     # v_agent.Q.load_state_dict(torch.load('./v_result00'))
     rewards = resolver.fit_agents(env, episode_n, u_agent, v_agent, fit_step=10)
     u_agent.noise.threshold = 0
     v_agent.noise.threshold = 0
     test_agent(env, u_agent, v_agent)
-    torch.save(u_agent.Q.state_dict(), './u_result' + str(env.initial_x) + str(env.initial_y))
-    torch.save(v_agent.Q.state_dict(), './v_result' + str(env.initial_x) + str(env.initial_y))
+    # torch.save(u_agent.Q.state_dict(), './u_result' + str(env.initial_x) + str(env.initial_y))
+    # torch.save(v_agent.Q.state_dict(), './v_result' + str(env.initial_x) + str(env.initial_y))
 
     #
     #
     # u_agent = init_u_agent(state_shape, action_shape, env.u_action_max, 128)
     # v_agent = init_v_agent(state_shape, action_shape, env.v_action_max, 64)
     # resolver.fit_v_agent(env, episode_n, u_agent, v_agent)
-    # #
+
     # v_agent.noise.threshold = 0
     # test_agent(env, u_agent, v_agent)
