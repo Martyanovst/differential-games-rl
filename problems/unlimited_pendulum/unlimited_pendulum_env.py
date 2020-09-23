@@ -16,7 +16,7 @@ class PendulumEnv(gym.Env):
         self.max_torque = 2.
         self.dt = .05
         self.g = g
-        self.m = 1.
+        self.m = 10.
         self.l = 1.
         self.step_counter = 0
         self.viewer = None
@@ -49,11 +49,11 @@ class PendulumEnv(gym.Env):
 
         u = u[0]
         self.last_u = u  # for rendering
-        costs = angle_normalize(th) ** 2 + .1 * thdot ** 2 + .001 * (u ** 2)
+        costs = angle_normalize(th) ** 2 + .1 * thdot ** 2 + 0.001 * (u ** 2)
 
         newthdot = thdot + (-3 * g / (2 * l) * np.sin(th + np.pi) + 3. / (m * l ** 2) * u) * dt
         newth = th + newthdot * dt
-        newthdot = np.clip(newthdot, -self.max_speed, self.max_speed)
+        # newthdot = np.clip(newthdot, -self.max_speed, self.max_speed)
 
         self.state = np.array([newth, newthdot])
         self.step_counter += 1
