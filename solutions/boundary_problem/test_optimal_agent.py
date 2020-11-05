@@ -27,7 +27,7 @@ def test_agent(env, agent):
         x2.append(state[2])
     plt.plot(x1, x2)
 
-env = BoundaryProblem(-1, 3)
+env = BoundaryProblem(0, -2)
 state_shape = 3
 action_max = 1.5
 action_shape = 1
@@ -39,7 +39,7 @@ noise = OUNoise(action_shape, threshold=1, threshold_min=0.001, threshold_decrea
 batch_size = 200
 naf_agent = UnlimitedNAFAgent(mu_model, v_model, noise, state_shape, action_shape, batch_size, 0.999, env.dt)
 naf_agent.noise.threshold = 0
-naf_agent.Q.load_state_dict(torch.load('./result13' + str(env.initial_x1) + str(env.initial_x2)))
+naf_agent.Q.load_state_dict(torch.load('./result' + str(env.initial_x1) + str(env.initial_x2)))
 test_agent(env, OptimalAgent(env))
 test_agent(env, naf_agent)
 plt.legend(['optimal', 'naf'])

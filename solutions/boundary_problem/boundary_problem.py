@@ -9,7 +9,7 @@ from problems.boundary_problem.optimal_agent import OptimalAgent
 from utilities.noises import OUNoise
 from utilities.sequentialNetwork import Seq_Network
 
-env = BoundaryProblem(-1, 3)
+env = BoundaryProblem(0, -2)
 state_shape = 3
 action_max = 1.5
 action_shape = 1
@@ -69,7 +69,7 @@ mean_rewards = np.zeros(episodes_n)
 mean_rewards1 = np.zeros(episodes_n)
 mean_rewards2 = np.zeros(episodes_n)
 for episode in range(episodes_n):
-    reward,reward1,reward2, x1, x2 = play_and_learn(env)
+    reward, reward1, reward2, x1, x2 = play_and_learn(env)
     rewards[episode] = reward
     rewards1[episode] = reward1
     rewards2[episode] = reward2
@@ -106,4 +106,4 @@ plt.title('fit second element')
 plt.legend(['NAF'])
 plt.show()
 play_and_learn(env, learn=False)
-torch.save(agent.Q.state_dict(), './result13' + str(env.initial_x1) + str(env.initial_x2))
+torch.save(agent.Q.state_dict(), './result' + str(env.initial_x1) + str(env.initial_x2))

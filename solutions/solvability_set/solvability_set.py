@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 state_shape = 3
 action_shape = 1
-episode_n = 1000
+episode_n = 500
 
 
 def init_u_agent(state_shape, action_shape, action_max, batch_size):
@@ -19,7 +19,7 @@ def init_u_agent(state_shape, action_shape, action_max, batch_size):
     v_model = Seq_Network([state_shape, 100, 100, 1], nn.Sigmoid())
     noise = OUNoise(1, threshold=action_max, threshold_min=0.001, threshold_decrease=2 * action_max / episode_n)
     agent = DoubleNAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape, action_max, batch_size,
-                           gamma=1)
+                           gamma=0.99)
     return agent
 
 
@@ -29,7 +29,7 @@ def init_v_agent(state_shape, action_shape, action_max, batch_size):
     v_model = Seq_Network([state_shape, 100, 100, 1], nn.Sigmoid())
     noise = OUNoise(1, threshold=action_max, threshold_min=0.001, threshold_decrease=2 * action_max / episode_n)
     agent = DoubleNAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape, action_max, batch_size,
-                           gamma=1)
+                           gamma=0.99)
     return agent
 
 
@@ -74,7 +74,7 @@ def test_agent(env, u_agent, v_agent):
 
 
 if __name__ == '__main__':
-    env = SolvabilitySet(initial_x=0, initial_y=0)
+    env = SolvabilitySet(initial_x=0, initial_y=1 / 2)
     resolver = DiffGamesResolver()
     u_agent = init_u_agent(state_shape, action_shape, env.u_action_max, 128)
     v_agent = init_v_agent(state_shape, action_shape, env.v_action_max, 128)
