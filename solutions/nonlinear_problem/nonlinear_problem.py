@@ -4,7 +4,6 @@ import torch
 import torch.nn as nn
 
 from models.simple_naf import SimpleNaf
-from models.unlimited_naf import UnlimitedNAFAgent
 from problems.nonlinear_problem.nonlinear_problem_env import NonlinearProblem
 from problems.nonlinear_problem.optimal_agent import OptimalAgent
 from utilities.noises import OUNoise
@@ -13,14 +12,16 @@ from utilities.sequentialNetwork import Seq_Network
 env = NonlinearProblem()
 state_shape = 2
 action_shape = 1
-episodes_n = 500
+episodes_n = 100
+epsilon_min = 0.00001
+epsilon = 1
 
-mu_model = Seq_Network([state_shape, 100, 100, 100, action_shape], nn.Sigmoid())
-p_model = Seq_Network([state_shape, 100, 100, 100, action_shape ** 2], nn.Sigmoid())
-v_model = Seq_Network([state_shape, 100, 100, 100, 1], nn.Sigmoid())
-noise = OUNoise(action_shape, threshold=1, threshold_min=0.001, threshold_decrease=0.002)
-batch_size = 200
-agent = SimpleNaf(mu_model, v_model, noise, state_shape, action_shape, batch_size, 1, env.dt)
+mu_model = Seq_Network([state_shape, 50, 25, action_shape], nn.Sigmoid())
+v_model = Seq_Network([state_shape, 50, 25, 1], nn.Sigmoid())
+noise = OUNoise(action_shape, threshold=epsilon, threshold_min=epsilon_min,
+                threshold_decrease=(epsilon_min / epsilon) ** (1 / episodes_n))
+batch_size = 64
+agent = SimpleNaf(mu_model, v_model, noise, state_shape, action_shape, batch_size, 0.999, env.dt)
 
 
 def play_and_learn(env):
@@ -32,8 +33,8 @@ def play_and_learn(env):
         action = agent.get_action(state)
         next_state, reward, done, _ = env.step(action)
         total_reward += reward
-        done = step >= 500 and total_reward >= env.optimal_v
         agent.fit(state, action, -reward, done, next_state)
+        done = step >= 500 and total_reward >= env.optimal_v
         state = next_state
         step += 1
     x1, x2 = env.state
@@ -47,7 +48,7 @@ def agent_play(env, agent):
     total_reward = 0
     ts = []
     us = []
-    terminal_time = 20
+    terminal_time = 1.5
     done = False
     step = 0
     while not done:
@@ -88,11 +89,13 @@ print('optimal', optimal_reward)
 print('fitted', reward)
 plt.plot(range(episodes_n), mean_rewards)
 plt.plot(range(episodes_n), env.optimal_v * np.ones(episodes_n))
-plt.title('fit')
+plt.title('Динамика показателя качества в процессе обучения')
 plt.legend(['NAF', 'Optimal'])
+plt.xlabel('Эпизод')
+plt.ylabel('Показатель качества')
 plt.show()
 plt.plot(range(episodes_n), mean_times)
 plt.title('times')
 plt.legend(['NAF'])
 plt.show()
-torch.save(agent.Q.state_dict(), './result13')
+torch.save(agent.Q.state_dict(), './test/result')

@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import numpy as np
+
+from models.simple_naf import SimpleNaf
 from models.unlimited_naf import UnlimitedNAFAgent
 from problems.nonlinear_problem.nonlinear_problem_env import NonlinearProblem
 from problems.nonlinear_problem.optimal_agent import OptimalAgent
@@ -43,19 +45,23 @@ state_shape = 2
 action_shape = 1
 episodes_n = 1000
 
-mu_model = Seq_Network([state_shape, 100, 100, 100, action_shape], nn.Sigmoid())
-p_model = Seq_Network([state_shape, 100, 100, 100, action_shape ** 2], nn.Sigmoid())
-v_model = Seq_Network([state_shape, 100, 100, 100, 1], nn.Sigmoid())
+mu_model = Seq_Network([state_shape, 50, 25, action_shape], nn.Sigmoid())
+v_model = Seq_Network([state_shape, 50, 25, 1], nn.Sigmoid())
 noise = OUNoise(action_shape, threshold=1, threshold_min=0.001, threshold_decrease=0.001)
-batch_size = 200
-agent = UnlimitedNAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape, batch_size, 1)
+batch_size = 64
+agent = SimpleNaf(mu_model, v_model, noise, state_shape, action_shape, batch_size, 0.999)
 agent.noise.threshold = 0
-agent.Q.load_state_dict(torch.load('./result13'))
-env = NonlinearProblem(1, 1)
+agent.Q.load_state_dict(torch.load('./test/result'))
+env = NonlinearProblem()
 optx1, optx2, optu = agent_play(env, OptimalAgent(), 'optimal agent')
 x1, x2, u = agent_play(env, agent, 'naf agent')
 plt.plot(optx1, optx2)
 plt.plot(x1, x2)
+plt.scatter([1], [1], color='green')
+plt.title('Траектория движения обученного агента')
+plt.legend(['Naf', 'Optimal', 'Start'])
+plt.xlabel('x1')
+plt.ylabel('x2')
 plt.show()
 #
 # X1 = np.arange(-1, 1, 0.1)

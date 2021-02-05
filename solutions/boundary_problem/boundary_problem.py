@@ -9,17 +9,17 @@ from problems.boundary_problem.optimal_agent import OptimalAgent
 from utilities.noises import OUNoise
 from utilities.sequentialNetwork import Seq_Network
 
-env = BoundaryProblem(0, -2)
+env = BoundaryProblem(-1, -1)
 state_shape = 3
 action_max = 1.5
 action_shape = 1
-episodes_n = 500
+episodes_n = 300
 
-mu_model = Seq_Network([state_shape, 150, 150, action_shape], nn.Sigmoid())
-p_model = Seq_Network([state_shape, 150, 150, action_shape ** 2], nn.Sigmoid())
-v_model = Seq_Network([state_shape, 150, 150, 1], nn.Sigmoid())
+mu_model = Seq_Network([state_shape, 50, 50, action_shape], nn.Sigmoid())
+p_model = Seq_Network([state_shape, 50, 50, action_shape ** 2], nn.Sigmoid())
+v_model = Seq_Network([state_shape, 50, 50, 1], nn.Sigmoid())
 noise = OUNoise(action_shape, threshold=1, threshold_min=0.001, threshold_decrease=0.002)
-batch_size = 200
+batch_size = 64
 agent = UnlimitedNAFAgent(mu_model, v_model, noise, state_shape, action_shape, batch_size, 0.999, env.dt)
 
 
@@ -106,4 +106,4 @@ plt.title('fit second element')
 plt.legend(['NAF'])
 plt.show()
 play_and_learn(env, learn=False)
-torch.save(agent.Q.state_dict(), './result' + str(env.initial_x1) + str(env.initial_x2))
+torch.save(agent.Q.state_dict(), './test/result' + str(env.initial_x1) + str(env.initial_x2))

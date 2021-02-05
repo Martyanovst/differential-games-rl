@@ -2,7 +2,7 @@ from numpy import hstack
 
 
 class BoundaryProblem:
-    def __init__(self, x1=-1, x2=-1, dt=0.005):
+    def __init__(self, x1=-3, x2=-1, dt=0.005):
         self.state = hstack((0, x1, x2))
         self.done = False
         self.initial_x1 = x1
