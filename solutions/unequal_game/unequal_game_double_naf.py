@@ -9,14 +9,16 @@ from utilities.sequentialNetwork import Seq_Network
 
 state_shape = 2
 action_shape = 1
-episode_n = 500
+episode_n = 300
+epsilon_min = 0.00001
 
 
 def init_u_agent(state_shape, action_shape, action_max, batch_size):
     mu_model = Seq_Network([state_shape, 32, 32, action_shape], nn.ReLU(), nn.Tanh())
     p_model = Seq_Network([state_shape, 32, 32, action_shape ** 2], nn.ReLU())
     v_model = Seq_Network([state_shape, 32, 32, 1], nn.ReLU())
-    noise = OUNoise(1, threshold=1, threshold_min=0.001, threshold_decrease=0.003)
+    noise = OUNoise(action_shape, threshold=action_max, threshold_min=action_max * epsilon_min,
+                    threshold_decrease=(epsilon_min / action_max) ** (1 / episode_n * 2))
     agent = DoubleNAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape, action_max, batch_size,
                            gamma=0.999)
     return agent
@@ -26,7 +28,8 @@ def init_v_agent(state_shape, action_shape, action_max, batch_size):
     mu_model = Seq_Network([state_shape, 32, 32, action_shape], nn.ReLU(), nn.Tanh())
     p_model = Seq_Network([state_shape, 32, 32, action_shape ** 2], nn.ReLU())
     v_model = Seq_Network([state_shape, 32, 32, 1], nn.ReLU())
-    noise = OUNoise(1, threshold=1, threshold_min=0.001, threshold_decrease=0.003 * action_max)
+    noise = OUNoise(action_shape, threshold=action_max, threshold_min=action_max * epsilon_min,
+                    threshold_decrease=(epsilon_min / action_max) ** (1 / episode_n * 2))
     agent = DoubleNAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape, action_max, batch_size,
                            gamma=0.999)
     return agent

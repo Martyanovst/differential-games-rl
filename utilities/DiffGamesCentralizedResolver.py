@@ -24,6 +24,8 @@ class DiffGamesCentralizedResolver:
             print("episode=%.0f, total reward=%.3f, threshold=%0.3f" % (
                 episode, total_reward, agent.noise.threshold))
         plt.plot(range(episode_n), mean_rewards)
+        plt.xlabel('Эпизод')
+        plt.ylabel('Показатель качества')
         plt.title(title)
         plt.show()
         return agent

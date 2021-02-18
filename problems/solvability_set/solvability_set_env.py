@@ -18,6 +18,8 @@ class SolvabilitySet:
 
     def reset(self):
         self.done = False
+        self.initial_x = np.random.uniform(-4, 4, 1)[0]
+        self.initial_y = np.random.uniform(-4, 4, 1)[0]
         self.state = np.array([0, self.initial_x, self.initial_y])
         return self.state
 
@@ -34,4 +36,3 @@ class SolvabilitySet:
             reward = delta - 4
 
         return self.state, reward, int(self.done), None
-
