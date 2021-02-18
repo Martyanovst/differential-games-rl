@@ -9,16 +9,19 @@ from problems.boundary_problem.optimal_agent import OptimalAgent
 from utilities.noises import OUNoise
 from utilities.sequentialNetwork import Seq_Network
 
-env = BoundaryProblem(-1, -1)
+env = BoundaryProblem(0, -2)
 state_shape = 3
 action_max = 1.5
 action_shape = 1
 episodes_n = 300
+epsilon = 1
+epsilon_min = 0.0000001
 
 mu_model = Seq_Network([state_shape, 50, 50, action_shape], nn.Sigmoid())
 p_model = Seq_Network([state_shape, 50, 50, action_shape ** 2], nn.Sigmoid())
 v_model = Seq_Network([state_shape, 50, 50, 1], nn.Sigmoid())
-noise = OUNoise(action_shape, threshold=1, threshold_min=0.001, threshold_decrease=0.002)
+noise = OUNoise(action_shape, threshold=epsilon, threshold_min=epsilon_min,
+                threshold_decrease=(epsilon_min / epsilon) ** (1 / episodes_n))
 batch_size = 64
 agent = UnlimitedNAFAgent(mu_model, v_model, noise, state_shape, action_shape, batch_size, 0.999, env.dt)
 

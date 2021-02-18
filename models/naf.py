@@ -47,12 +47,11 @@ class NAFAgent:
         self.loss = nn.MSELoss()
         self.Q_target = deepcopy(self.Q)
         self.tau = 1e-3
-        self.memory = deque(maxlen=2500)
+        self.memory = deque(maxlen=100000)
         self.gamma = gamma
 
         self.batch_size = batch_size
         self.noise = noise
-        self.reward_normalize = 1
 
     def get_action(self, state, with_noise=True):
         state = torch.tensor(state, dtype=torch.float)
@@ -84,7 +83,7 @@ class NAFAgent:
         if len(self.memory) >= self.batch_size:
             states, actions, rewards, dones, next_states = self.get_batch()
             self.opt.zero_grad()
-            target = self.reward_normalize * rewards.reshape(self.batch_size, 1) + (
+            target = rewards.reshape(self.batch_size, 1) + (
                     1 - dones).reshape(self.batch_size, 1) * self.gamma * self.Q_target.v(
                 next_states).detach()
             loss = self.loss(self.Q(states, actions), target)
