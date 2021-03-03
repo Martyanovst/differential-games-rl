@@ -25,7 +25,7 @@ class Q_model(nn.Module):
         return A + self.v(state)
 
 
-class SimpleNaf:
+class NAF_R:
 
     def __init__(self, mu_model, v_model,
                  noise, state_shape, action_shape,

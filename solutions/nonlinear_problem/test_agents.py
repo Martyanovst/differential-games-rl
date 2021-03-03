@@ -9,7 +9,7 @@ from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import numpy as np
 
-from models.simple_naf import SimpleNaf
+from models.naf_r import NAF_R
 from models.unlimited_naf import UnlimitedNAFAgent
 from problems.nonlinear_problem.nonlinear_problem_env import NonlinearProblem
 from problems.nonlinear_problem.optimal_agent import OptimalAgent
@@ -49,7 +49,7 @@ mu_model = Seq_Network([state_shape, 50, 25, action_shape], nn.Sigmoid())
 v_model = Seq_Network([state_shape, 50, 25, 1], nn.Sigmoid())
 noise = OUNoise(action_shape, threshold=1, threshold_min=0.001, threshold_decrease=0.001)
 batch_size = 64
-agent = SimpleNaf(mu_model, v_model, noise, state_shape, action_shape, batch_size, 0.999)
+agent = NAF_R(mu_model, v_model, noise, state_shape, action_shape, batch_size, 0.999)
 agent.noise.threshold = 0
 agent.Q.load_state_dict(torch.load('./test/result'))
 env = NonlinearProblem()

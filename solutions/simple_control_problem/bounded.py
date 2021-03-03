@@ -3,7 +3,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from models.naf import NAFAgent
+from models.bounded.bounded_naf import Bounded_NAF
 from problems.simple_control_problem.simple_control_problem_env import SimpleControlProblem
 from utilities.noises import OUNoise
 from utilities.sequentialNetwork import Seq_Network
@@ -12,17 +12,19 @@ env = SimpleControlProblem()
 state_shape = 2
 action_shape = 1
 action_max = 1
-episodes_n = 500
+episodes_n = 100
 epsilon_min = 0.000001
 epsilon = 1
 
 mu_model = Seq_Network([state_shape, 128, 128, action_shape], nn.ReLU(), nn.Tanh())
+phi_model = Seq_Network([state_shape, 128, 128, action_shape], nn.ReLU())
 p_model = Seq_Network([state_shape, 128, 128, action_shape ** 2], nn.ReLU())
 v_model = Seq_Network([state_shape, 128, 128, 1], nn.ReLU())
 noise = OUNoise(action_shape, threshold=epsilon, threshold_min=epsilon_min,
                 threshold_decrease=(epsilon_min / epsilon) ** (1 / episodes_n))
-batch_size = 100
-agent = NAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape, action_max, batch_size, 1)
+batch_size = 128
+agent = Bounded_NAF(mu_model, p_model, v_model, phi_model, noise, state_shape, action_shape, action_max, batch_size,
+                    1)
 
 
 def play_and_learn(env):
@@ -72,14 +74,14 @@ for episode in range(episodes_n):
 agent.noise.threshold = 0
 reward = agent_play(env, agent)
 plt.title('track')
-plt.legend(['NAF'])
+plt.legend(['Bounded NAF'])
 plt.show()
 plt.plot(range(episodes_n), mean_rewards)
 plt.title('Динамика показателя качества в процессе обучения')
-plt.legend(['NAF'])
+plt.legend(['Bounded NAF'])
 plt.xlabel('Эпизод')
 plt.ylabel('Показатель качества')
 plt.show()
 plt.show()
-torch.save(agent.Q.state_dict(), './test/naf')
-np.save('./test/naf_fit', mean_rewards)
+torch.save(agent.Q.state_dict(), './test/bounded')
+np.save('./test/bounded', mean_rewards)

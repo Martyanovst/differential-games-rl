@@ -3,7 +3,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from models.simple_naf import SimpleNaf
+from models.naf_r import NAF_R
 from problems.nonlinear_problem.nonlinear_problem_env import NonlinearProblem
 from problems.nonlinear_problem.optimal_agent import OptimalAgent
 from utilities.noises import OUNoise
@@ -21,7 +21,7 @@ v_model = Seq_Network([state_shape, 50, 25, 1], nn.Sigmoid())
 noise = OUNoise(action_shape, threshold=epsilon, threshold_min=epsilon_min,
                 threshold_decrease=(epsilon_min / epsilon) ** (1 / episodes_n))
 batch_size = 64
-agent = SimpleNaf(mu_model, v_model, noise, state_shape, action_shape, batch_size, 0.999, env.dt)
+agent = NAF_R(mu_model, v_model, noise, state_shape, action_shape, batch_size, 0.999, env.dt)
 
 
 def play_and_learn(env):

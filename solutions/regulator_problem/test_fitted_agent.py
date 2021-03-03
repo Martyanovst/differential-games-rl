@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from models.simple_naf import SimpleNaf
+from models.naf_r import NAF_R
 import matplotlib.pyplot as plt
 from models.unlimited_naf import UnlimitedNAFAgent
 from problems.regulator_problem.optimal_agent import OptimalAgent
@@ -40,7 +40,7 @@ p_model = Seq_Network([state_shape, 150, 150, 150, action_shape ** 2], nn.ReLU()
 v_model = Seq_Network([state_shape, 150, 150, 150, 1], nn.ReLU())
 noise = OUNoise(action_shape, threshold=1, threshold_min=0.001, threshold_decrease=0.001)
 batch_size = 200
-agent = SimpleNaf(mu_model, v_model, noise, state_shape, action_shape, batch_size, 1)
+agent = NAF_R(mu_model, v_model, noise, state_shape, action_shape, batch_size, 1)
 agent.noise.threshold = 0
 agent.Q.load_state_dict(torch.load('./result13'))
 env = RegulatorProblem()
