@@ -12,8 +12,8 @@ env = SimpleControlProblem()
 state_shape = 2
 action_shape = 1
 action_max = 1
-episodes_n = 100
-epsilon_min = 0.000001
+episodes_n = 200
+epsilon_min = 0.0000001
 epsilon = 1
 
 mu_model = Seq_Network([state_shape, 128, 128, action_shape], nn.ReLU(), nn.Tanh())
@@ -81,7 +81,6 @@ plt.title('Динамика показателя качества в проце�
 plt.legend(['Bounded NAF'])
 plt.xlabel('Эпизод')
 plt.ylabel('Показатель качества')
-plt.show()
 plt.show()
 torch.save(agent.Q.state_dict(), './test/bounded')
 np.save('./test/bounded', mean_rewards)

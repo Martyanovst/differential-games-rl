@@ -8,10 +8,9 @@ import torch.nn as nn
 
 
 class Q_model(nn.Module):
-    def __init__(self, mu_model, p_model,
-                 v_model, phi_model, action_shape, action_max=1):
+    def __init__(self, mu_model,
+                 v_model, phi_model, action_shape, dt, r=1, action_max=1):
         super().__init__()
-        self.P = p_model
         self.mu = mu_model
         self.v = v_model
         self.phi = phi_model
@@ -23,20 +22,14 @@ class Q_model(nn.Module):
             torch.ones(action_shape, action_shape))).unsqueeze(0)
 
     def forward(self, state, action):
-        L = self.P(state).view(-1, self.action_shape, self.action_shape)
-        L = L * self.tril_mask.expand_as(L) + torch.exp(L) * self.diag_mask.expand_as(L)
-        P = torch.bmm(L, L.transpose(2, 1))
-
-        mu = self.mu(state) * self.action_max
+        mu = self.mu(state)
         action_mu = (action - mu).unsqueeze(2)
-
         phi = self.phi(state)
         action_phi = (phi - mu).unsqueeze(2)
-
-        A = -0.5 * \
-            torch.bmm(torch.bmm(action_mu.transpose(2, 1), P),
+        A = -self.dt * \
+            torch.bmm(action_mu.transpose(2, 1),
                       action_mu)[:, :, 0] + \
-            torch.bmm(torch.bmm(action_phi.transpose(2, 1), P),
+            2*self.dt*torch.bmm(action_phi.transpose(2, 1),
                       action_mu)[:, :, 0]
         return A + self.v(state)
 
