@@ -23,7 +23,7 @@ v_model = Seq_Network([state_shape, 128, 128, 1], nn.ReLU())
 noise = OUNoise(action_shape, threshold=epsilon, threshold_min=epsilon_min,
                 threshold_decrease=(epsilon_min / epsilon) ** (1 / episodes_n))
 batch_size = 128
-agent = Bounded_R_NAF(mu_model, v_model, phi_model, noise, state_shape, action_shape, action_max, env.dt,
+agent = Bounded_R_NAF(mu_model, v_model, phi_model, noise, state_shape, action_shape, action_max, env.dt, 0.5,
                       batch_size,
                       1)
 
