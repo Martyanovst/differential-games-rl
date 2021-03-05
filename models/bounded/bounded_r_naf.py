@@ -14,6 +14,8 @@ class Q_model(nn.Module):
         self.mu = mu_model
         self.v = v_model
         self.phi = phi_model
+        self.dt = dt
+        self.r = r
         self.action_max = action_max
         self.action_shape = action_shape
         self.tril_mask = torch.tril(torch.ones(
@@ -29,21 +31,21 @@ class Q_model(nn.Module):
         A = -self.dt * \
             torch.bmm(action_mu.transpose(2, 1),
                       action_mu)[:, :, 0] + \
-            2*self.dt*torch.bmm(action_phi.transpose(2, 1),
-                      action_mu)[:, :, 0]
+            2 * self.dt * self.r * torch.bmm(action_phi.transpose(2, 1),
+                                        action_mu)[:, :, 0]
         return A + self.v(state)
 
 
-class Bounded_NAF:
+class Bounded_R_NAF:
 
-    def __init__(self, mu_model, p_model, v_model, phi_model,
+    def __init__(self, mu_model, v_model, phi_model,
                  noise, state_shape, action_shape,
-                 action_max, batch_size=200, gamma=0.9999):
+                 action_max, dt, r=1, batch_size=200, gamma=0.9999):
         self.state_shape = state_shape
         self.action_shape = action_shape
         self.action_max = action_max
 
-        self.Q = Q_model(mu_model, p_model, v_model, phi_model, action_shape)
+        self.Q = Q_model(mu_model, v_model, phi_model, action_shape, dt, r)
         self.opt = torch.optim.Adam(self.Q.parameters(), lr=1e-4)
         self.loss = nn.MSELoss()
         self.Q_target = deepcopy(self.Q)

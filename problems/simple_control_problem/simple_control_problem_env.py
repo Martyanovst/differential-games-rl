@@ -2,7 +2,7 @@ from numpy import hstack
 
 
 class SimpleControlProblem:
-    def __init__(self, x0=1, terminal_t=2, dt=0.01):
+    def __init__(self, x0=1, terminal_t=2, dt=0.025):
         self.terminal_t = terminal_t
         self.x0 = x0
         self.state = hstack((0, self.x0))
