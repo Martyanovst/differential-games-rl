@@ -3,7 +3,6 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from models.bounded.bounded_naf import Bounded_NAF
 from models.bounded.bounded_r_naf import Bounded_R_NAF
 from problems.simple_control_problem.simple_control_problem_env import SimpleControlProblem
 from utilities.noises import OUNoise
