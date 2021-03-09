@@ -3,7 +3,6 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from models.bounded.bounded_naf import Bounded_NAF
 from models.bounded.bounded_r_naf import Bounded_R_NAF
 from problems.simple_control_problem.simple_control_problem_env import SimpleControlProblem
 from utilities.noises import OUNoise
@@ -13,8 +12,8 @@ env = SimpleControlProblem()
 state_shape = 2
 action_shape = 1
 action_max = 1
-episodes_n = 200
-epsilon_min = 0.0000001
+episodes_n = 500
+epsilon_min = 0.001
 epsilon = 1
 
 mu_model = Seq_Network([state_shape, 128, 128, action_shape], nn.ReLU(), nn.Tanh())

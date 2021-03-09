@@ -31,8 +31,8 @@ class Q_model(nn.Module):
         A = -self.dt * \
             torch.bmm(action_mu.transpose(2, 1),
                       action_mu)[:, :, 0] + \
-            2 * self.dt * self.r * torch.bmm(action_phi.transpose(2, 1),
-                                        action_mu)[:, :, 0]
+            2*self.dt * self.r * torch.bmm(action_phi.transpose(2, 1),
+                                         action_mu)[:, :, 0]
         return A + self.v(state)
 
 
@@ -45,7 +45,7 @@ class Bounded_R_NAF:
         self.action_shape = action_shape
         self.action_max = action_max
 
-        self.Q = Q_model(mu_model, v_model, phi_model, action_shape, dt, r)
+        self.Q = Q_model(mu_model, v_model, phi_model, action_shape, dt, r, action_max)
         self.opt = torch.optim.Adam(self.Q.parameters(), lr=1e-4)
         self.loss = nn.MSELoss()
         self.Q_target = deepcopy(self.Q)
