@@ -14,7 +14,7 @@ state_shape = 2
 action_shape = 1
 action_max = 1
 episodes_n = 200
-epsilon_min = 0.0000001
+epsilon_min = 0.001
 epsilon = 1
 
 mu_model = Seq_Network([state_shape, 128, 128, action_shape], nn.ReLU(), nn.Tanh())

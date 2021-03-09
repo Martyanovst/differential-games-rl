@@ -40,7 +40,7 @@ class Bounded_R_NAF:
 
     def __init__(self, mu_model, v_model, phi_model,
                  noise, state_shape, action_shape,
-                 action_max, dt, r=1, batch_size=200, gamma=0.9999):
+                 action_max, dt, r, batch_size=200, gamma=0.9999):
         self.state_shape = state_shape
         self.action_shape = action_shape
         self.action_max = action_max
