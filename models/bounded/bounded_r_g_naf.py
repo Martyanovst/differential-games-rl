@@ -9,11 +9,10 @@ import torch.nn as nn
 
 class Q_model(nn.Module):
     def __init__(self, mu_model,
-                 v_model, phi_model, action_shape, dt, r=1, action_max=1):
+                 v_model,action_shape, dt, r=1, action_max=1):
         super().__init__()
         self.mu = mu_model
         self.v = v_model
-        self.phi = phi_model
         self.dt = dt
         self.r = r
         self.action_max = action_max
@@ -26,7 +25,7 @@ class Q_model(nn.Module):
     def forward(self, state, action):
         mu = self.mu(state)
         action_mu = (action - mu).unsqueeze(2)
-        phi = self.phi(state)
+        phi = -1/2 * (1 / self.r)
         action_phi = (phi - mu).unsqueeze(2)
         A = -self.dt * self.r * \
             torch.bmm(action_mu.transpose(2, 1),
@@ -36,16 +35,16 @@ class Q_model(nn.Module):
         return A + self.v(state)
 
 
-class Bounded_R_NAF:
+class Bounded_R_G_NAF:
 
-    def __init__(self, mu_model, v_model, phi_model,
+    def __init__(self, mu_model, v_model,
                  noise, state_shape, action_shape,
                  action_max, dt, r, batch_size=200, gamma=0.9999):
         self.state_shape = state_shape
         self.action_shape = action_shape
         self.action_max = action_max
 
-        self.Q = Q_model(mu_model, v_model, phi_model, action_shape, dt, r, action_max)
+        self.Q = Q_model(mu_model, v_model, action_shape, dt, r, action_max)
         self.opt = torch.optim.Adam(self.Q.parameters(), lr=1e-4)
         self.loss = nn.MSELoss()
         self.Q_target = deepcopy(self.Q)
