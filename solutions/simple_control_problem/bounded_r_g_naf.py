@@ -4,12 +4,11 @@ import torch
 import torch.nn as nn
 
 from models.bounded.bounded_r_g_naf import Bounded_R_G_NAF
-from models.bounded.bounded_r_naf import Bounded_R_NAF
 from problems.simple_control_problem.simple_control_problem_env import SimpleControlProblem
 from utilities.noises import OUNoise
 from utilities.sequentialNetwork import Seq_Network
 
-env = SimpleControlProblem(dt=0.1)
+env = SimpleControlProblem()
 state_shape = 2
 action_shape = 1
 action_max = 1

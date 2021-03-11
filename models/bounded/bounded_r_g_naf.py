@@ -29,7 +29,7 @@ class Q_model(nn.Module):
         v = self.v(state)
         v.backward(torch.ones((128, 1)), retain_graph=True)
         dv = state.grad[:, 1:]
-        phi = ((- 0.5) * (1 / self.r) * self.g * dv)
+        phi = ((-0.5) * (1 / self.r) * self.g * dv)
         action_phi = (phi - mu).unsqueeze(2)
         A = -self.dt * self.r * \
             torch.bmm(action_mu.transpose(2, 1),
