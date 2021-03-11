@@ -27,16 +27,17 @@ class Q_model(nn.Module):
         mu = self.mu(state)
         action_mu = (action - mu).unsqueeze(2)
         v = self.v(state)
-        v.backward(torch.ones((128, 1)), retain_graph=True)
-        dv = state.grad[:, 1:]
-        phi = ((-0.5) * (1 / self.r) * self.g * dv)
+        v.backward(torch.ones((128, 1)))
+        dv = state.grad[:, 1:].detach()
+        phi = ((0.5) * (1 / self.r) * self.g * dv)
         action_phi = (phi - mu).unsqueeze(2)
         A = -self.dt * self.r * \
             torch.bmm(action_mu.transpose(2, 1),
                       action_mu)[:, :, 0] + \
             2 * self.dt * self.r * torch.bmm(action_phi.transpose(2, 1),
                                              action_mu)[:, :, 0]
-        return A + v
+        self.v.zero_grad()
+        return A + self.v(state)
 
 
 class Bounded_R_G_NAF:
