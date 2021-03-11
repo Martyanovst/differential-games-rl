@@ -9,12 +9,13 @@ import torch.nn as nn
 
 class Q_model(nn.Module):
     def __init__(self, mu_model,
-                 v_model,action_shape, dt, r=1, action_max=1):
+                 v_model, action_shape, dt, r=1, g=1, action_max=1):
         super().__init__()
         self.mu = mu_model
         self.v = v_model
         self.dt = dt
         self.r = r
+        self.g = g
         self.action_max = action_max
         self.action_shape = action_shape
         self.tril_mask = torch.tril(torch.ones(
@@ -25,26 +26,29 @@ class Q_model(nn.Module):
     def forward(self, state, action):
         mu = self.mu(state)
         action_mu = (action - mu).unsqueeze(2)
-        phi = -1/2 * (1 / self.r)
+        v = self.v(state)
+        v.backward(torch.ones((128, 1)), retain_graph=True)
+        dv = state.grad[:, 1:]
+        phi = ((- 0.5) * (1 / self.r) * self.g * dv)
         action_phi = (phi - mu).unsqueeze(2)
         A = -self.dt * self.r * \
             torch.bmm(action_mu.transpose(2, 1),
                       action_mu)[:, :, 0] + \
             2 * self.dt * self.r * torch.bmm(action_phi.transpose(2, 1),
-                                         action_mu)[:, :, 0]
-        return A + self.v(state)
+                                             action_mu)[:, :, 0]
+        return A + v
 
 
 class Bounded_R_G_NAF:
 
     def __init__(self, mu_model, v_model,
                  noise, state_shape, action_shape,
-                 action_max, dt, r, batch_size=200, gamma=0.9999):
+                 action_max, dt, r, g, batch_size=200, gamma=0.9999):
         self.state_shape = state_shape
         self.action_shape = action_shape
         self.action_max = action_max
 
-        self.Q = Q_model(mu_model, v_model, action_shape, dt, r, action_max)
+        self.Q = Q_model(mu_model, v_model, action_shape, dt, r, g, action_max)
         self.opt = torch.optim.Adam(self.Q.parameters(), lr=1e-4)
         self.loss = nn.MSELoss()
         self.Q_target = deepcopy(self.Q)
@@ -72,7 +76,7 @@ class Bounded_R_G_NAF:
     def get_batch(self):
         minibatch = random.sample(self.memory, self.batch_size)
         states, actions, rewards, dones, next_states = map(np.array, zip(*minibatch))
-        states = torch.tensor(states, dtype=torch.float32)
+        states = torch.tensor(states, dtype=torch.float32, requires_grad=True)
         actions = torch.tensor(actions, dtype=torch.float32)
         rewards = torch.tensor(rewards, dtype=torch.float32)
         dones = torch.from_numpy(dones.astype(np.float32))
