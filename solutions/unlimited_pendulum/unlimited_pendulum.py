@@ -4,7 +4,7 @@ from torch import nn
 
 from models.double_naf import DoubleNAFAgent
 from models.unlimited_naf import UnlimitedNAFAgent
-from problems.unlimited_pendulum.unlimited_pendulum_env import PendulumEnv
+from problems.unlimited_pendulum.unlimited_pendulum_env import UnlimitedPendulumEnv
 from utilities.noises import OUNoise
 from utilities.sequentialNetwork import Seq_Network
 
@@ -61,6 +61,6 @@ def fit(env):
     plt.plot(range(episodes_n), mean_rewards)
 
 
-env = PendulumEnv()
+env = UnlimitedPendulumEnv()
 fit(env)
 plt.show()

@@ -37,11 +37,14 @@ class NAFAgent:
 
     def __init__(self, mu_model, p_model, v_model,
                  noise, state_shape, action_shape,
-                 action_max, batch_size=200, gamma=0.9999):
+                 action_max, batch_size=200, gamma=0.9999, action_min=None):
         self.state_shape = state_shape
         self.action_shape = action_shape
         self.action_max = action_max
-
+        if action_min:
+            self.action_min = action_min
+        else:
+            self.action_min = -action_max
         self.Q = Q_model(mu_model, p_model, v_model, action_shape)
         self.opt = torch.optim.Adam(self.Q.parameters(), lr=1e-4)
         self.loss = nn.MSELoss()
@@ -58,7 +61,7 @@ class NAFAgent:
         mu_value = self.Q.mu(state).detach().data.numpy() * self.action_max
         noise = self.noise.noise() * with_noise
         action = mu_value + noise
-        return np.clip(action, - self.action_max, self.action_max)
+        return np.clip(action, self.action_min, self.action_max)
 
     def state_dict(self):
         return self.Q_target.state_dict()

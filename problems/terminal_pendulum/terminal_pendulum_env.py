@@ -5,7 +5,7 @@ import numpy as np
 from os import path
 
 
-class UnlimitedPendulumEnv(gym.Env):
+class PendulumEnv(gym.Env):
     metadata = {
         'render.modes': ['human', 'rgb_array'],
         'video.frames_per_second': 30
@@ -15,10 +15,10 @@ class UnlimitedPendulumEnv(gym.Env):
         self.max_speed = 8
         self.max_torque = 2.
         self.dt = .05
+        self.terminal_t = 2
         self.g = g
-        self.m = 10.
+        self.m = 1.
         self.l = 1.
-        self.step_counter = 0
         self.viewer = None
 
         high = np.array([1., 1., self.max_speed], dtype=np.float32)
@@ -40,36 +40,37 @@ class UnlimitedPendulumEnv(gym.Env):
         return [seed]
 
     def step(self, u):
-        th, thdot = self.state  # th := theta
+        t, th, thdot = self.state  # th := theta
 
         g = self.g
         m = self.m
         l = self.l
         dt = self.dt
 
-        u = u[0]
+        u = np.clip(u, -self.max_torque, self.max_torque)[0]
         self.last_u = u  # for rendering
-        costs = angle_normalize(th) ** 2 + .1 * thdot ** 2 + 0.001 * (u ** 2)
+        costs = angle_normalize(th) ** 2 + .1 * thdot ** 2 + .001 * (u ** 2)
 
         newthdot = thdot + (-3 * g / (2 * l) * np.sin(th + np.pi) + 3. / (m * l ** 2) * u) * dt
         newth = th + newthdot * dt
         # newthdot = np.clip(newthdot, -self.max_speed, self.max_speed)
+        t += self.dt
+        done = t >= self.terminal_t
 
-        self.state = np.array([newth, newthdot])
-        self.step_counter += 1
-        done = self.step_counter >= 200
+        self.state = np.array([t, newth, newthdot])
         return self._get_obs(), -costs, done, {}
 
     def reset(self):
         high = np.array([np.pi, 1])
         self.state = self.np_random.uniform(low=-high, high=high)
+        t = 0
+        self.state = np.insert(self.state, 0, t)
         self.last_u = None
-        self.step_counter = 0
         return self._get_obs()
 
     def _get_obs(self):
-        theta, thetadot = self.state
-        return np.array([np.cos(theta), np.sin(theta), thetadot])
+        t, theta, thetadot = self.state
+        return np.array([t, np.cos(theta), np.sin(theta), thetadot])
 
     def render(self, mode='human'):
         if self.viewer is None:
