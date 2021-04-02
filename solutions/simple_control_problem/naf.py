@@ -54,7 +54,7 @@ for i in range(10):
     v_model = Seq_Network([state_shape, 128, 128, 1], nn.ReLU())
     noise = OUNoise(action_shape, threshold=epsilon, threshold_min=epsilon_min,
                     threshold_decrease=(epsilon_min / epsilon) ** (1 / episodes_n))
-    batch_size = 100
+    batch_size = 128
     agent = NAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape, action_max, batch_size, 1)
 
     rewards = np.zeros(episodes_n)
@@ -67,17 +67,4 @@ for i in range(10):
         print("episode=%.0f, noise_threshold=%.3f, total reward=%.3f, mean reward=%.3f, x0=%.5f, iteration=%.1f" % (
             episode, agent.noise.threshold, rewards[episode], mean_reward, x, i))
 
-    # agent.noise.threshold = 0
-    # reward = agent_play(env, agent)
-    # plt.title('track')
-    # plt.legend(['NAF'])
-    # plt.show()
-    # plt.plot(range(episodes_n), mean_rewards)
-    # plt.title('Динамика показателя качества в процессе обучения')
-    # plt.legend(['NAF'])
-    # plt.xlabel('Эпизод')
-    # plt.ylabel('Показатель качества')
-    # plt.show()
-    # plt.show()
-    # torch.save(agent.Q.state_dict(), './test/naf')
     np.save('./test/naf_test/' + str(i), mean_rewards)

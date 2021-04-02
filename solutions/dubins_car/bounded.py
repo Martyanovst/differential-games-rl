@@ -14,8 +14,8 @@ state_shape = env.state_dim
 action_shape = env.action_dim
 action_max = env.action_max[0]
 action_min = env.action_min[0]
-episodes_n = 500
-epsilon_min = 0.00000000001
+episodes_n = 200
+epsilon_min = 0.0000001
 epsilon = 1
 
 mu_model = Seq_Network([state_shape, 128, 128, action_shape], nn.ReLU())
