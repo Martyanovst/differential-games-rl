@@ -36,23 +36,24 @@ def agent_play(env, agent):
 
 
 for i in range(10):
-    env = DubinsCar()
+    env = DubinsCar(dt=2)
     state_shape = env.state_dim
     action_shape = env.action_dim
-    action_max = env.action_max[0]
-    action_min = env.action_min[0]
-    episodes_n = 200
-    epsilon_min = 0.0001
+    action_max = env.action_max
+    action_min = env.action_min
+    episodes_n = 500
+    epsilon_min = 0.00000001
     epsilon = 1
-    batch_size = 128
+    batch_size = 256
 
 
-    mu_model = Seq_Network([state_shape, 128, 128, action_shape], nn.ReLU())
-    p_model = Seq_Network([state_shape, 128, 128, action_shape ** 2], nn.ReLU())
-    v_model = Seq_Network([state_shape, 128, 128, 1], nn.ReLU())
+    mu_model = Seq_Network([state_shape, 256, 128, action_shape], nn.ReLU(), nn.Tanh())
+    p_model = Seq_Network([state_shape, 256, 128, action_shape ** 2], nn.ReLU())
+    v_model = Seq_Network([state_shape, 256, 128, 1], nn.ReLU())
     noise = OUNoise(action_shape, threshold=epsilon, threshold_min=epsilon_min,
                     threshold_decrease=(epsilon_min / epsilon) ** (1 / episodes_n))
-    agent = NAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape, action_max, action_min=action_min,
+    agent = NAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape,
+                     action_max=action_max, action_min=action_min,
                      batch_size=batch_size, gamma=1)
 
     rewards = np.zeros(episodes_n)

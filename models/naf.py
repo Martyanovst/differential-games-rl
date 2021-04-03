@@ -46,7 +46,7 @@ class NAFAgent:
         else:
             self.action_min = -action_max
         self.Q = Q_model(mu_model, p_model, v_model, action_shape)
-        self.opt = torch.optim.Adam(self.Q.parameters(), lr=1e-4)
+        self.opt = torch.optim.Adam(self.Q.parameters(), lr=1e-3)
         self.loss = nn.MSELoss()
         self.Q_target = deepcopy(self.Q)
         self.tau = 1e-3
@@ -86,8 +86,8 @@ class NAFAgent:
         if len(self.memory) >= self.batch_size:
             states, actions, rewards, dones, next_states = self.get_batch()
             self.opt.zero_grad()
-            target = rewards.reshape(self.batch_size, 1) + (
-                    1 - dones).reshape(self.batch_size, 1) * self.gamma * self.Q_target.v(
+            target = rewards.reshape(self.batch_size, 1) + (1 - dones).reshape(self.batch_size,
+                                                                               1) * self.gamma * self.Q_target.v(
                 next_states).detach()
             loss = self.loss(self.Q(states, actions), target)
             loss.backward()

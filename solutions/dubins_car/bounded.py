@@ -9,13 +9,13 @@ from problems.simple_control_problem.simple_control_problem_env import SimpleCon
 from utilities.noises import OUNoise
 from utilities.sequentialNetwork import Seq_Network
 
-env = DubinsCar()
+env = DubinsCar(dt=2)
 state_shape = env.state_dim
 action_shape = env.action_dim
 action_max = env.action_max[0]
 action_min = env.action_min[0]
-episodes_n = 200
-epsilon_min = 0.0000001
+episodes_n = 1000
+epsilon_min = 0.00000000001
 epsilon = 1
 
 mu_model = Seq_Network([state_shape, 128, 128, action_shape], nn.ReLU())
