@@ -1,30 +1,22 @@
-import matplotlib.pyplot as plt
+from collections import deque
+
 import numpy as np
-import torch
 import torch.nn as nn
 
 from models.bounded.bounded_r_naf import Bounded_R_NAF
-from problems.simple_control_problem.simple_control_problem_env import SimpleControlProblem
+from problems.dubins_car.dubins_car_env import DubinsCar
 from utilities.noises import OUNoise
 from utilities.sequentialNetwork import Seq_Network
 
-env = SimpleControlProblem()
-state_shape = 2
-action_shape = 1
-action_max = 1
+env = DubinsCar(inner_step_n=100)
+state_shape = env.state_dim
+action_shape = env.action_dim
+action_max = env.action_max
+action_min = env.action_min
 episodes_n = 200
-epsilon_min = 0.0000001
+epsilon_min = 0.01
+batch_size = 256
 epsilon = 1
-
-mu_model = Seq_Network([state_shape, 128, 128, action_shape], nn.ReLU(), nn.Tanh())
-phi_model = Seq_Network([state_shape, 128, 128, action_shape], nn.ReLU())
-v_model = Seq_Network([state_shape, 128, 128, 1], nn.ReLU())
-noise = OUNoise(action_shape, threshold=epsilon, threshold_min=epsilon_min,
-                threshold_decrease=(epsilon_min / epsilon) ** (1 / episodes_n))
-batch_size = 128
-agent = Bounded_R_NAF(mu_model, v_model, phi_model, noise, state_shape, action_shape, action_max, env.dt, 0.5,
-                      batch_size,
-                      1)
 
 
 def play_and_learn(env):
@@ -39,48 +31,58 @@ def play_and_learn(env):
         agent.fit(state, action, -reward, done, next_state)
         state = next_state
         step += 1
-    _, x = env.state
     agent.noise.decrease()
-    return total_reward, x
+    return total_reward
 
 
 def agent_play(env, agent):
     state = env.reset()
     total_reward = 0
-    ts = []
-    us = []
     done = False
     while not done:
-        ts.append(state[0])
-        us.append(state[1])
         action = agent.get_action(state)
         next_state, reward, done, _ = env.step(action)
         total_reward += reward
         state = next_state
-    plt.plot(ts, us)
     return total_reward
 
 
-rewards = np.zeros(episodes_n)
-mean_rewards = np.zeros(episodes_n)
-for episode in range(episodes_n):
-    reward, x = play_and_learn(env)
-    rewards[episode] = reward
-    mean_reward = np.mean(rewards[max(0, episode - 25):episode + 1])
-    mean_rewards[episode] = mean_reward
-    print("episode=%.0f, noise_threshold=%.3f, total reward=%.3f, mean reward=%.3f, x0=%.5f" % (
-        episode, agent.noise.threshold, rewards[episode], mean_reward, x))
+max_iterations = episodes_n * 3
 
-agent.noise.threshold = 0
-reward = agent_play(env, agent)
-plt.title('track')
-plt.legend(['Bounded R-NAF'])
-plt.show()
-plt.plot(range(episodes_n), mean_rewards)
-plt.title('Динамика показателя качества в процессе обучения')
-plt.legend(['Bounded R-NAF'])
-plt.xlabel('Эпизод')
-plt.ylabel('Показатель качества')
-plt.show()
-torch.save(agent.Q.state_dict(), './test/bounded_r')
-np.save('./test/bounded_r', mean_rewards)
+
+def fit_with_dt(agent, dt):
+    global idx, mean_rewards, rewards
+    env = DubinsCar(dt=dt, inner_step_n=100)
+    agent.Q.dt = dt
+    agent.Q_target.dt = dt
+    agent.noise.threshold = epsilon
+    agent.memory = deque(maxlen=100000)
+    for episode in range(episodes_n):
+        reward = play_and_learn(env)
+        rewards[idx] = reward
+        mean_reward = np.mean(rewards[max(0, idx - 25):idx + 1])
+        mean_rewards[idx] = mean_reward
+        print("episode=%.0f, noise_threshold=%.3f, total reward=%.3f, mean reward=%.3f" % (
+            idx, agent.noise.threshold, reward, mean_reward))
+        idx += 1
+
+
+for i in range(5):
+    print('-----------------------------------  ' + str(i) + '  -------------------------------------------')
+    rewards = np.zeros(max_iterations)
+    mean_rewards = np.zeros(max_iterations)
+    idx = 0
+    mu_model = Seq_Network([state_shape, 128, 128, action_shape], nn.ReLU(), nn.Tanh())
+    phi_model = Seq_Network([state_shape, 128, 128, action_shape], nn.ReLU())
+    v_model = Seq_Network([state_shape, 128, 128, 1], nn.ReLU())
+    noise = OUNoise(action_shape, threshold=epsilon, threshold_min=epsilon_min,
+                    threshold_decrease=(epsilon_min / epsilon) ** (1 / episodes_n))
+    batch_size = 128
+    agent = Bounded_R_NAF(mu_model, v_model, phi_model, noise, state_shape, action_shape, action_max, dt=env.dt, r=0.1,
+                          batch_size=batch_size,
+                          gamma=1,
+                          learning_n_per_fit=8)
+    fit_with_dt(agent, 2)
+    fit_with_dt(agent, 0.5)
+    fit_with_dt(agent, 0.25)
+    np.save('./test/bounded_r_test/' + str(i), mean_rewards)

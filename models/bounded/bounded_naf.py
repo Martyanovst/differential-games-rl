@@ -45,7 +45,8 @@ class Bounded_NAF:
 
     def __init__(self, mu_model, p_model, v_model, phi_model,
                  noise, state_shape, action_shape,
-                 action_max, batch_size=200, gamma=0.9999, action_min=None):
+                 action_max, batch_size=200, gamma=0.9999, action_min=None, learning_n_per_fit=8):
+        self.learning_n_per_fit = learning_n_per_fit
         self.state_shape = state_shape
         self.action_shape = action_shape
         self.action_max = action_max
@@ -54,7 +55,7 @@ class Bounded_NAF:
         else:
             self.action_min = -action_max
         self.Q = Q_model(mu_model, p_model, v_model, phi_model, action_shape)
-        self.opt = torch.optim.Adam(self.Q.parameters(), lr=1e-4)
+        self.opt = torch.optim.Adam(self.Q.parameters(), lr=1e-3)
         self.loss = nn.MSELoss()
         self.Q_target = deepcopy(self.Q)
         self.tau = 1e-3
@@ -92,12 +93,13 @@ class Bounded_NAF:
         self.memory.append([state, action, reward, done, next_state])
 
         if len(self.memory) >= self.batch_size:
-            states, actions, rewards, dones, next_states = self.get_batch()
-            self.opt.zero_grad()
-            target = rewards.reshape(self.batch_size, 1) + (
-                    1 - dones).reshape(self.batch_size, 1) * self.gamma * self.Q_target.v(
-                next_states).detach()
-            loss = self.loss(self.Q(states, actions), target)
-            loss.backward()
-            self.opt.step()
-            self.update_targets(self.Q_target, self.Q)
+            for _ in range(self.learning_n_per_fit):
+                states, actions, rewards, dones, next_states = self.get_batch()
+                self.opt.zero_grad()
+                target = rewards.reshape(self.batch_size, 1) + (1 - dones).reshape(self.batch_size,
+                                                                                   1) * self.gamma * self.Q_target.v(
+                    next_states).detach()
+                loss = self.loss(self.Q(states, actions), target)
+                loss.backward()
+                self.opt.step()
+                self.update_targets(self.Q_target, self.Q)

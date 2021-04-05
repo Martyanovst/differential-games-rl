@@ -40,7 +40,8 @@ class Bounded_R_NAF:
 
     def __init__(self, mu_model, v_model, phi_model,
                  noise, state_shape, action_shape,
-                 action_max, dt, r, batch_size=200, gamma=0.9999):
+                 action_max, dt, r, batch_size=200, gamma=0.9999,learning_n_per_fit=8):
+        self.learning_n_per_fit = learning_n_per_fit
         self.state_shape = state_shape
         self.action_shape = action_shape
         self.action_max = action_max
@@ -84,12 +85,13 @@ class Bounded_R_NAF:
         self.memory.append([state, action, reward, done, next_state])
 
         if len(self.memory) >= self.batch_size:
-            states, actions, rewards, dones, next_states = self.get_batch()
-            self.opt.zero_grad()
-            target = rewards.reshape(self.batch_size, 1) + (
-                    1 - dones).reshape(self.batch_size, 1) * self.gamma * self.Q_target.v(
-                next_states).detach()
-            loss = self.loss(self.Q(states, actions), target)
-            loss.backward()
-            self.opt.step()
-            self.update_targets(self.Q_target, self.Q)
+            for _ in range(self.learning_n_per_fit):
+                states, actions, rewards, dones, next_states = self.get_batch()
+                self.opt.zero_grad()
+                target = rewards.reshape(self.batch_size, 1) + (1 - dones).reshape(self.batch_size,
+                                                                                   1) * self.gamma * self.Q_target.v(
+                    next_states).detach()
+                loss = self.loss(self.Q(states, actions), target)
+                loss.backward()
+                self.opt.step()
+                self.update_targets(self.Q_target, self.Q)
