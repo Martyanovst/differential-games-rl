@@ -9,17 +9,18 @@ import torch.nn as nn
 
 class Q_model(nn.Module):
     def __init__(self, mu_model,
-                 v_model, action_shape, dt):
+                 v_model, action_shape, dt, r):
         super().__init__()
         self.mu = mu_model
         self.v = v_model
         self.dt = dt
+        self.r = r
         self.action_shape = action_shape
 
     def forward(self, state, action):
         mu = self.mu(state)
         action_mu = (action - mu).unsqueeze(2)
-        A = -self.dt * \
+        A = -self.dt * self.r * \
             torch.bmm(action_mu.transpose(2, 1),
                       action_mu)[:, :, 0]
         return A + self.v(state)
@@ -28,16 +29,23 @@ class Q_model(nn.Module):
 class NAF_R:
 
     def __init__(self, mu_model, v_model,
-                 noise, state_shape, action_shape,
-                 batch_size=200, gamma=0.9999, dt=0.005):
+                 noise, state_shape, action_shape, action_max=1, action_min=None,
+                 batch_size=200, gamma=0.9999, r=1, dt=0.005, learning_n_per_fit=8):
+        self.learning_n_per_fit = learning_n_per_fit
+        self.action_max = action_max
         self.state_shape = state_shape
         self.action_shape = action_shape
 
-        self.Q = Q_model(mu_model, v_model, action_shape, dt)
+        if action_min:
+            self.action_min = action_min
+        else:
+            self.action_min = -action_max
+
+        self.Q = Q_model(mu_model, v_model, action_shape, dt, r)
         self.opt = torch.optim.Adam(self.Q.parameters(), lr=1e-3)
         self.loss = nn.MSELoss()
         self.Q_target = deepcopy(self.Q)
-        self.tau = 1e-2
+        self.tau = 1e-3
         self.memory = deque(maxlen=100000)
         self.gamma = gamma
 
@@ -50,7 +58,7 @@ class NAF_R:
         mu_value = self.Q.mu(state).detach().data.numpy()
         noise = self.noise.noise() * with_noise
         action = mu_value + noise
-        return action
+        return np.clip(action, self.action_min, self.action_max)
 
     def state_dict(self):
         return self.Q_target.state_dict()
@@ -73,12 +81,13 @@ class NAF_R:
         self.memory.append([state, action, reward, done, next_state])
 
         if len(self.memory) >= self.batch_size:
-            states, actions, rewards, dones, next_states = self.get_batch()
-            self.opt.zero_grad()
-            target = self.reward_normalize * rewards.reshape(self.batch_size, 1) + (
-                    1 - dones).reshape(self.batch_size, 1) * self.gamma * self.Q_target.v(
-                next_states).detach()
-            loss = self.loss(self.Q(states, actions), target)
-            loss.backward()
-            self.opt.step()
-            self.update_targets(self.Q_target, self.Q)
+            for _ in range(self.learning_n_per_fit):
+                states, actions, rewards, dones, next_states = self.get_batch()
+                self.opt.zero_grad()
+                target = self.reward_normalize * rewards.reshape(self.batch_size, 1) + (
+                        1 - dones).reshape(self.batch_size, 1) * self.gamma * self.Q_target.v(
+                    next_states).detach()
+                loss = self.loss(self.Q(states, actions), target)
+                loss.backward()
+                self.opt.step()
+                self.update_targets(self.Q_target, self.Q)

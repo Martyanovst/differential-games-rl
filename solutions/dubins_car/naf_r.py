@@ -3,18 +3,19 @@ from collections import deque
 import numpy as np
 import torch.nn as nn
 
-from models.bounded.bounded_r_naf import Bounded_R_NAF
+from models.naf import NAFAgent
+from models.naf_r import NAF_R
 from problems.dubins_car.dubins_car_env import DubinsCar
 from utilities.noises import OUNoise
 from utilities.sequentialNetwork import Seq_Network
 
-env = DubinsCar(inner_step_n=100)
-state_shape = env.state_dim
-action_shape = env.action_dim
-action_max = env.action_max
-action_min = env.action_min
+_env = DubinsCar(inner_step_n=100)
+state_shape = _env.state_dim
+action_shape = _env.action_dim
+action_max = _env.action_max
+action_min = _env.action_min
 episodes_n = 200
-epsilon_min = 0.005
+epsilon_min = 0.01
 batch_size = 256
 epsilon = 1
 
@@ -60,18 +61,16 @@ for i in range(5):
     rewards = np.zeros(max_iterations)
     mean_rewards = np.zeros(max_iterations)
     idx = 0
-    mu_model = Seq_Network([state_shape, 128, 256, 512, action_shape], nn.Sigmoid(), nn.Tanh())
-    phi_model = Seq_Network([state_shape, 128, 256, 512, action_shape], nn.Sigmoid())
-    v_model = Seq_Network([state_shape, 128, 256, 512, 1], nn.Sigmoid())
+    mu_model = Seq_Network([state_shape, 256, 128, action_shape], nn.ReLU(), nn.Tanh())
+    p_model = Seq_Network([state_shape, 256, 128, action_shape ** 2], nn.ReLU())
+    v_model = Seq_Network([state_shape, 256, 128, 1], nn.ReLU())
     noise = OUNoise(action_shape, threshold=epsilon, threshold_min=epsilon_min,
                     threshold_decrease=(epsilon_min / epsilon) ** (1 / episodes_n))
-    batch_size = 128
-    agent = Bounded_R_NAF(mu_model, v_model, phi_model, noise, state_shape, action_shape, action_max=action_max,
-                          action_min=action_min, dt=env.dt, r=0.1,
-                          batch_size=batch_size,
-                          gamma=1,
-                          learning_n_per_fit=8)
+    agent = NAF_R(mu_model, v_model, noise, state_shape, action_shape,
+                  action_max=action_max, action_min=action_min,
+                  r=0.1, dt=_env.dt,
+                  batch_size=batch_size, gamma=1, learning_n_per_fit=8)
     fit_with_dt(agent, 2)
     fit_with_dt(agent, 0.5)
     fit_with_dt(agent, 0.25)
-    np.save('./test/bounded_r_test/' + str(i), mean_rewards)
+    np.save('./test/naf_test/' + str(i), mean_rewards)

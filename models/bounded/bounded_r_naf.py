@@ -40,11 +40,15 @@ class Bounded_R_NAF:
 
     def __init__(self, mu_model, v_model, phi_model,
                  noise, state_shape, action_shape,
-                 action_max, dt, r, batch_size=200, gamma=0.9999,learning_n_per_fit=8):
+                 action_max, dt, r, batch_size=200, gamma=0.9999, action_min=None, learning_n_per_fit=8):
         self.learning_n_per_fit = learning_n_per_fit
         self.state_shape = state_shape
         self.action_shape = action_shape
         self.action_max = action_max
+        if action_min:
+            self.action_min = action_min
+        else:
+            self.action_min = -action_max
 
         self.Q = Q_model(mu_model, v_model, phi_model, action_shape, dt, r, action_max)
         self.opt = torch.optim.Adam(self.Q.parameters(), lr=1e-4)
@@ -62,7 +66,7 @@ class Bounded_R_NAF:
         mu_value = self.Q.mu(state).detach().data.numpy() * self.action_max
         noise = self.noise.noise() * with_noise
         action = mu_value + noise
-        return np.clip(action, - self.action_max, self.action_max)
+        return np.clip(action, self.action_min, self.action_max)
 
     def state_dict(self):
         return self.Q_target.state_dict()
