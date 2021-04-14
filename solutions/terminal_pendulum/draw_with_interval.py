@@ -14,7 +14,7 @@ def plot(model, color, label):
     plt.plot(x, mean, color=color, label=label)
 
 plot('naf', 'b', 'NAF')
-# plot('bounded', 'r', 'BOUNDED NAF')
+plot('bounded', 'r', 'BOUNDED NAF')
 # plot('bounded_r', 'g', 'BOUNDED R NAF')
 # plot('bounded_r_g', 'y', 'BOUNDED R G NAF')
 # plot('sphere', 'm', 'SPHERE NAF')

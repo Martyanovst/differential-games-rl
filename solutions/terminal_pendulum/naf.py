@@ -48,13 +48,13 @@ for i in range(10):
     episodes_n = 100
     epsilon_min = 0.01
     epsilon = 1
+    batch_size = 128
 
     mu_model = Seq_Network([state_shape, 128, 128, action_shape], nn.ReLU(), nn.Tanh())
     p_model = Seq_Network([state_shape, 128, 128, action_shape ** 2], nn.ReLU())
     v_model = Seq_Network([state_shape, 128, 128, 1], nn.ReLU())
     noise = OUNoise(action_shape, threshold=epsilon, threshold_min=epsilon_min,
                     threshold_decrease=(epsilon_min / epsilon) ** (1 / episodes_n))
-    batch_size = 128
     agent = NAFAgent(mu_model, p_model, v_model, noise, state_shape, action_shape, action_max, batch_size, 1)
 
     rewards = np.zeros(episodes_n)
