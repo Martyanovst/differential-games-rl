@@ -28,11 +28,9 @@ class Q_model(nn.Module):
         action_mu = (action - mu).unsqueeze(2)
         phi = self.phi(state)
         action_phi = (phi - mu).unsqueeze(2)
-        A = -self.dt * self.r * \
-            torch.bmm(action_mu.transpose(2, 1),
-                      action_mu)[:, :, 0] + \
-            2 * self.dt * self.r * torch.bmm(action_phi.transpose(2, 1),
-                                         action_mu)[:, :, 0]
+        A = self.dt * self.r * (-torch.bmm(action_mu.transpose(2, 1),
+                                           action_mu)[:, :, 0] + 2 * torch.bmm(action_phi.transpose(2, 1),
+                                                                               action_mu)[:, :, 0])
         return A + self.v(state)
 
 

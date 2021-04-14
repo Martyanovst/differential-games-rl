@@ -4,11 +4,11 @@ import numpy as np
 import torch.nn as nn
 
 from models.naf_r import NAF_R
-from problems.dubins_car.dubins_car_env import DubinsCar
+from problems.dubins_car.dubins_car_env import DubinsCar, DubinsCar_SymmetricActionInterval
 from utilities.noises import OUNoise
 from utilities.sequentialNetwork import Seq_Network
 
-_env = DubinsCar(inner_step_n=100)
+_env = DubinsCar_SymmetricActionInterval(inner_step_n=100)
 state_shape = _env.state_dim
 action_shape = _env.action_dim
 action_max = _env.action_max
@@ -40,7 +40,7 @@ max_iterations = episodes_n * 3
 
 def fit_with_dt(agent, dt):
     global idx, mean_rewards, rewards
-    env = DubinsCar(dt=dt, inner_step_n=100)
+    env = DubinsCar_SymmetricActionInterval(dt=dt, inner_step_n=100)
     agent.Q.dt = dt
     agent.Q_target.dt = dt
     agent.noise.threshold = epsilon

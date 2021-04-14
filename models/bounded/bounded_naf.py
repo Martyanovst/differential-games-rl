@@ -55,7 +55,7 @@ class Bounded_NAF:
         else:
             self.action_min = -action_max
         self.Q = Q_model(mu_model, p_model, v_model, phi_model, action_shape)
-        self.opt = torch.optim.Adam(self.Q.parameters(), lr=1e-3)
+        self.opt = torch.optim.Adam(self.Q.parameters(), lr=1e-4)
         self.loss = nn.MSELoss()
         self.Q_target = deepcopy(self.Q)
         self.tau = 1e-3

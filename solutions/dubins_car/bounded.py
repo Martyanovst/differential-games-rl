@@ -14,7 +14,7 @@ action_shape = env.action_dim
 action_max = env.action_max
 action_min = env.action_min
 episodes_n = 200
-epsilon_min = 0.01
+epsilon_min = 0.00001
 batch_size = 256
 epsilon = 1
 

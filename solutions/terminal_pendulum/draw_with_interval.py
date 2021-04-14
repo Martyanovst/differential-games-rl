@@ -2,10 +2,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 def plot(model, color, label):
-    data = np.array([np.load('./test/' + model + '_test/' + str(i) + '.npy') for i in range(5)])
+    data = np.array([np.load('./test/' + model + '_test/' + str(i) + '.npy') for i in range(10)])
     integral = np.trapz(data, axis=1)
     idx = np.argpartition(integral, 3)
-    x = np.arange(600)
+    x = np.arange(100)
     best = data[idx[:3]]
     min = best.min(axis=0)
     mean = best.mean(axis=0)
@@ -14,9 +14,8 @@ def plot(model, color, label):
     plt.plot(x, mean, color=color, label=label)
 
 plot('naf', 'b', 'NAF')
-plot('naf_r', 'g', 'NAF R')
-plot('bounded', 'r', 'BOUNDED NAF')
-plot('bounded_r', 'y', 'BOUNDED R NAF')
+# plot('bounded', 'r', 'BOUNDED NAF')
+# plot('bounded_r', 'g', 'BOUNDED R NAF')
 # plot('bounded_r_g', 'y', 'BOUNDED R G NAF')
 # plot('sphere', 'm', 'SPHERE NAF')
 # plot('sphere_r', 'c', 'SPHERE R NAF')

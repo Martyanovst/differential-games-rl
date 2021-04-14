@@ -3,18 +3,19 @@ from collections import deque
 import numpy as np
 import torch.nn as nn
 
-from models.naf_r import NAF_R
-from problems.dubins_car.dubins_car_env import DubinsCar
+from models.bounded.bounded_naf import Bounded_NAF
+from models.sphere.sphere import Sphere_NAF
+from problems.dubins_car.dubins_car_env import DubinsCar, DubinsCar_SymmetricActionInterval
 from utilities.noises import OUNoise
 from utilities.sequentialNetwork import Seq_Network
 
-_env = DubinsCar(inner_step_n=100)
-state_shape = _env.state_dim
-action_shape = _env.action_dim
-action_max = _env.action_max
-action_min = _env.action_min
+env = DubinsCar_SymmetricActionInterval(inner_step_n=100)
+state_shape = env.state_dim
+action_shape = env.action_dim
+action_max = env.action_max
+action_min = env.action_min
 episodes_n = 200
-epsilon_min = 0.01
+epsilon_min = 0.00001
 batch_size = 256
 epsilon = 1
 
@@ -35,14 +36,24 @@ def play_and_learn(env):
     return total_reward
 
 
+def agent_play(env, agent):
+    state = env.reset()
+    total_reward = 0
+    done = False
+    while not done:
+        action = agent.get_action(state)
+        next_state, reward, done, _ = env.step(action)
+        total_reward += reward
+        state = next_state
+    return total_reward
+
+
 max_iterations = episodes_n * 3
 
 
 def fit_with_dt(agent, dt):
     global idx, mean_rewards, rewards
-    env = DubinsCar(dt=dt, inner_step_n=100)
-    agent.Q.dt = dt
-    agent.Q_target.dt = dt
+    env = DubinsCar_SymmetricActionInterval(dt=dt, inner_step_n=100)
     agent.noise.threshold = epsilon
     agent.memory = deque(maxlen=100000)
     for episode in range(episodes_n):
@@ -60,16 +71,17 @@ for i in range(5):
     rewards = np.zeros(max_iterations)
     mean_rewards = np.zeros(max_iterations)
     idx = 0
-    mu_model = Seq_Network([state_shape, 256, 128, action_shape], nn.ReLU(), nn.Tanh())
-    p_model = Seq_Network([state_shape, 256, 128, action_shape ** 2], nn.ReLU())
-    v_model = Seq_Network([state_shape, 256, 128, 1], nn.ReLU())
+    p_model = Seq_Network([state_shape, 128, 128, action_shape], nn.ReLU())
+    phi_model = Seq_Network([state_shape, 128, 128, action_shape], nn.ReLU())
+    v_model = Seq_Network([state_shape, 128, 128, 1], nn.ReLU())
     noise = OUNoise(action_shape, threshold=epsilon, threshold_min=epsilon_min,
                     threshold_decrease=(epsilon_min / epsilon) ** (1 / episodes_n))
-    agent = NAF_R(mu_model, v_model, noise, state_shape, action_shape,
-                  action_max=action_max, action_min=action_min,
-                  r=0.1, dt=_env.dt,
-                  batch_size=batch_size, gamma=1, learning_n_per_fit=8)
+    batch_size = 128
+    agent = Sphere_NAF(p_model, phi_model, v_model, noise, state_shape, action_shape, action_max,
+                       batch_size,
+                       1,
+                       action_min=action_min, learning_n_per_fit=8)
     fit_with_dt(agent, 2)
     fit_with_dt(agent, 0.5)
     fit_with_dt(agent, 0.25)
-    np.save('./test/naf_r_test/' + str(i), mean_rewards)
+    np.save('./test/sphere_test/' + str(i), mean_rewards)

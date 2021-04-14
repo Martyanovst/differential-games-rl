@@ -5,7 +5,7 @@ import numpy as np
 from os import path
 
 
-class PendulumEnv(gym.Env):
+class TerminalPendulumEnv(gym.Env):
     metadata = {
         'render.modes': ['human', 'rgb_array'],
         'video.frames_per_second': 30
@@ -15,7 +15,7 @@ class PendulumEnv(gym.Env):
         self.max_speed = 8
         self.max_torque = 2.
         self.dt = .05
-        self.terminal_t = 2
+        self.terminal_t = 5
         self.g = g
         self.m = 1.
         self.l = 1.
@@ -58,7 +58,7 @@ class PendulumEnv(gym.Env):
         done = t >= self.terminal_t
 
         self.state = np.array([t, newth, newthdot])
-        return self._get_obs(), -costs, done, {}
+        return self._get_obs(), costs, done, {}
 
     def reset(self):
         high = np.array([np.pi, 1])
