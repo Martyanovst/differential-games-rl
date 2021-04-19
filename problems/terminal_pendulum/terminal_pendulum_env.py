@@ -11,14 +11,15 @@ class TerminalPendulumEnv(gym.Env):
         'video.frames_per_second': 30
     }
 
-    def __init__(self, g=10.0):
+    def __init__(self, gravity=10.0):
         self.max_speed = 8
         self.max_torque = 2.
         self.dt = .05
         self.terminal_t = 5
-        self.g = g
+        self.gravity = gravity
         self.m = 1.
         self.l = 1.
+        self.g = (self.m * self.l ** 2)
         self.viewer = None
 
         high = np.array([1., 1., self.max_speed], dtype=np.float32)
@@ -42,7 +43,7 @@ class TerminalPendulumEnv(gym.Env):
     def step(self, u):
         t, th, thdot = self.state  # th := theta
 
-        g = self.g
+        g = self.gravity
         m = self.m
         l = self.l
         dt = self.dt
