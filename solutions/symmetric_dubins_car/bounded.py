@@ -84,4 +84,4 @@ for i in range(5):
     fit_with_dt(agent, 2)
     fit_with_dt(agent, 0.5)
     fit_with_dt(agent, 0.25)
-    np.save('./test/bounded_test/' + str(i), mean_rewards)
+    np.save('./test/bounded_r_test/' + str(i), mean_rewards)

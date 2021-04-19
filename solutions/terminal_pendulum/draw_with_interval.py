@@ -15,9 +15,10 @@ def plot(model, color, label):
 
 plot('naf', 'b', 'NAF')
 plot('bounded', 'r', 'BOUNDED NAF')
-# plot('bounded_r', 'g', 'BOUNDED R NAF')
+plot('naf_r', 'g', 'NAF R NAF')
+plot('bounded_r', 'y', 'BOUNDED R NAF')
 # plot('bounded_r_g', 'y', 'BOUNDED R G NAF')
-# plot('sphere', 'm', 'SPHERE NAF')
+plot('sphere', 'm', 'SPHERE NAF')
 # plot('sphere_r', 'c', 'SPHERE R NAF')
 # plot('sphere_r_g', 'r', 'SPHERE R G NAF')
 plt.xlabel('episode')

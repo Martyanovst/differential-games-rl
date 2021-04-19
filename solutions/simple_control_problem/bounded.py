@@ -70,4 +70,4 @@ for i in range(10):
         mean_rewards[episode] = mean_reward
         print("episode=%.0f, noise_threshold=%.3f, total reward=%.3f, mean reward=%.3f, x0=%.5f, iteration=%.1f" % (
             episode, agent.noise.threshold, rewards[episode], mean_reward, x, i))
-    np.save('./test/bounded_test/' + str(i), mean_rewards)
+    np.save('./test/bounded_r_test/' + str(i), mean_rewards)
