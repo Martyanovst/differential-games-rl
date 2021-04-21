@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def get_session(env, agent, session_len, agent_learning):
     session = {}
     session['states'], session['actions'], session['rewards'], session['dones'] = [], [], [], []
@@ -25,13 +28,14 @@ def get_session(env, agent, session_len, agent_learning):
     return session
 
 
-def go(env, agent, show, episode_n=100, session_n=1, session_len=10000, agent_learning=True):
+def go(env, agent, callback, episode_n=100, session_n=1, session_len=10000, agent_learning=True):
     for episode in range(episode_n):
         sessions = [get_session(env, agent, session_len, agent_learning) for _ in range(session_n)]
 
-        show(env, agent, episode, sessions)
+        callback(env, agent, episode, sessions)
 
         if agent_learning:
             agent.fit(sessions)
-            agent.noise.reduce()
+            agent.noise.decrease()
 
+    return agent
