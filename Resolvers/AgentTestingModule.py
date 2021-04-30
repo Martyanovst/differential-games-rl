@@ -17,19 +17,27 @@ class AgentTestingModule:
         print("episode=%.0f, noise_threshold=%.3f, total reward=%.3f, mean reward=%.3f" % (
             episode, agent.noise.threshold, -total_reward, -mean_reward))
 
-    def __reset__(self, episode_n):
-        self.rewards = np.zeros(episode_n)
-        self.mean_rewards = np.zeros(episode_n)
+    def __reset__(self, episode_len):
+        self.rewards = np.zeros(episode_len)
+        self.mean_rewards = np.zeros(episode_len)
 
-    def test_agent(self, agent_gen, episode_n, session_len, epoch_n, path=None):
+    def test_agent(self, agent_gen, episode_n, session_len, epoch_n, dt_array, path=None):
         for epoch in range(epoch_n):
-            self.__reset__(episode_n)
+            self.__reset__(episode_n * len(dt_array))
             print('\nEPOCH ' + str(epoch) + '\n')
-            OneAgentSolver.go(self.env, agent_gen(), self.__callback__,
-                              episode_n=episode_n,
-                              session_n=1,
-                              session_len=session_len,
-                              agent_learning=True
-                              )
+            agent = agent_gen(self.env)
+            epsilon = agent.noise.threshold
+            idx = 0
+            for dt in dt_array:
+                agent.noise.threshold = epsilon
+                self.env.dt = dt
+                OneAgentSolver.go(self.env, agent, self.__callback__,
+                                  start_episode=idx * episode_n,
+                                  episode_n=episode_n,
+                                  session_n=1,
+                                  session_len=session_len,
+                                  agent_learning=True
+                                  )
+                idx += 1
             if path:
                 np.save(path + str(epoch), -self.mean_rewards)

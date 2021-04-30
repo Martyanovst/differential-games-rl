@@ -28,11 +28,11 @@ def get_session(env, agent, session_len, agent_learning):
     return session
 
 
-def go(env, agent, callback, episode_n=100, session_n=1, session_len=10000, agent_learning=True):
+def go(env, agent, callback, start_episode=0, episode_n=100, session_n=1, session_len=10000, agent_learning=True):
     for episode in range(episode_n):
         sessions = [get_session(env, agent, session_len, agent_learning) for _ in range(session_n)]
 
-        callback(env, agent, episode, sessions)
+        callback(env, agent, start_episode + episode, sessions)
 
         if agent_learning:
             agent.fit(sessions)

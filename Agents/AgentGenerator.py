@@ -22,21 +22,21 @@ class AgentGenerator:
         return NAF(self.state_dim, self.action_dim, self.action_min, self.action_max, q_model, noise,
                    batch_size=128, gamma=1, tau=1e-3, q_model_lr=1e-3, learning_n_per_fit=16)
 
-    def generate_naf(self):
+    def generate_naf(self, env):
         mu_model = Seq_Network([self.state_dim, 256, 128, self.action_dim], nn.ReLU())
         v_model = Seq_Network([self.state_dim, 256, 128, 1], nn.ReLU())
         p_model = Seq_Network([self.state_dim, 256, self.action_dim ** 2], nn.ReLU())
         q_model = QModel(self.action_dim, self.action_min, self.action_max, mu_model, p_model, v_model)
         return self._naf_(q_model)
 
-    def generate_naf_sphere_case(self):
+    def generate_naf_sphere_case(self, env):
         nu_model = Seq_Network([self.state_dim, 256, 128, self.action_dim], nn.ReLU())
         v_model = Seq_Network([self.state_dim, 256, 128, 1], nn.ReLU())
         p_model = Seq_Network([self.state_dim, 256, self.action_dim ** 2], nn.ReLU())
         q_model = QModel_SphereCase(self.action_dim, self.action_min, self.action_max, nu_model, v_model, p_model)
         return self._naf_(q_model)
 
-    def generate_naf_bounded_case(self):
+    def generate_naf_bounded_case(self, env):
         nu_model = Seq_Network([self.state_dim, 256, 128, self.action_dim], nn.ReLU())
         mu_model = Seq_Network([self.state_dim, 256, 128, self.action_dim], nn.ReLU())
         v_model = Seq_Network([self.state_dim, 256, 128, 1], nn.ReLU())
@@ -45,7 +45,7 @@ class AgentGenerator:
                                      v_model)
         return self._naf_(q_model)
 
-    def generate_naf_sphere_case_r_based(self):
+    def generate_naf_sphere_case_r_based(self, env):
         nu_model = Seq_Network([self.state_dim, 256, 128, self.action_dim], nn.ReLU())
         v_model = Seq_Network([self.state_dim, 256, 128, 1], nn.ReLU())
         q_model = QModel_SphereCase_RBased(self.action_dim, self.action_min, self.action_max, nu_model, v_model,
