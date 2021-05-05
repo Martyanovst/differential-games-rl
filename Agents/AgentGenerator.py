@@ -1,5 +1,6 @@
 from Agents.NAF import NAF
-from Agents.QModels import QModel_SphereCase, QModel, QModel_BoundedCase, QModel_SphereCase_RBased
+from Agents.QModels import QModel_SphereCase, QModel, QModel_BoundedCase, QModel_SphereCase_RBased, QModel_RBased, \
+    QModel_BoundedCase_RBased
 from Agents.Utilities.Noises import OUNoise
 import torch.nn as nn
 from Agents.Utilities.SequentialNetwork import Seq_Network
@@ -14,6 +15,7 @@ class AgentGenerator:
         self.action_max = env.action_max
         self.action_min = env.action_min
         self.beta = env.beta
+        self.r = env.r
         self.noise_min = noise_min
 
     def _naf_(self, q_model):
@@ -27,6 +29,14 @@ class AgentGenerator:
         v_model = Seq_Network([self.state_dim, 256, 128, 1], nn.ReLU())
         p_model = Seq_Network([self.state_dim, 256, self.action_dim ** 2], nn.ReLU())
         q_model = QModel(self.action_dim, self.action_min, self.action_max, mu_model, p_model, v_model)
+        return self._naf_(q_model)
+
+    def generate_naf_r_based(self, env):
+        mu_model = Seq_Network([self.state_dim, 256, 128, self.action_dim], nn.ReLU())
+        v_model = Seq_Network([self.state_dim, 256, 128, 1], nn.ReLU())
+        q_model = QModel_RBased(self.action_dim, self.action_min, self.action_max, mu_model,
+                                v_model,
+                                self.r, self.dt)
         return self._naf_(q_model)
 
     def generate_naf_sphere_case(self, env):
@@ -50,4 +60,13 @@ class AgentGenerator:
         v_model = Seq_Network([self.state_dim, 256, 128, 1], nn.ReLU())
         q_model = QModel_SphereCase_RBased(self.action_dim, self.action_min, self.action_max, nu_model, v_model,
                                            self.beta, self.dt)
+        return self._naf_(q_model)
+
+    def generate_naf_bounded_case_r_based(self, env):
+        nu_model = Seq_Network([self.state_dim, 256, 128, self.action_dim], nn.ReLU())
+        mu_model = Seq_Network([self.state_dim, 256, 128, self.action_dim], nn.ReLU())
+        v_model = Seq_Network([self.state_dim, 256, 128, 1], nn.ReLU())
+        q_model = QModel_BoundedCase_RBased(self.action_dim, self.action_min, self.action_max, nu_model, mu_model,
+                                            v_model,
+                                            self.r, self.dt)
         return self._naf_(q_model)

@@ -30,12 +30,30 @@ class QModel(nn.Module):
         return A + self.v_model(state)
 
 
+class QModel_RBased(nn.Module):
+    def __init__(self, action_dim, action_min, action_max,
+                 mu_model, v_model, r, dt):
+        super().__init__()
+        self.action_dim = action_dim
+        self.action_min = torch.FloatTensor(action_min)
+        self.action_max = torch.FloatTensor(action_max)
+        self.mu_model = mu_model
+        self.v_model = v_model
+        self.dt = dt
+        self.r = r
+
+    def forward(self, state, action):
+        mu = transform_interval(self.mu_model(state), self.action_min, self.action_max)
+        action_mu = (action - mu)
+        A = -self.dt * self.r * (action_mu ** 2)
+        return A + self.v_model(state)
+
+
 class MuModel(nn.Module):
     def __init__(self, nu_model):
         super().__init__()
         self.nu_model = nu_model
         self.tanh = nn.Tanh()
-        return None
 
     def forward(self, state):
         nu = self.nu_model(state)
@@ -105,4 +123,25 @@ class QModel_SphereCase_RBased(nn.Module):
         nu = self.nu_model(state)
         mu = self.mu_model(state)
         A = - self.dt * self.beta * (action - mu) * (action + mu - 2 * nu)
+        return A + self.v_model(state)
+
+
+class QModel_BoundedCase_RBased(nn.Module):
+    def __init__(self, action_dim, action_min, action_max,
+                 nu_model, mu_model, v_model, r, dt):
+        super().__init__()
+
+        self.action_dim = action_dim
+        self.action_min = action_min
+        self.action_max = action_max
+        self.nu_model = nu_model
+        self.mu_model = mu_model
+        self.v_model = v_model
+        self.dt = dt
+        self.r = r
+
+    def forward(self, state, action):
+        nu = self.nu_model(state)
+        mu = self.mu_model(state)
+        A = - self.dt * self.r * (action - mu) * (action + mu - 2 * nu)
         return A + self.v_model(state)
