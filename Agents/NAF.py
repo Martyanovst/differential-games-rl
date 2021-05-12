@@ -29,6 +29,7 @@ class NAF:
 
     def get_action(self, state):
         state = torch.FloatTensor(state)
+        state.requires_grad = True
         mu_value = self.q_model.mu_model(state).detach().numpy()
         noise = self.noise.noise()
         action = mu_value + noise
@@ -56,6 +57,7 @@ class NAF:
             for _ in range(self.learning_n_per_fit):
                 batch = random.sample(self.memory, self.batch_size)
                 states, actions, rewards, dones, next_states = map(torch.FloatTensor, zip(*batch))
+                states.requires_grad = True
                 rewards = rewards.reshape(self.batch_size, 1)
                 dones = dones.reshape(self.batch_size, 1)
 

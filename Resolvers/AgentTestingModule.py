@@ -25,7 +25,7 @@ class AgentTestingModule:
         for epoch in range(epoch_n):
             self.__reset__(episode_n * len(dt_array))
             print('\nEPOCH ' + str(epoch) + '\n')
-            agent = agent_gen(self.env)
+            agent = agent_gen()
             epsilon = agent.noise.threshold
             idx = 0
             for dt in dt_array:
