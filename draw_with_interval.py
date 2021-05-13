@@ -1,15 +1,15 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-task = 'DubinsCar'
-# task = 'VanDerPol'
+# task = 'DubinsCar'
+task = 'VanDerPol'
 
 
 def plot_best_by_last_value(model, color):
     data = np.array([np.load('./Tests/' + task + '/' + model + '/' + str(i) + '.npy') for i in range(20)])
     integral = data[:, -1]
-    idx = np.argpartition(integral, 3)
-    x = np.arange(500)
+    idx = np.argpartition(integral, 5)
+    x = np.arange(data.shape[1])
     best = data[idx[:3]]
     min = best.min(axis=0)
     mean = best.mean(axis=0)
@@ -34,11 +34,13 @@ def plot(model, color):
 plot_best_by_last_value('NAF', 'b')
 # plot_best_by_last_value('NAF_R', 'y')
 # plot_best_by_last_value('BOUNDED', 'g')
-# plot_best_by_last_value('BOUNDED_R', 'y')
-# plot_best_by_last_value('SPHERE', 'r')
-plot_best_by_last_value('SPHERE_R', 'm')
-plot_best_by_last_value('BOUNDED_R_G', 'y')
+plot_best_by_last_value('BOUNDED_R', 'y')
+plot_best_by_last_value('SPHERE', 'r')
+# plot_best_by_last_value('SPHERE_R', 'g')
+plot_best_by_last_value('BOUNDED_R_G', 'g')
+# plot_best_by_last_value('SPHERE_R_G', 'y')
 plt.xlabel('episode')
 plt.ylabel('reward')
+plt.title(task)
 plt.legend()
 plt.show()
