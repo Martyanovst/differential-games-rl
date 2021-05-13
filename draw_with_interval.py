@@ -1,9 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+task = 'DubinsCar'
+# task = 'VanDerPol'
+
 
 def plot_best_by_last_value(model, color):
-    data = np.array([np.load('./Tests/DubinsCar/' + model + '/' + str(i) + '.npy') for i in range(20)])
+    data = np.array([np.load('./Tests/' + task + '/' + model + '/' + str(i) + '.npy') for i in range(20)])
     integral = data[:, -1]
     idx = np.argpartition(integral, 3)
     x = np.arange(500)
@@ -16,7 +19,7 @@ def plot_best_by_last_value(model, color):
 
 
 def plot(model, color):
-    data = np.array([np.load('./Tests/DubinsCar/' + model + '/' + str(i) + '.npy') for i in range(10)])
+    data = np.array([np.load('./Tests/' + task + '/' + model + '/' + str(i) + '.npy') for i in range(10)])
     integral = np.trapz(data, axis=1)
     idx = np.argpartition(integral, 3)
     x = np.arange(500)

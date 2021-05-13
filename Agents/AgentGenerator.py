@@ -1,6 +1,6 @@
 from Agents.NAF import NAF
 from Agents.QModels import QModel_SphereCase, QModel, QModel_BoundedCase, QModel_SphereCase_RBased, QModel_RBased, \
-    QModel_BoundedCase_RBased, QModel_BoundedCase_RG_Based, QModel_RG_Based
+    QModel_BoundedCase_RBased, QModel_BoundedCase_RG_Based, QModel_RG_Based, QModel_SphereCase_RG_Based
 from Agents.Utilities.Noises import OUNoise
 import torch.nn as nn
 from Agents.Utilities.SequentialNetwork import Seq_Network
@@ -91,15 +91,15 @@ class AgentGenerator:
                                   r=self.r,
                                   g=self.g,
                                   dt=self.dt,
-                                  batch_size=self.batch_size)
+                                  )
         return self._naf_(q_model)
 
     def generate_naf_sphere_case_rg_based(self):
         v_model = Seq_Network([self.state_dim, 256, 128, 1], nn.ReLU())
-        q_model = QModel_RG_Based(self.action_dim, self.action_min, self.action_max,
-                                  v_model,
-                                  r=self.r,
-                                  g=self.g,
-                                  dt=self.dt,
-                                  batch_size=self.batch_size)
+        q_model = QModel_SphereCase_RG_Based(self.action_dim, self.action_min, self.action_max,
+                                             v_model,
+                                             r=self.r,
+                                             g=self.g,
+                                             dt=self.dt,
+                                             )
         return self._naf_(q_model)

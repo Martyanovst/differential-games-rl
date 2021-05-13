@@ -62,7 +62,8 @@ class NAF:
                 dones = dones.reshape(self.batch_size, 1)
 
                 target = rewards + (1 - dones) * self.gamma * self.q_target.v_model(next_states).detach()
-                loss = self.loss(self.q_model(states, actions), target)
+                inpt = self.q_model(states, actions)
+                loss = self.loss(inpt, target)
                 self.opt.zero_grad()
                 loss.backward()
                 self.opt.step()

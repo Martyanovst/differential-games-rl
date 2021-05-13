@@ -176,32 +176,29 @@ class QModel_BoundedCase_RG_Based(nn.Module):
 
 class QModel_SphereCase_RG_Based(nn.Module):
     def __init__(self, action_dim, action_min, action_max,
-                 mu_model, v_model, r, g, dt, batch_size):
+                 v_model, r, g, dt):
         super().__init__()
-        self.mu_model = mu_model
         self.action_dim = action_dim
         self.action_min = action_min
         self.action_max = action_max
         self.v_model = v_model
         self.dt = dt
         self.r = r
-        self.g = torch.FloatTensor(g).repeat(batch_size, 1).unsqueeze(1)
+        self.g = torch.FloatTensor(g)
+        self.tanh = nn.Tanh()
         self.action_max = action_max
         self.action_dim = action_dim
-        self.tril_mask = torch.tril(torch.ones(
-            action_dim, action_dim), diagonal=-1).unsqueeze(0)
-        self.diag_mask = torch.diag(torch.diag(
-            torch.ones(action_dim, action_dim))).unsqueeze(0)
 
     def forward(self, state, action):
-        mu = self.mu_model(state)
-        action_mu = (action - mu).unsqueeze(2)
+        g = self.g.repeat(state.shape[0], 1).unsqueeze(1)
         v = self.v_model(state)
         v.backward(torch.ones((state.shape[0], 1)))
         dv = state.grad[:, 1:].detach().unsqueeze(2)
-        phi = (0.5 * (1 / self.r) * torch.bmm(self.g,
+        phi = (0.5 * (1 / self.r) * torch.bmm(g,
                                               dv)[:, :, 0])
+        mu = self.tanh(phi)
         action_phi = (phi - mu).unsqueeze(2)
+        action_mu = (action - mu).unsqueeze(2)
         A = -self.dt * self.r * \
             torch.bmm(action_mu.transpose(2, 1),
                       action_mu)[:, :, 0] + \
@@ -209,6 +206,14 @@ class QModel_SphereCase_RG_Based(nn.Module):
                                              action_mu)[:, :, 0]
         self.v_model.zero_grad()
         return A + self.v_model(state)
+
+    def mu_model(self, state):
+        v = self.v_model(state)
+        v.backward()
+        dv = state.grad[1:].detach()
+        mu = (0.5 * (1 / self.r) * torch.matmul(self.g,
+                                                dv))
+        return mu
 
 
 class QModel_RG_Based(nn.Module):
@@ -224,10 +229,6 @@ class QModel_RG_Based(nn.Module):
         self.g = torch.FloatTensor(g)
         self.action_max = action_max
         self.action_dim = action_dim
-        self.tril_mask = torch.tril(torch.ones(
-            action_dim, action_dim), diagonal=-1).unsqueeze(0)
-        self.diag_mask = torch.diag(torch.diag(
-            torch.ones(action_dim, action_dim))).unsqueeze(0)
 
     def forward(self, state, action):
         g = self.g.repeat(state.shape[0], 1).unsqueeze(1)
@@ -235,10 +236,8 @@ class QModel_RG_Based(nn.Module):
         v.backward(torch.ones((state.shape[0], 1)))
         dv = state.grad[:, 1:].detach().unsqueeze(2)
         mu = (0.5 * (1 / self.r) * torch.bmm(g, dv)[:, :, 0])
-        action_mu = (action - mu).unsqueeze(2)
-        A = -self.dt * self.r * \
-            torch.bmm(action_mu.transpose(2, 1),
-                      action_mu)[:, :, 0]
+        action_mu = (action - mu)
+        A = -self.dt * self.r * (action_mu ** 2)
         self.v_model.zero_grad()
         return A + self.v_model(state)
 
