@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+# task = 'SimpleControl'
 # task = 'DubinsCar'
 task = 'VanDerPol'
 
@@ -11,9 +12,9 @@ def plot_best_by_last_value(model, color):
     idx = np.argpartition(integral, 5)
     x = np.arange(data.shape[1])
     best = data[idx[:3]]
-    min = best.min(axis=0)
-    mean = best.mean(axis=0)
-    max = best.max(axis=0)
+    min = -best.min(axis=0)
+    mean = -best.mean(axis=0)
+    max = -best.max(axis=0)
     plt.fill_between(x, min, max, alpha=0.1, color=color)
     plt.plot(x, mean, color=color, label=model)
 
@@ -27,20 +28,23 @@ def plot(model, color):
     min = best.min(axis=0)
     mean = best.mean(axis=0)
     max = best.max(axis=0)
-    plt.fill_between(x, min, max, alpha=0.1, color=color)
+    plt.fill_between(x, min, max, color=color)
     plt.plot(x, mean, color=color, label=model)
 
 
-plot_best_by_last_value('NAF', 'b')
+# plot_best_by_last_value('NAF', 'b')
 # plot_best_by_last_value('NAF_R', 'y')
 # plot_best_by_last_value('BOUNDED', 'g')
 # plot_best_by_last_value('BOUNDED_R', 'y')
 # plot_best_by_last_value('SPHERE', 'r')
-# plot_best_by_last_value('SPHERE_R', 'g')
-plot_best_by_last_value('BOUNDED_R_G', 'g')
+plot_best_by_last_value('SPHERE_R', 'g')
+# plot_best_by_last_value('BOUNDED_R_G', 'g')
 plot_best_by_last_value('SPHERE_R_G', 'r')
-plt.xlabel('episode')
-plt.ylabel('reward')
+plt.xlabel('episodes')
+plt.ylabel('rewards')
 plt.title(task)
-plt.legend()
+plt.legend(loc=4)
+ax = plt.gca()
+ax.set_facecolor('#eaeaf2')
+plt.grid(color='white')
 plt.show()
