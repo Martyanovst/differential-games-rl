@@ -40,18 +40,11 @@ class NAF:
         for target_param, original_param in zip(target.parameters(), original.parameters()):
             target_param.data.copy_((1 - self.tau) * target_param.data + self.tau * original_param.data)
 
-    def add_to_memory(self, sessions):
-        for session in sessions:
-            session_len = len(session['actions'])
-            for i in range(session_len):
-                self.memory.append([session['states'][i],
-                                    session['actions'][i],
-                                    session['rewards'][i],
-                                    session['dones'][i],
-                                    session['states'][i + 1]])
+    def add_to_memory(self, step):
+        self.memory.append(step)
 
-    def fit(self, sessions):
-        self.add_to_memory(sessions)
+    def fit(self, step):
+        self.add_to_memory(step)
 
         if len(self.memory) >= self.batch_size:
             for _ in range(self.learning_n_per_fit):

@@ -10,7 +10,7 @@ class AgentTestingModule:
         self.mean_rewards = np.zeros(0)
 
     def __callback__(self, env, agent, episode, sessions):
-        total_reward = np.sum(sessions[0]['rewards'])
+        total_reward = np.sum(sessions['rewards'])
         self.rewards[episode] = total_reward
         mean_reward = np.mean(self.rewards[max(0, episode - 25):episode + 1])
         self.mean_rewards[episode] = mean_reward
