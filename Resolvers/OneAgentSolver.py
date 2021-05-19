@@ -11,7 +11,6 @@ def go(env, agent, callback, start_episode=0, episode_n=100, session_n=1, sessio
 
             if agent_learning:
                 agent.fit([state, action, reward, done, next_state])
-                agent.noise.decrease()
             state = next_state
             session['states'].append(state)
             session['rewards'].append(reward)
@@ -20,6 +19,7 @@ def go(env, agent, callback, start_episode=0, episode_n=100, session_n=1, sessio
             if done:
                 break
 
+        agent.noise.decrease()
         callback(env, agent, start_episode + episode, session)
 
     return agent
