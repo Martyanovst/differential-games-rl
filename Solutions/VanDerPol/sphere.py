@@ -12,4 +12,4 @@ tester = AgentTestingModule(env)
 path = './../../Tests/VanDerPol/SPHERE/'
 
 agent_generator = AgentGenerator(env, batch_size, episode_n, noise_min)
-tester.test_agent(agent_generator.generate_naf_sphere_case, episode_n, session_len=1000, epoch_n=epoch_n, path=path, dt_array=[1])
+tester.test_agent(agent_generator.generate_naf_sphere_case, episode_n, session_len=1000, epoch_n=epoch_n, path=path, dt_array=[0.5])
