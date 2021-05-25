@@ -4,7 +4,7 @@ from Resolvers.AgentTestingModule import AgentTestingModule
 
 env = DubinsCar(dt=1, inner_step_n=100)
 epoch_n = 20
-episode_n = 500
+episode_n = 750
 noise_min = 1e-3
 batch_size = 128
 
