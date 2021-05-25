@@ -3,10 +3,12 @@ import numpy as np
 
 # task = 'SimpleControl'
 # task = 'DubinsCar'
-task = 'VanDerPol'
+# task = 'VanDerPol'
+task = 'TerminalPendulum'
 
 
 def plot_best_by_last_value(model, color):
+    plt.ylim(-7.5, 0)
     data = np.array([np.load('./Tests/' + task + '/' + model + '/' + str(i) + '.npy') for i in range(20)])
     integral = data[:, -1]
     idx = np.argpartition(integral, 5)
@@ -33,17 +35,13 @@ def plot(model, color):
 
 
 # plot_best_by_last_value('NAF', 'b')
-# plot_best_by_last_value('NAF_R', 'y')
-# plot_best_by_last_value('BOUNDED', 'g')
-# plot_best_by_last_value('BOUNDED_R', 'y')
-# plot_best_by_last_value('SPHERE', 'r')
+# plot_best_by_last_value('SPHERE', 'b')
 plot_best_by_last_value('SPHERE_R', 'b')
-plot_best_by_last_value('SPHERE_R_DT', 'r')
-plt.axvline(x=250, linestyle="--", color='gray')
-plt.text(x=100, y=-7, s='dt=1')
-plt.text(x=300, y=-7, s='dt=0.5')
-# plot_best_by_last_value('BOUNDED_R_G', 'g')
-# plot_best_by_last_value('SPHERE_R_G', 'r')
+# plot_best_by_last_value('SPHERE_R_DT', 'r')
+# plt.axvline(x=250, linestyle="--", color='gray')
+# plt.text(x=125, y=-5, s='dt=0.5')
+# plt.text(x=375, y=-5, s='dt=0.1')
+plot_best_by_last_value('SPHERE_R_G', 'r')
 plt.xlabel('episodes')
 plt.ylabel('rewards')
 plt.title(task)

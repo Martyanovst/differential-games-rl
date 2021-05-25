@@ -19,7 +19,7 @@ class PendulumTerminal:
         self.beta = self.r
         self.m = 1.
         self.l = 1.
-        self.g = np.array([0, 3. / (self.m * self.l ** 2)])
+        self.g = np.array([0, (self.m * self.l ** 2)])
 
 
     def reset(self):
