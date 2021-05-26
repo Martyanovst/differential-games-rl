@@ -3,7 +3,8 @@ import numpy as np
 
 # task = 'SimpleControl'
 # task = 'DubinsCar'
-task = 'VanDerPol'
+# task = 'VanDerPol'
+task = 'TerminalPendulum'
 
 
 def plot_best_by_last_value(model, color):
@@ -31,12 +32,12 @@ def plot(model, color):
     plt.fill_between(x, min, max, color=color)
     plt.plot(x, mean, color=color, label=model)
 
-plt.ylim(-5, 0)
+plt.ylim(-35, 0)
 
-plot_best_by_last_value('NAF', 'b')
-plot_best_by_last_value('SPHERE', 'r')
-plot_best_by_last_value('SPHERE_R', 'g')
-plot_best_by_last_value('SPHERE_R_G', 'y')
+# plot_best_by_last_value('NAF', 'b')
+# plot_best_by_last_value('SPHERE', 'r')
+# plot_best_by_last_value('SPHERE_R', 'g')
+# plot_best_by_last_value('SPHERE_R_G', 'y')
 
 # plot_best_by_last_value('NAF', 'b')
 # plot_best_by_last_value('SPHERE', 'r')
