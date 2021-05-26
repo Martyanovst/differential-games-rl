@@ -1,0 +1,18 @@
+batch_size = 128
+dt = 0.5
+gamma = 1
+lr = 1e-3
+tau = 1e-3
+noise_min = 1e-3
+
+Neural network architecture:
+input_size -> 256 -> 128 -> output_size
+Activation function: ReLU
+
+epoch counts:
+Simple Control - 250
+Dubins car - 750
+Van der pol - 500
+Terminal pendulum - 500
+
+
