@@ -8,7 +8,7 @@ task = 'TerminalPendulum'
 
 
 def plot_best_by_last_value(model, color):
-    plt.ylim(-10, 0)
+    plt.ylim(-6, 0)
     data = np.array([np.load('./Tests/' + task + '/' + model + '/' + str(i) + '.npy') for i in range(20)])
     integral = data[:, -1]
     idx = np.argpartition(integral, 5)
@@ -34,14 +34,14 @@ def plot(model, color):
     plt.plot(x, mean, color=color, label=model)
 
 
-plot_best_by_last_value('NAF', 'b')
-plot_best_by_last_value('SPHERE', 'r')
+# plot_best_by_last_value('NAF', 'b')
+# plot_best_by_last_value('SPHERE', 'r')
 plot_best_by_last_value('SPHERE_R', 'g')
-# plot_best_by_last_value('SPHERE_R_DT', 'r')
-# plt.axvline(x=250, linestyle="--", color='gray')
-# plt.text(x=125, y=-4, s='dt=0.5')
-# plt.text(x=375, y=-4, s='dt=0.1')
-plot_best_by_last_value('SPHERE_R_G', 'y')
+plot_best_by_last_value('SPHERE_R_DT', 'r')
+plt.axvline(x=250, linestyle="--", color='gray')
+plt.text(x=125, y=-4.5, s='dt=0.5')
+plt.text(x=375, y=-4.5, s='dt=0.1')
+# plot_best_by_last_value('SPHERE_R_G', 'y')
 plt.xlabel('episodes')
 plt.ylabel('rewards')
 plt.title(task)

@@ -1,3 +1,5 @@
+from collections import deque
+
 import numpy as np
 
 from Resolvers import OneAgentSolver
@@ -27,6 +29,7 @@ class AgentTestingModule:
             print('\nEPOCH ' + str(epoch) + '\n')
             agent = agent_gen()
             epsilon = agent.noise.threshold
+            agent.memory = deque(maxlen=100000)
             idx = 0
             for dt in dt_array:
                 agent.noise.threshold = epsilon
