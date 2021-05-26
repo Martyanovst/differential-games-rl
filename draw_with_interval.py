@@ -31,15 +31,28 @@ def plot(model, color):
     plt.fill_between(x, min, max, color=color)
     plt.plot(x, mean, color=color, label=model)
 
+plt.ylim(-5, 0)
+
+plot_best_by_last_value('NAF', 'b')
+plot_best_by_last_value('SPHERE', 'r')
+plot_best_by_last_value('SPHERE_R', 'g')
+plot_best_by_last_value('SPHERE_R_G', 'y')
 
 # plot_best_by_last_value('NAF', 'b')
+# plot_best_by_last_value('SPHERE', 'r')
+
 # plot_best_by_last_value('SPHERE', 'b')
-plot_best_by_last_value('SPHERE_R', 'b')
+# plot_best_by_last_value('SPHERE_R', 'r')
+
+# plot_best_by_last_value('SPHERE_R', 'b')
 # plot_best_by_last_value('SPHERE_R_G', 'r')
-plot_best_by_last_value('SPHERE_R_DT', 'r')
-plt.axvline(x=250, linestyle="--", color='gray')
-plt.text(x=100, y=-10, s='dt=1')
-plt.text(x=300, y=-10, s='dt=0.25')
+
+# plot_best_by_last_value('SPHERE_R', 'b')
+# plot_best_by_last_value('SPHERE_R_DT', 'r')
+# plt.axvline(x=250, linestyle="--", color='gray')
+# plt.text(x=75, y=-10, s='dt=1')
+# plt.text(x=150, y=-10, s='dt=0.1')
+
 plt.xlabel('episodes')
 plt.ylabel('rewards')
 plt.title(task)
