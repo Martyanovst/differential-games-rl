@@ -2,9 +2,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # task = 'SimpleControl'
-# task = 'DubinsCar'
+task = 'DubinsCar'
 # task = 'VanDerPol'
-task = 'TerminalPendulum'
+# task = 'TerminalPendulum'
 
 labels = {"NAF": "NAF", "SPHERE": "BNAF", "SPHERE_R": "RB-BNAF", "SPHERE_R_G": "GB-BNAF"}
 
@@ -47,10 +47,10 @@ def plot_sphere_r(model, color, label):
     plt.plot(x, mean, color=color, label=label)
 
 
-# plot_best_by_last_value('NAF', 'b')
-# plot_best_by_last_value('SPHERE', 'r')
-# plot_best_by_last_value('SPHERE_R', 'g')
-# plot_best_by_last_value('SPHERE_R_G', 'y')
+plot_best_by_last_value('NAF', 'b')
+plot_best_by_last_value('SPHERE', 'r')
+plot_best_by_last_value('SPHERE_R', 'g')
+plot_best_by_last_value('SPHERE_R_G', 'y')
 
 # plot_best_by_last_value('NAF', 'b')
 # plot_best_by_last_value('SPHERE', 'r')
@@ -61,12 +61,12 @@ def plot_sphere_r(model, color, label):
 # plot_best_by_last_value('SPHERE_R', 'b')
 # plot_best_by_last_value('SPHERE_R_G', 'r')
 
-plt.ylim(-36, 0)
-plot_sphere_r('SPHERE_R', 'b', 'RB-BNAF(Δt=0.5)')
-plot_sphere_r('SPHERE_R_DT', 'r', 'RB-BNAF(Δt=0.5, Δt=0.1)')
-plt.axvline(x=500, linestyle="--", color='gray')
-plt.text(x=250, y=-25, s='Δt=0.5')
-plt.text(x=750, y=-25, s='Δt=0.1')
+plt.ylim(-11, 0)
+# plot_sphere_r('SPHERE_R', 'b', 'RB-BNAF(Δt=0.5)')
+# plot_sphere_r('SPHERE_R_DT', 'r', 'RB-BNAF(Δt=0.5, Δt=0.1)')
+# plt.axvline(x=500, linestyle="--", color='gray')
+# plt.text(x=250, y=-25, s='Δt=0.5')
+# plt.text(x=750, y=-25, s='Δt=0.1')
 
 plt.xlabel('episodes')
 plt.ylabel('rewards')
