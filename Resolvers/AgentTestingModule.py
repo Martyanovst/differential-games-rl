@@ -1,3 +1,5 @@
+from collections import deque
+
 import numpy as np
 
 from Resolvers import OneAgentSolver
@@ -30,6 +32,7 @@ class AgentTestingModule:
             idx = 0
             for dt in dt_array:
                 agent.noise.threshold = epsilon
+                agent.memory = deque(maxlen=100000)
                 self.env.dt = dt
                 OneAgentSolver.go(self.env, agent, self.__callback__,
                                   start_episode=idx * episode_n,
