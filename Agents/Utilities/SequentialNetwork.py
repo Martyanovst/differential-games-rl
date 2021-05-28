@@ -3,7 +3,7 @@ from torch import nn
 
 
 class Seq_Network(nn.Module):
-    def __init__(self, layers, hidden_activation, output_activation=None):
+    def __init__(self, layers, hidden_activation, output_activation=None, random_seed=1):
         super().__init__()
         hidden_layers = layers[:-1]
         network = [nn.Sequential(nn.Linear(i, o), hidden_activation) for i, o in
@@ -11,6 +11,7 @@ class Seq_Network(nn.Module):
         network.append(nn.Linear(layers[-2], layers[-1]))
         if output_activation:
             network.append(output_activation)
+        self.random_seed = random_seed
         self.network = nn.Sequential(*network)
         self.apply(self._init_weights_)
 

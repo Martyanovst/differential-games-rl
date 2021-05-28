@@ -15,7 +15,8 @@ class PendulumTerminal:
         self.inner_dt = dt / inner_step_n
 
         self.gravity = 9.8
-        self.r = 0.01
+        # self.r = 0.01
+        self.r = 0.05
         self.beta = self.r
         self.m = 1.
         self.l = 1.
