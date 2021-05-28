@@ -43,8 +43,9 @@ class DubinsCar_SymmetricActionInterval:
         self.action_max = action_max
         self.terminal_time = terminal_time
         self.dt = dt
-        self.beta = 0.01
+        # self.beta = 0.01
         # self.r = 0.01
+        self.beta = 0.05
         self.r = 0.05
         self.g = np.array([0, 0, 0.75])
         self.initial_state = initial_state
