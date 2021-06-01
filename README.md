@@ -28,9 +28,9 @@ python train.py
      --dt=<float> \
      --lr=<float> \
      --batch=<int> \
-     --save-agent=<path> \
-     --save-train-rewards=<path> \
-     --save-train-plot=<path>
+     --save-agent-path=<path> \
+     --save-train-rewards-path=<path> \
+     --save-train-plot-path=<path>
 ```
 
 **params:**
@@ -38,14 +38,14 @@ python train.py
 | Parameter | Type | Default | Description |
 |-----------|------------|---------|-------------|
 | --env    |*simple-motions* &#124; *van-der-pol* &#124; *pendulum* &#124; *dubins-car*|simple-motions| Optimal control task to solve
-|--model    |*naf* &#124; *b-naf* &#124; *rb-naf* &#124; *gb-bnaf* | naf           | One of the models, described in article
-|--epoch_num| int | 500           | Number of training epochs
+|--model    |*naf* &#124; *b-naf* &#124; *rb-naf* &#124; *gb-naf* | naf           | One of the models, described in article
+|--epoch-num| int | 500           | Number of training epochs
 |--dt       | float | 0.5          | Discretization step in continuous tasks
 |--lr       | float | 0.001        | Learning rate
 |--batch    | int | 128          | Batch size
-|--save-agent| Path | | Path to save trained agent
-|--save-train-rewards| Path | | Path to save training reward history in numpy array format
-|--save-train-plot   | Path | | Path to save training reward history plot
+|--save-agent-path| Path | | Path to save trained agent
+|--save-train-rewards-path| Path | | Path to save training reward history in numpy array format
+|--save-train-plot-path   | Path | | Path to save training reward history plot
 
 **Usage example:**
 ```
@@ -58,7 +58,7 @@ python train.py --task=pendulum --model=rb-naf --dt=0.5 --lr=0.001 --batch=128
 To evaluate pre-trained model, run:
 
 ```eval
-python eval.py --task --model
+python eval.py --env=<env-name> --model=<model-name>
 ```
 
 This script prints to the console all the states of the environment during the evaluation and outputs the final score.
