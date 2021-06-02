@@ -21,6 +21,10 @@ class DubinsCar:
         self.state = self.initial_state
         return self.state
 
+    def set_dt(self, dt):
+        self.dt = dt
+        self.inner_dt = dt / self.inner_step_n
+
     def step(self, action):
         action = np.clip(action, self.action_min, self.action_max)
         action = action * 0.75 + 0.25
@@ -37,3 +41,7 @@ class DubinsCar:
             done = False
 
         return self.state, reward, done, None
+
+    def render(self):
+        print('time: %.3f  x: %.3f y: %.3f theta: %.3f' % (self.state[0], self.state[1], self.state[2], self.state[3]))
+

@@ -70,8 +70,8 @@ class QModel_Bounded(nn.Module):
         super().__init__()
         self.dt = dt
         self.action_dim = action_dim
-        self.action_min = action_min
-        self.action_max = action_max
+        self.action_min = torch.FloatTensor(action_min)
+        self.action_max = torch.FloatTensor(action_max)
 
         self.nu_model = nu_model
         self.mu_model = MuModel(nu_model)
@@ -80,20 +80,20 @@ class QModel_Bounded(nn.Module):
 
     def forward(self, state, action):
         nu = self.nu_model(state)
-        mu = self.mu_model(state)
+        mu = transform_interval(self.mu_model(state), self.action_min, self.action_max)
         p = self.p_model(state)
         A = - 0.5 * torch.exp(p) * (action - mu) * (action + mu - 2 * nu)
         return A + self.v_model(state)
 
-    def load_state_dict(self, state_dict):
+    def load_state_dict(self, state_dict, **kwargs):
         self.action_dim = state_dict['action_dim']
         self.action_min = state_dict['action_min']
         self.action_max = state_dict['action_max']
         self.dt = state_dict['dt']
-        self.p_model.load_state_dict(state_dict['p_model'], )
-        self.nu_model.load_state_dict(state_dict['nu_model'], )
+        self.p_model.load_state_dict(state_dict['p_model'])
+        self.nu_model.load_state_dict(state_dict['nu_model'])
         self.mu_model = MuModel(self.nu_model)
-        self.v_model.load_state_dict(state_dict['v_model'], )
+        self.v_model.load_state_dict(state_dict['v_model'])
         return self
 
     def state_dict(self, **kwargs):
@@ -115,8 +115,8 @@ class QModel_Bounded_RewardBased(nn.Module):
         super().__init__()
 
         self.action_dim = action_dim
-        self.action_min = action_min
-        self.action_max = action_max
+        self.action_min = torch.FloatTensor(action_min)
+        self.action_max = torch.FloatTensor(action_max)
 
         self.nu_model = nu_model
         self.mu_model = MuModel(nu_model)
@@ -126,7 +126,7 @@ class QModel_Bounded_RewardBased(nn.Module):
 
     def forward(self, state, action):
         nu = self.nu_model(state)
-        mu = self.mu_model(state)
+        mu = transform_interval(self.mu_model(state), self.action_min, self.action_max)
         A = - self.dt * self.beta * (action - mu) * (action + mu - 2 * nu)
         return A + self.v_model(state)
 
@@ -148,9 +148,9 @@ class QModel_Bounded_RewardBased(nn.Module):
         self.action_max = state_dict['action_max']
         self.dt = state_dict['dt']
         self.beta = state_dict['beta']
-        self.nu_model.load_state_dict(state_dict['nu_model'], )
+        self.nu_model.load_state_dict(state_dict['nu_model'])
         self.mu_model = MuModel(self.nu_model)
-        self.v_model.load_state_dict(state_dict['v_model'], )
+        self.v_model.load_state_dict(state_dict['v_model'])
         return self
 
 
@@ -159,8 +159,8 @@ class QModel_Bounded_GradientBased(nn.Module):
                  v_model, r, g, dt):
         super().__init__()
         self.action_dim = action_dim
-        self.action_min = action_min
-        self.action_max = action_max
+        self.action_min = torch.FloatTensor(action_min)
+        self.action_max = torch.FloatTensor(action_max)
         self.v_model = v_model
         self.dt = dt
         self.r = r
@@ -174,7 +174,7 @@ class QModel_Bounded_GradientBased(nn.Module):
         dv = state.grad[:, 1:].detach().unsqueeze(2)
         phi = (0.5 * (1 / self.r) * torch.bmm(g,
                                               dv)[:, :, 0])
-        mu = self.tanh(phi)
+        mu = transform_interval(self.tanh(phi), self.action_min, self.action_max)
         action_phi = (phi - mu).unsqueeze(2)
         action_mu = (action - mu).unsqueeze(2)
         A = -self.dt * self.r * \
@@ -191,7 +191,7 @@ class QModel_Bounded_GradientBased(nn.Module):
         dv = state.grad[1:].detach()
         mu = (0.5 * (1 / self.r) * torch.matmul(self.g,
                                                 dv))
-        return mu
+        return transform_interval(self.tanh(mu), self.action_min, self.action_max)
 
     def state_dict(self, **kwargs):
         return {
@@ -212,5 +212,5 @@ class QModel_Bounded_GradientBased(nn.Module):
         self.dt = state_dict['dt']
         self.r = state_dict['r']
         self.g = state_dict['g']
-        self.v_model.load_state_dict(state_dict['v_model'], )
+        self.v_model.load_state_dict(state_dict['v_model'])
         return self

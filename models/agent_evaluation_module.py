@@ -31,8 +31,8 @@ class AgentEvaluationModule:
                 agent.fit([state, action, reward, done, next_state])
             state = next_state
             total_reward += reward
-
-        agent.noise.decrease()
+        if agent_learning:
+            agent.noise.decrease()
         return total_reward
 
     def train_agent(self, agent, epoch_num):

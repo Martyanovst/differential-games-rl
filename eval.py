@@ -6,7 +6,6 @@ from environments.simpleMotions.simple_motions_env import SimpleMotions
 from environments.vanDerPol.van_der_pol_env import VanDerPol
 from models.agent_evaluation_module import AgentEvaluationModule
 from models.agent_generator import AgentGenerator
-from models.naf import NAF
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--env', type=str, choices=('simple-motions', 'van-der-pol', 'pendulum', 'dubins-car'),
@@ -24,7 +23,7 @@ else:
     env = DubinsCar()
 
 agent = AgentGenerator(env).load(args.model)
-dt = agent.q_model.dt
+env.set_dt(agent.q_model.dt)
 
 evaluation_module = AgentEvaluationModule(env)
 

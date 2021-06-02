@@ -22,6 +22,9 @@ class SimpleMotions:
         self.done = False
         return self.state
 
+    def set_dt(self, dt):
+        self.dt = dt
+
     def step(self, u_action):
         u = u_action[0]
         t, x = self.state
@@ -33,3 +36,6 @@ class SimpleMotions:
             reward -= (x ** 2)
         self.state = hstack((t, x))
         return self.state, reward, int(self.done), None
+
+    def render(self):
+        print('time: %.3f  position: %.3f' % (self.state[0], self.state[1]))

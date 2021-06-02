@@ -20,7 +20,11 @@ class Pendulum:
         self.m = 1.
         self.l = 1.
         self.g = np.array([0, 3 / (self.m * self.l ** 2)])
+        self.state = self.initial_state
 
+    def set_dt(self, dt):
+        self.dt = dt
+        self.inner_dt = dt / self.inner_step_n
 
     def reset(self):
         self.state = self.initial_state
@@ -42,3 +46,6 @@ class Pendulum:
             done = False
 
         return self.state, reward, done, None
+
+    def render(self):
+        print('time: %.3f  angle: %.3f angular velocity: %.3f' % (self.state[0], self.state[1], self.state[2]))
