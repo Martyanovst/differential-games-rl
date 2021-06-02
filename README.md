@@ -11,6 +11,7 @@ It currently includes code and models for some optimal control tasks:
 > You find models and tasks theoretical description in the paper.
 
 ## Requirements
+For training and evaluating described models, you will need python 3.6.
 
 To install requirements:
 
