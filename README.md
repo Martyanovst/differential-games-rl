@@ -90,10 +90,10 @@ Our models achieves the following performance on:
 
 **Plots**
 
-| ![simple-motions](plots/simple-motions.png) | ![van-der-pol](plots/van-der-por.png) |
+| ![simple-motions](plots/simple-motions.png) | ![van-der-pol](plots/van-der-pol.png) |
 |:----:|:----:|
 |  *Simple Motions* | *Van der Pol oscillator* |
-| ![pendulum](plots/pendulum.png) | ![dubins-car](plots/all_dc.png) |
+| ![pendulum](plots/pendulum.png) | ![dubins-car](plots/dubins-car.png) |
 |  *Pendulum* | *Dubins car* |
 
 
