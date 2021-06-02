@@ -1,6 +1,6 @@
 # Continuous Deep Q-Learning in Optimal Control Problems: Normalized Advantage Functions Analysis
-This repository is the official implementation of ["Continuous Deep Q-Learning in Optimal Control
-Problems: Normalized Advantage Functions Analysis"]().
+This repository is the official implementation of "Continuous Deep Q-Learning in Optimal Control
+Problems: Normalized Advantage Functions Analysis".
 It currently includes code and models for some optimal control tasks:
 
 - Simple motions
@@ -90,10 +90,10 @@ Our models achieves the following performance on:
 
 **Plots**
 
-| ![simple-motions](graphics/all_sc.png) | ![van-der-pol](graphics/all_vdp.png) |
+| ![simple-motions](plots/simple-motions.png) | ![van-der-pol](plots/van-der-por.png) |
 |:----:|:----:|
 |  *Simple Motions* | *Van der Pol oscillator* |
-| ![pendulum](graphics/all_tp.png) | ![dubins-car](graphics/all_dc.png) |
+| ![pendulum](plots/pendulum.png) | ![dubins-car](plots/all_dc.png) |
 |  *Pendulum* | *Dubins car* |
 
 
