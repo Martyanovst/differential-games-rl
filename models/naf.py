@@ -1,12 +1,12 @@
-import numpy as np
-import torch
-import torch.nn as nn
 import random
 from collections import deque
 from copy import deepcopy
+
+import numpy as np
+import torch
+import torch.nn as nn
+
 from models.linear_transformations import transform_interval
-from models.ou_noise import load_noise
-from models.q_models import load_q_model
 
 
 class NAF:
@@ -36,19 +36,6 @@ class NAF:
             'gamma': self.gamma,
             'batch_size': self.batch_size
         }, path)
-
-    @staticmethod
-    def load(path):
-        state_dict = torch.load(path)
-        q_model = load_q_model(state_dict['q-model'])
-        noise = load_noise(state_dict['noise'])
-        action_min = state_dict['action_min']
-        action_max = state_dict['action_max']
-        tau = state_dict['tau']
-        lr = state_dict['lr']
-        gamma = state_dict['gamma']
-        batch_size = state_dict['batch_size']
-        return NAF(action_min, action_max, q_model, noise, batch_size, gamma, tau, lr)
 
     def train(self):
         self.noise.threshold = 1

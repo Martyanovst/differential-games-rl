@@ -41,7 +41,7 @@ elif args.model == 'bnaf':
 elif args.model == 'rb-bnaf':
     agent = agent_generator.generate__b_naf_reward_based()
 else:
-    agent = agent_generator.generate_naf_bounded_gradient_based()
+    agent = agent_generator.generate_b_naf_gradient_based()
 
 training_module = AgentEvaluationModule(env)
 rewards = training_module.train_agent(agent, args.epoch_num)

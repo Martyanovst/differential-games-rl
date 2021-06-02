@@ -3,50 +3,6 @@ import torch.nn as nn
 from models.linear_transformations import transform_interval
 
 
-def load_q_model(state_dict):
-    if state_dict['model-name'] == 'q-model':
-        action_dim = state_dict['action_dim']
-        action_min = state_dict['action_min']
-        action_max = state_dict['action_max']
-        p_model = torch.load(state_dict['p_model'])
-        mu_model = torch.load(state_dict['mu_model'])
-        v_model = torch.load(state_dict['v_model'])
-        return QModel(action_dim=action_dim, action_min=action_min, action_max=action_max, p_model=p_model,
-                      mu_model=mu_model, v_model=v_model)
-
-    elif state_dict['model-name'] == 'q-model-bounded':
-        action_dim = state_dict['action_dim']
-        action_min = state_dict['action_min']
-        action_max = state_dict['action_max']
-        p_model = torch.load(state_dict['p_model'])
-        nu_model = torch.load(state_dict['nu_model'])
-        v_model = torch.load(state_dict['v_model'])
-        return QModel_Bounded(action_dim=action_dim, action_min=action_min, action_max=action_max, p_model=p_model,
-                              nu_model=nu_model, v_model=v_model)
-
-    elif state_dict['model-name'] == 'q-model-bounded-reward-based':
-        action_dim = state_dict['action_dim']
-        action_min = state_dict['action_min']
-        action_max = state_dict['action_max']
-        beta = state_dict['beta']
-        dt = state_dict['dt']
-        nu_model = torch.load(state_dict['nu_model'])
-        v_model = torch.load(state_dict['v_model'])
-        return QModel_Bounded_RewardBased(action_dim=action_dim, action_min=action_min, action_max=action_max,
-                                          nu_model=nu_model, v_model=v_model, beta=beta, dt=dt)
-
-    elif state_dict['model-name'] == 'q-model-bounded-gradient-based':
-        action_dim = state_dict['action_dim']
-        action_min = state_dict['action_min']
-        action_max = state_dict['action_max']
-        r = state_dict['r']
-        g = state_dict['g']
-        dt = state_dict['dt']
-        v_model = torch.load(state_dict['v_model'])
-        return QModel_Bounded_GradientBased(action_dim=action_dim, action_min=action_min, action_max=action_max,
-                                            v_model=v_model, r=r, dt=dt, g=g)
-
-
 class MuModel(nn.Module):
     def __init__(self, nu_model):
         super().__init__()
@@ -60,8 +16,9 @@ class MuModel(nn.Module):
 
 class QModel(nn.Module):
     def __init__(self, action_dim, action_min, action_max,
-                 mu_model, p_model, v_model):
+                 mu_model, p_model, v_model, dt):
         super().__init__()
+        self.dt = dt
         self.action_dim = action_dim
         self.action_min = torch.FloatTensor(action_min)
         self.action_max = torch.FloatTensor(action_max)
@@ -84,12 +41,23 @@ class QModel(nn.Module):
                       action_mu)[:, :, 0]
         return A + self.v_model(state)
 
+    def load_state_dict(self, state_dict, **kwargs):
+        self.action_dim = state_dict['action_dim']
+        self.action_min = state_dict['action_min']
+        self.action_max = state_dict['action_max']
+        self.dt = state_dict['dt']
+        self.p_model.load_state_dict(state_dict['p_model'], )
+        self.mu_model.load_state_dict(state_dict['mu_model'], )
+        self.v_model.load_state_dict(state_dict['v_model'], )
+        return self
+
     def state_dict(self, **kwargs):
         return {
             'model-name': 'q-model',
             'action_dim': self.action_dim,
             'action_min': self.action_min,
             'action_max': self.action_max,
+            'dt': self.dt,
             'p_model': self.p_model.state_dict(),
             'mu_model': self.mu_model.state_dict(),
             'v_model': self.v_model.state_dict()
@@ -98,9 +66,9 @@ class QModel(nn.Module):
 
 class QModel_Bounded(nn.Module):
     def __init__(self, action_dim, action_min, action_max,
-                 nu_model, v_model, p_model):
+                 nu_model, v_model, p_model, dt):
         super().__init__()
-
+        self.dt = dt
         self.action_dim = action_dim
         self.action_min = action_min
         self.action_max = action_max
@@ -117,12 +85,24 @@ class QModel_Bounded(nn.Module):
         A = - 0.5 * torch.exp(p) * (action - mu) * (action + mu - 2 * nu)
         return A + self.v_model(state)
 
+    def load_state_dict(self, state_dict):
+        self.action_dim = state_dict['action_dim']
+        self.action_min = state_dict['action_min']
+        self.action_max = state_dict['action_max']
+        self.dt = state_dict['dt']
+        self.p_model.load_state_dict(state_dict['p_model'], )
+        self.nu_model.load_state_dict(state_dict['nu_model'], )
+        self.mu_model = MuModel(self.nu_model)
+        self.v_model.load_state_dict(state_dict['v_model'], )
+        return self
+
     def state_dict(self, **kwargs):
         return {
             'model-name': 'q-model-bounded',
             'action_dim': self.action_dim,
             'action_min': self.action_min,
             'action_max': self.action_max,
+            'dt': self.dt,
             'p_model': self.p_model.state_dict(),
             'nu_model': self.nu_model.state_dict(),
             'v_model': self.v_model.state_dict()
@@ -161,6 +141,17 @@ class QModel_Bounded_RewardBased(nn.Module):
             'nu_model': self.nu_model.state_dict(),
             'v_model': self.v_model.state_dict()
         }
+
+    def load_state_dict(self, state_dict, **kwargs):
+        self.action_dim = state_dict['action_dim']
+        self.action_min = state_dict['action_min']
+        self.action_max = state_dict['action_max']
+        self.dt = state_dict['dt']
+        self.beta = state_dict['beta']
+        self.nu_model.load_state_dict(state_dict['nu_model'], )
+        self.mu_model = MuModel(self.nu_model)
+        self.v_model.load_state_dict(state_dict['v_model'], )
+        return self
 
 
 class QModel_Bounded_GradientBased(nn.Module):
@@ -213,3 +204,13 @@ class QModel_Bounded_GradientBased(nn.Module):
             'g': self.g,
             'v_model': self.v_model.state_dict()
         }
+
+    def load_state_dict(self, state_dict, **kwargs):
+        self.action_dim = state_dict['action_dim']
+        self.action_min = state_dict['action_min']
+        self.action_max = state_dict['action_max']
+        self.dt = state_dict['dt']
+        self.r = state_dict['r']
+        self.g = state_dict['g']
+        self.v_model.load_state_dict(state_dict['v_model'], )
+        return self

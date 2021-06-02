@@ -1,6 +1,6 @@
 # Continuous Deep Q-Learning in Optimal Control Problems: Normalized Advantage Functions Analysis
 This repository is the official implementation of ["Continuous Deep Q-Learning in Optimal Control
-Problems: Normalized Advantage Functions Analysis"](https://arxiv.org/abs/2030.12345).
+Problems: Normalized Advantage Functions Analysis"]().
 It currently includes code and models for some optimal control tasks:
 
 - Simple motions
@@ -60,7 +60,7 @@ python train.py --env=pendulum --model=rb-bnaf --dt=0.5 --lr=0.001 --batch=128
 To evaluate pre-trained model, run:
 
 ```eval
-python eval.py --env=<env-name> --model=<path> --dt=<float>
+python eval.py --env=<env-name> --model=<path>
 ```
 
 This script prints to the console all the states of the environment during the evaluation and outputs the final score.
@@ -71,7 +71,7 @@ This script prints to the console all the states of the environment during the e
 |-----------|------------|---------|-------------|
 | --env    |*simple-motions* &#124; *van-der-pol* &#124; *pendulum* &#124; *dubins-car*| | Optimal control task to solve
 |--model    |path |                 | Path to pre-trained model
-|--dt       |float | 0.5            | Discretization step of continuous environment
+
 
 ## Results
 
