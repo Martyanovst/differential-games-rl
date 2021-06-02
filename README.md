@@ -8,6 +8,8 @@ It currently includes code and models for some optimal control tasks:
 - Pendulum with terminal time
 - Dubins Car
 
+> You find models and tasks theoretical description in the paper.
+
 ## Requirements
 
 To install requirements:
@@ -71,6 +73,8 @@ This script prints to the console all the states of the environment during the e
 |-----------|------------|---------|-------------|
 | --env    |*simple-motions* &#124; *van-der-pol* &#124; *pendulum* &#124; *dubins-car*| | Optimal control task to solve
 |--model    |path |                 | Path to pre-trained model
+
+> Note that you can only use the model for the task on which it was trained
 
 
 ## Results
