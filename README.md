@@ -26,30 +26,32 @@ python train.py
      --model=<model-name> \
      --epoch-num=<int>
      --dt=<float> \
+     --gamma=<float> \
      --lr=<float> \
      --batch=<int> \
-     --save-agent-path=<path> \
-     --save-train-rewards-path=<path> \
-     --save-train-plot-path=<path>
+     --save_model_path=<path> \
+     --save_rewards_path=<path> \
+     --save_plot_path=<path>
 ```
 
 **params:**
 
 | Parameter | Type | Default | Description |
 |-----------|------------|---------|-------------|
-| --env    |*simple-motions* &#124; *van-der-pol* &#124; *pendulum* &#124; *dubins-car*|simple-motions| Optimal control task to solve
-|--model    |*naf* &#124; *b-naf* &#124; *rb-naf* &#124; *gb-naf* | naf           | One of the models, described in article
-|--epoch-num| int | 500           | Number of training epochs
-|--dt       | float | 0.5          | Discretization step in continuous tasks
+| --env    |*simple-motions* &#124; *van-der-pol* &#124; *pendulum* &#124; *dubins-car*| | Optimal control task to solve
+|--model    |*naf* &#124; *bnaf* &#124; *rb-bnaf* &#124; *gb-bnaf* |           | One of the models, described in article
+|--epoch_num| int   | 500           | Number of training epochs
+|--gamma    | float | 1            | Reward discount rate
+|--dt       | float | 0.5          | Discretization step of continuous environment
 |--lr       | float | 0.001        | Learning rate
 |--batch    | int | 128          | Batch size
-|--save-agent-path| Path | | Path to save trained agent
-|--save-train-rewards-path| Path | | Path to save training reward history in numpy array format
-|--save-train-plot-path   | Path | | Path to save training reward history plot
+|--save_model_path| Path | | Path to save trained agent
+|--save_rewards_path| Path | | Path to save training reward history in numpy array format
+|--save_plot_path   | Path | | Path to save training reward history plot
 
 **Usage example:**
 ```
-python train.py --task=pendulum --model=rb-naf --dt=0.5 --lr=0.001 --batch=128
+python train.py --env=pendulum --model=rb-bnaf --dt=0.5 --lr=0.001 --batch=128
 ```
 
 
@@ -58,10 +60,18 @@ python train.py --task=pendulum --model=rb-naf --dt=0.5 --lr=0.001 --batch=128
 To evaluate pre-trained model, run:
 
 ```eval
-python eval.py --env=<env-name> --model=<model-name>
+python eval.py --env=<env-name> --model=<path> --dt=<float>
 ```
 
 This script prints to the console all the states of the environment during the evaluation and outputs the final score.
+
+**params:**
+
+| Parameter | Type | Default | Description |
+|-----------|------------|---------|-------------|
+| --env    |*simple-motions* &#124; *van-der-pol* &#124; *pendulum* &#124; *dubins-car*| | Optimal control task to solve
+|--model    |path |                 | Path to pre-trained model
+|--dt       |float | 0.5            | Discretization step of continuous environment
 
 ## Results
 
