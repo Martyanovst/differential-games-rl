@@ -119,7 +119,7 @@ Thus, we consider that GB-BNAF is the most unsuccessful modification of NAF.
 |  *Pendulum* | *Dubins car* |
 
  
-Figures above shows the learning results for RN-NAF, when we reduce **dt** in the middle of the learning.
+Figures above shows the learning results for RB-BNAF, when we reduce **dt** in the middle of the learning.
 We can see that it does not make the algorithm results worse,
 although the learning becomes slower in Van der Pol oscillator and Dubins car problems.
 
