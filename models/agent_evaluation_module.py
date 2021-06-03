@@ -11,7 +11,7 @@ class AgentEvaluationModule:
         self.rewards[epoch] = total_reward
         mean_reward = np.mean(self.rewards[max(0, epoch - 25):epoch + 1])
         self.mean_rewards[epoch] = mean_reward
-        print("epoch=%.0f, noise_threshold=%.3f, total reward=%.3f, mean reward=%.3f" % (
+        print("epoch=%.0f, noise threshold=%.3f, total reward=%.3f, mean reward=%.3f" % (
             epoch, agent.noise.threshold, total_reward, mean_reward))
 
     def __reset__(self, epoch_num):
