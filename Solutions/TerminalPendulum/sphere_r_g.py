@@ -1,10 +1,11 @@
 from Agents.AgentGenerator import AgentGenerator
+from Environments.SimpleControl.simple_control_problem_env import SimpleControlProblem
 from Environments.TerminalPendulum.TerminalPendulum import PendulumTerminal
 from Resolvers.AgentTestingModule import AgentTestingModule
 
-env = PendulumTerminal(dt=1, inner_step_n=100)
+env = PendulumTerminal(dt=0.5)
 epoch_n = 20
-episode_n = 500
+episode_n = 1000
 noise_min = 1e-3
 batch_size = 128
 

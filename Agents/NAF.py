@@ -40,31 +40,23 @@ class NAF:
         for target_param, original_param in zip(target.parameters(), original.parameters()):
             target_param.data.copy_((1 - self.tau) * target_param.data + self.tau * original_param.data)
 
-    def add_to_memory(self, sessions):
-        for session in sessions:
-            session_len = len(session['actions'])
-            for i in range(session_len):
-                self.memory.append([session['states'][i],
-                                    session['actions'][i],
-                                    session['rewards'][i],
-                                    session['dones'][i],
-                                    session['states'][i + 1]])
+    def add_to_memory(self, step):
+        self.memory.append(step)
 
-    def fit(self, sessions):
-        self.add_to_memory(sessions)
+    def fit(self, step):
+        self.add_to_memory(step)
 
         if len(self.memory) >= self.batch_size:
-            for _ in range(self.learning_n_per_fit):
-                batch = random.sample(self.memory, self.batch_size)
-                states, actions, rewards, dones, next_states = map(torch.FloatTensor, zip(*batch))
-                states.requires_grad = True
-                rewards = rewards.reshape(self.batch_size, 1)
-                dones = dones.reshape(self.batch_size, 1)
+            batch = random.sample(self.memory, self.batch_size)
+            states, actions, rewards, dones, next_states = map(torch.FloatTensor, zip(*batch))
+            states.requires_grad = True
+            rewards = rewards.reshape(self.batch_size, 1)
+            dones = dones.reshape(self.batch_size, 1)
 
-                target = rewards + (1 - dones) * self.gamma * self.q_target.v_model(next_states).detach()
-                inpt = self.q_model(states, actions)
-                loss = self.loss(inpt, target)
-                self.opt.zero_grad()
-                loss.backward()
-                self.opt.step()
-                self.update_targets(self.q_target, self.q_model)
+            target = rewards + (1 - dones) * self.gamma * self.q_target.v_model(next_states).detach()
+            inpt = self.q_model(states, actions)
+            loss = self.loss(inpt, target)
+            self.opt.zero_grad()
+            loss.backward()
+            self.opt.step()
+            self.update_targets(self.q_target, self.q_model)
