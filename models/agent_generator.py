@@ -31,21 +31,21 @@ class AgentGenerator:
         return NAF(self.action_min, self.action_max, q_model, noise,
                    batch_size=128, gamma=1, tau=1e-3, q_model_lr=self.lr)
 
-    def generate_naf(self):
+    def _generate_naf(self):
         mu_model = Seq_Network([self.state_dim, 256, 128, self.action_dim], nn.ReLU())
         v_model = Seq_Network([self.state_dim, 256, 128, 1], nn.ReLU())
         p_model = Seq_Network([self.state_dim, 256, self.action_dim ** 2], nn.ReLU())
         q_model = QModel(self.action_dim, self.action_min, self.action_max, mu_model, p_model, v_model, self.dt)
         return self._naf_(q_model)
 
-    def generate_b_naf(self):
+    def _generate_b_naf(self):
         nu_model = Seq_Network([self.state_dim, 256, 128, self.action_dim], nn.ReLU())
         v_model = Seq_Network([self.state_dim, 256, 128, 1], nn.ReLU())
         p_model = Seq_Network([self.state_dim, 256, self.action_dim ** 2], nn.ReLU())
         q_model = QModel_Bounded(self.action_dim, self.action_min, self.action_max, nu_model, v_model, p_model, self.dt)
         return self._naf_(q_model)
 
-    def generate__b_naf_reward_based(self):
+    def _generate__b_naf_reward_based(self):
         nu_model = Seq_Network([self.state_dim, 256, 128, self.action_dim], nn.ReLU())
         v_model = Seq_Network([self.state_dim, 256, 128, 1], nn.ReLU())
         q_model = QModel_Bounded_RewardBased(self.action_dim, self.action_min, self.action_max, nu_model,
@@ -53,7 +53,7 @@ class AgentGenerator:
                                              self.beta, self.dt)
         return self._naf_(q_model)
 
-    def generate_b_naf_gradient_based(self):
+    def _generate_b_naf_gradient_based(self):
         v_model = Seq_Network([self.state_dim, 256, 128, 1], nn.ReLU())
         q_model = QModel_Bounded_GradientBased(self.action_dim, self.action_min, self.action_max, v_model, r=self.r,
                                                g=self.g, dt=self.dt)
@@ -79,3 +79,13 @@ class AgentGenerator:
         model.gamma = state_dict['gamma']
         model.batch_size = state_dict['batch_size']
         return model
+
+    def generate(self, model_type):
+        if model_type == 'naf':
+            return self._generate_naf()
+        elif model_type == 'bnaf':
+            return self._generate_b_naf()
+        elif model_type == 'rb-bnaf':
+            return self._generate__b_naf_reward_based()
+        elif model_type == 'gb-bnaf':
+            return self._generate_b_naf_gradient_based()
