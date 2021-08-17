@@ -44,10 +44,12 @@ class CentralizedNAF:
         }, path)
 
     def train(self):
-        self.noise.threshold = 1
+        self.u_noise.threshold = 1
+        self.v_noise.threshold = 1
 
     def eval(self):
-        self.noise.threshold = 0
+        self.u_noise.threshold = 0
+        self.v_noise.threshold = 0
 
     def get_u_action(self, state):
         state = torch.FloatTensor(state)
