@@ -3,11 +3,19 @@ import json
 import os
 
 import matplotlib.pyplot as plt
+import torch
+import random
 import numpy as np
 
 from environments.enviroment_generator import generate_env
 from models.agent_evaluation_module import AgentEvaluationModule
 from models.agent_generator import AgentGenerator
+
+def configure_random_seed(seed):
+    if seed:
+        torch.manual_seed(0)
+        random.seed(0)
+        np.random.seed(0)
 
 
 def plot_reward(epoch_num, rewards_array, save_plot_path=None):
@@ -36,6 +44,8 @@ args = parser.parse_args()
 with open(args.config) as json_config_file:
     config = json.load(json_config_file)
 train_settings = config['train_cfg']
+configure_random_seed(train_settings.get('random_seed'))
+
 env = generate_env(config['environment'])
 
 agent_generator = AgentGenerator(env, train_cfg=config['train_cfg'], model_cfg=config['model'])

@@ -2,7 +2,7 @@
   "environment": {
     "env_name": "dubins-car",
     "params": {
-      "dt": 0.01
+      "dt": 0.5
     }
   },
   "model": {
@@ -10,9 +10,10 @@
     "lr": 0.001
   },
   "train_cfg": {
-    "epoch_num": 100,
+    "epoch_num": 1000,
     "batch_size": 128,
     "save_model_path": "./model",
-    "save_plot_path": "./plot"
+    "save_plot_path": "./plot",
+    "random_seed": 2021
   }
 }
