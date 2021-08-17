@@ -10,7 +10,7 @@ from models.sequential_network import Seq_Network
 
 
 class AgentGenerator:
-    def __init__(self, env, train_cfg, model_cfg):
+    def __init__(self, env, train_cfg):
         self.dt = env.dt
         self.g = env.g
         self.epoch_num = train_cfg['epoch_num']
@@ -21,55 +21,59 @@ class AgentGenerator:
         self.action_min = env.action_min
         self.beta = env.beta
         self.r = env.r
-        self.lr = model_cfg.get('lr', 1e-3)
-        self.gamma = model_cfg.get('gamma', 1)
-        self.model_type = model_cfg['model_name']
+
         self.noise_min = 1e-3
 
-    def _naf_(self, q_model):
+    def _naf_(self, q_model, model_cfg):
+        if model_cfg:
+            lr = model_cfg.get('lr', 1e-3)
+            gamma = model_cfg.get('gamma', 1)
+        else:
+            lr = 1e-3
+            gamma = 1
         noise = OUNoise(self.action_dim, threshold_min=self.noise_min,
                         threshold_decrease=self.noise_min ** (1 / self.epoch_num))
         return NAF(self.action_min, self.action_max, q_model, noise,
-                   batch_size=self.batch_size, gamma=self.gamma, tau=1e-3, q_model_lr=self.lr)
+                   batch_size=self.batch_size, gamma=gamma, tau=1e-3, q_model_lr=lr)
 
-    def _generate_naf(self):
+    def _generate_naf(self, model_cfg):
         mu_model = Seq_Network([self.state_dim, 256, 128, self.action_dim], nn.ReLU())
         v_model = Seq_Network([self.state_dim, 256, 128, 1], nn.ReLU())
         p_model = Seq_Network([self.state_dim, 256, self.action_dim ** 2], nn.ReLU())
         q_model = QModel(self.action_dim, self.action_min, self.action_max, mu_model, p_model, v_model, self.dt)
-        return self._naf_(q_model)
+        return self._naf_(q_model, model_cfg)
 
-    def _generate_b_naf(self):
+    def _generate_b_naf(self, model_cfg):
         nu_model = Seq_Network([self.state_dim, 256, 128, self.action_dim], nn.ReLU())
         v_model = Seq_Network([self.state_dim, 256, 128, 1], nn.ReLU())
         p_model = Seq_Network([self.state_dim, 256, self.action_dim ** 2], nn.ReLU())
         q_model = QModel_Bounded(self.action_dim, self.action_min, self.action_max, nu_model, v_model, p_model, self.dt)
-        return self._naf_(q_model)
+        return self._naf_(q_model, model_cfg)
 
-    def _generate__b_naf_reward_based(self):
+    def _generate__b_naf_reward_based(self, model_cfg):
         nu_model = Seq_Network([self.state_dim, 256, 128, self.action_dim], nn.ReLU())
         v_model = Seq_Network([self.state_dim, 256, 128, 1], nn.ReLU())
         q_model = QModel_Bounded_RewardBased(self.action_dim, self.action_min, self.action_max, nu_model,
                                              v_model,
                                              self.beta, self.dt)
-        return self._naf_(q_model)
+        return self._naf_(q_model, model_cfg)
 
-    def _generate_b_naf_gradient_based(self):
+    def _generate_b_naf_gradient_based(self, model_cfg):
         v_model = Seq_Network([self.state_dim, 256, 128, 1], nn.ReLU())
         q_model = QModel_Bounded_GradientBased(self.action_dim, self.action_min, self.action_max, v_model, r=self.r,
                                                g=self.g, dt=self.dt)
-        return self._naf_(q_model)
+        return self._naf_(q_model, model_cfg)
 
-    def load(self, path):
+    def load(self, path, model_cfg=None):
         state_dict = torch.load(path)
         if state_dict['q-model']['model-name'] == 'q-model':
-            model = self.generate_naf()
+            model = self._generate_naf(model_cfg)
         elif state_dict['q-model']['model-name'] == 'q-model-bounded':
-            model = self.generate_b_naf()
+            model = self._generate_b_naf(model_cfg)
         elif state_dict['q-model']['model-name'] == 'q-model-bounded-reward-based':
-            model = self.generate__b_naf_reward_based()
+            model = self._generate__b_naf_reward_based(model_cfg)
         else:
-            model = self.generate_b_naf_gradient_based()
+            model = self._generate_b_naf_gradient_based(model_cfg)
 
         model.q_model.load_state_dict(state_dict['q-model'])
         model.noise = load_noise(state_dict['noise'])
@@ -81,12 +85,13 @@ class AgentGenerator:
         model.batch_size = state_dict['batch_size']
         return model
 
-    def generate(self):
-        if self.model_type == 'naf':
-            return self._generate_naf()
-        elif self.model_type == 'bnaf':
-            return self._generate_b_naf()
-        elif self.model_type == 'rb-bnaf':
-            return self._generate__b_naf_reward_based()
-        elif self.model_type == 'gb-bnaf':
-            return self._generate_b_naf_gradient_based()
+    def generate(self, model_cfg):
+        model_name = model_cfg['model_name']
+        if model_name == 'naf':
+            return self._generate_naf(model_cfg)
+        elif model_name == 'bnaf':
+            return self._generate_b_naf(model_cfg)
+        elif model_name == 'rb-bnaf':
+            return self._generate__b_naf_reward_based(model_cfg)
+        elif model_name == 'gb-bnaf':
+            return self._generate_b_naf_gradient_based(model_cfg)

@@ -8,7 +8,7 @@ import random
 import numpy as np
 
 from environments.enviroment_generator import generate_env
-from models.agent_evaluation_module import AgentEvaluationModule
+from models.agent_evaluation_module import SingleAgentEvaluationModule, TwoAgentsEvaluationModule
 from models.agent_generator import AgentGenerator
 
 
@@ -49,16 +49,21 @@ configure_random_seed(train_settings.get('random_seed'))
 
 env = generate_env(config['environment'])
 
-agent_generator = AgentGenerator(env, train_cfg=train_settings, model_cfg=config['model'])
+agent_generator = AgentGenerator(env, train_cfg=train_settings)
 
-agent = agent_generator.generate()
-training_module = AgentEvaluationModule(env)
-rewards = training_module.train_agent(agent, train_settings['epoch_num'])
+u_agent = agent_generator.generate(model_cfg=config['u-model'])
+v_agent = agent_generator.generate(model_cfg=config['v-model'])
+training_module = TwoAgentsEvaluationModule(env)
+rewards = training_module.train_agent(u_agent, v_agent, train_settings)
 plot_reward(train_settings['epoch_num'], rewards, train_settings.get('save_plot_path'))
 
-save_model_path = train_settings.get('save_model_path')
-if save_model_path:
-    agent.save(save_model_path)
+save_u_model_path = train_settings.get('save_u_model_path')
+if save_u_model_path:
+    u_agent.save(save_u_model_path)
+
+save_v_model_path = train_settings.get('save_v_model_path')
+if save_v_model_path:
+    v_agent.save(save_v_model_path)
 
 save_rewards_path = train_settings.get('save_rewards_path')
 if save_rewards_path:

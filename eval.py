@@ -4,7 +4,7 @@ from environments.dubinsCar.dubins_car_env import DubinsCar
 from environments.pendulum.pendulum_env import Pendulum
 from environments.simpleMotions.simple_motions_env import SimpleMotions
 from environments.vanDerPol.van_der_pol_env import VanDerPol
-from models.agent_evaluation_module import AgentEvaluationModule
+from models.agent_evaluation_module import SingleAgentEvaluationModule
 from models.agent_generator import AgentGenerator
 
 parser = argparse.ArgumentParser()
@@ -25,6 +25,6 @@ else:
 agent = AgentGenerator(env).load(args.model)
 env.set_dt(agent.q_model.dt)
 
-evaluation_module = AgentEvaluationModule(env)
+evaluation_module = SingleAgentEvaluationModule(env)
 
 evaluation_module.eval_agent(agent)
