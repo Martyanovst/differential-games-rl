@@ -33,24 +33,22 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--config', type=file_path, required=True)
 args = parser.parse_args()
 
-with open('args.config') as json_config_file:
+with open(args.config) as json_config_file:
     config = json.load(json_config_file)
+train_settings = config['train_cfg']
+env = generate_env(config['environment'])
 
-env = generate_env(config.enviroment)
+agent_generator = AgentGenerator(env, train_cfg=config['train_cfg'], model_cfg=config['model'])
 
-agent_generator = AgentGenerator(env,
-                                 batch_size=config.batch,
-                                 epoch_num=config.epoch_num,
-                                 gamma=config.gamma,
-                                 lr=config.lr)
-
-agent = agent_generator.generate(config.model)
+agent = agent_generator.generate()
 training_module = AgentEvaluationModule(env)
-rewards = training_module.train_agent(agent, config.epoch_num)
-plot_reward(config.epoch_num, rewards, config.get('save_plot_path'))
+rewards = training_module.train_agent(agent, train_settings['epoch_num'])
+plot_reward(train_settings['epoch_num'], rewards, config.get('save_plot_path'))
 
-if config.save_model_path:
-    agent.save(config.save_model_path)
+save_model_path = train_settings.get('save_model_path')
+if save_model_path:
+    agent.save(save_model_path)
 
-if config.save_rewards_path:
-    np.save(config.save_rewards_path, rewards)
+save_rewards_path = train_settings.get('save_rewards_path')
+if save_rewards_path:
+    np.save(save_rewards_path, rewards)

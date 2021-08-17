@@ -1,15 +1,17 @@
 {
   "environment": {
     "env_name": "dubins-car",
-    "dt": 0.01
+    "params": {
+      "dt": 0.01
+    }
   },
   "model": {
     "model_name": "naf",
-    "lr": 0.001,
-    "batch": 128
+    "lr": 0.001
   },
   "train_cfg": {
     "epoch_num": 100,
+    "batch_size": 128,
     "save_model_path": "./model",
     "save_plot_path": "./plot"
   }

@@ -6,12 +6,13 @@ from environments.vanDerPol.van_der_pol_env import VanDerPol
 
 
 def generate_env(config):
-    if config.env_name == 'simple-motions':
-        return SimpleMotions(**config.env_params)
-    elif config.env_name == 'van-der-pol':
-        return VanDerPol(**config.env_params)
-    elif config.env_name == 'pendulum':
-        return Pendulum(**config.env_params)
-    elif config.env_name == 'dubins-car':
-        return DubinsCar(**config.env_params)
+    env_name = config['env_name']
+    if env_name == 'simple-motions':
+        return SimpleMotions(**config['params'])
+    elif env_name == 'van-der-pol':
+        return VanDerPol(**config['params'])
+    elif env_name == 'pendulum':
+        return Pendulum(**config['params'])
+    elif env_name == 'dubins-car':
+        return DubinsCar(**config['params'])
 

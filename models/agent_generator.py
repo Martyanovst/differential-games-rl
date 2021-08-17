@@ -10,26 +10,27 @@ from models.sequential_network import Seq_Network
 
 
 class AgentGenerator:
-    def __init__(self, env, batch_size=128, epoch_num=100, gamma=1, lr=1e-3):
+    def __init__(self, env, train_cfg, model_cfg):
         self.dt = env.dt
         self.g = env.g
-        self.epoch_num = epoch_num
-        self.batch_size = batch_size
+        self.epoch_num = train_cfg['epoch_num']
+        self.batch_size = train_cfg['batch_size']
         self.state_dim = env.state_dim
         self.action_dim = env.action_dim
         self.action_max = env.action_max
         self.action_min = env.action_min
         self.beta = env.beta
         self.r = env.r
-        self.lr = lr
-        self.gamma = gamma
+        self.lr = model_cfg.get('lr', 1e-3)
+        self.gamma = model_cfg.get('gamma', 1)
+        self.model_type = model_cfg['model_name']
         self.noise_min = 1e-3
 
     def _naf_(self, q_model):
         noise = OUNoise(self.action_dim, threshold_min=self.noise_min,
                         threshold_decrease=self.noise_min ** (1 / self.epoch_num))
         return NAF(self.action_min, self.action_max, q_model, noise,
-                   batch_size=128, gamma=1, tau=1e-3, q_model_lr=self.lr)
+                   batch_size=self.batch_size, gamma=self.gamma, tau=1e-3, q_model_lr=self.lr)
 
     def _generate_naf(self):
         mu_model = Seq_Network([self.state_dim, 256, 128, self.action_dim], nn.ReLU())
@@ -80,12 +81,12 @@ class AgentGenerator:
         model.batch_size = state_dict['batch_size']
         return model
 
-    def generate(self, model_type):
-        if model_type == 'naf':
+    def generate(self):
+        if self.model_type == 'naf':
             return self._generate_naf()
-        elif model_type == 'bnaf':
+        elif self.model_type == 'bnaf':
             return self._generate_b_naf()
-        elif model_type == 'rb-bnaf':
+        elif self.model_type == 'rb-bnaf':
             return self._generate__b_naf_reward_based()
-        elif model_type == 'gb-bnaf':
+        elif self.model_type == 'gb-bnaf':
             return self._generate_b_naf_gradient_based()
