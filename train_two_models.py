@@ -1,14 +1,14 @@
 import argparse
 import json
 import os
+import random
 
 import matplotlib.pyplot as plt
-import torch
-import random
 import numpy as np
+import torch
 
 from environments.enviroment_generator import generate_env
-from models.agent_evaluation_module import SingleAgentEvaluationModule, TwoAgentsEvaluationModule
+from models.agent_evaluation_module import TwoAgentsEvaluationModule
 from models.agent_generator import AgentGenerator
 
 
