@@ -11,6 +11,7 @@ from environments.enviroment_generator import generate_env
 from models.agent_evaluation_module import AgentEvaluationModule
 from models.agent_generator import AgentGenerator
 
+
 def configure_random_seed(seed):
     if seed:
         torch.manual_seed(0)
@@ -48,12 +49,12 @@ configure_random_seed(train_settings.get('random_seed'))
 
 env = generate_env(config['environment'])
 
-agent_generator = AgentGenerator(env, train_cfg=config['train_cfg'], model_cfg=config['model'])
+agent_generator = AgentGenerator(env, train_cfg=train_settings, model_cfg=config['model'])
 
 agent = agent_generator.generate()
 training_module = AgentEvaluationModule(env)
 rewards = training_module.train_agent(agent, train_settings['epoch_num'])
-plot_reward(train_settings['epoch_num'], rewards, config.get('save_plot_path'))
+plot_reward(train_settings['epoch_num'], rewards, train_settings.get('save_plot_path'))
 
 save_model_path = train_settings.get('save_model_path')
 if save_model_path:

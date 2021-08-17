@@ -10,7 +10,7 @@
     "lr": 0.001
   },
   "train_cfg": {
-    "epoch_num": 1000,
+    "epoch_num": 10,
     "batch_size": 128,
     "save_model_path": "./model",
     "save_plot_path": "./plot",
