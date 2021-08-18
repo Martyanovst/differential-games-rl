@@ -1,3 +1,4 @@
+from environments.cartpole.cartpole_env import CartPole
 from environments.dubinsCar.dubins_car_env import DubinsCar
 from environments.pendulum.pendulum_env import Pendulum
 from environments.simpleMotions.simple_motions_env import SimpleMotions
@@ -15,4 +16,6 @@ def generate_env(config):
         return Pendulum(**config['params'])
     elif env_name == 'dubins-car':
         return DubinsCar(**config['params'])
+    elif env_name == 'cartpole':
+        return CartPole(**config['params'])
 

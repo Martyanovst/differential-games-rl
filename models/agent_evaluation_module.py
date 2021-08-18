@@ -37,10 +37,11 @@ class SingleAgentEvaluationModule:
 
     def train_agent(self, agent, train_cfg):
         epoch_num = train_cfg['epoch_num']
+        render = train_cfg.get('render', False)
         self.__reset__(epoch_num)
         agent.train()
         for epoch in range(epoch_num):
-            rewards = self._evaluate_(agent, agent_learning=True, render=False)
+            rewards = self._evaluate_(agent, agent_learning=True, render=render)
             total_reward = np.sum(rewards)
             self.__callback__(agent, epoch, total_reward)
 
