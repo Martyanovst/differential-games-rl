@@ -53,10 +53,10 @@ class CartPole(gym.Env):
 
     metadata = {"render.modes": ["human", "rgb_array"], "video.frames_per_second": 50}
 
-    def __init__(self, dt=0.2, terminal_time=5):
+    def __init__(self, dt=0.2, terminal_time=10):
         self.gravity = 9.8
         self.masscart = 1.0
-        self.masspole = 0.05
+        self.masspole = 0.1
         self.g = 0
         self.r = 0
         self.beta = 0
@@ -131,16 +131,16 @@ class CartPole(gym.Env):
 
         reward = 0
         t += self.dt
-        x = np.clip(x, -self.x_threshold, self.x_threshold)
-        if x < -self.x_threshold:
-            x = -self.x_threshold
-            x_dot = 0
-        elif x > self.x_threshold:
-            x = self.x_threshold
-            x_dot = 0
+        # x = np.clip(x, -self.x_threshold, self.x_threshold)
+        # if x < -self.x_threshold:
+        #     x = -self.x_threshold
+        #     x_dot = 0
+        # elif x > self.x_threshold:
+        #     x = self.x_threshold
+        #     x_dot = 0
         self.state = (t, x, x_dot, theta, theta_dot)
-        if abs(x) >= self.x_threshold:
-            reward -= 100
+        # if abs(x) >= self.x_threshold:
+        #     reward -= 100
         # done = bool(
         #     x < -self.x_threshold
         #     or x > self.x_threshold
@@ -148,9 +148,10 @@ class CartPole(gym.Env):
         #     or theta > self.theta_threshold_radians
         # )
         done = t >= self.terminal_time
-        reward += -0.001 * np.abs(force)
+        reward += -0.1 * np.abs(force)
         if done:
-            reward += -np.abs(theta)
+            # reward += -np.abs(theta) - 0.1 * np.abs(theta_dot) - 0.1 * np.abs(x_dot) - np.abs(x)
+            reward -= np.abs(x) + 0.1 * np.abs(x_dot) + np.abs(theta) + 0.1 * np.abs(theta_dot)
 
         return np.array(self.state), reward, done, {}
 

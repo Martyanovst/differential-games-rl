@@ -7,14 +7,12 @@
   },
   "model": {
     "model_name": "naf",
-    "lr": 0.001
+    "lr": 0.0005
   },
   "train_cfg": {
     "epoch_num": 1000,
     "batch_size": 128,
     "render": true,
-    "save_model_path": "./model",
-    "save_plot_path": "./plot",
     "random_seed": 2021
   }
 }
