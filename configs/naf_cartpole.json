@@ -2,7 +2,7 @@
   "environment": {
     "env_name": "cartpole",
     "params": {
-      "dt": 0.2
+      "dt": 0.1
     }
   },
   "model": {
@@ -10,7 +10,7 @@
     "lr": 0.0005
   },
   "train_cfg": {
-    "epoch_num": 1000,
+    "epoch_num": 1500,
     "batch_size": 128,
     "render": true,
     "random_seed": 2021
