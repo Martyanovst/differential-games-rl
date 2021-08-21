@@ -1,4 +1,7 @@
+import time
+
 import numpy as np
+import time
 
 
 class SingleAgentEvaluationModule:
@@ -11,8 +14,8 @@ class SingleAgentEvaluationModule:
         self.rewards[epoch] = total_reward
         mean_reward = np.mean(self.rewards[max(0, epoch - 25):epoch + 1])
         self.mean_rewards[epoch] = mean_reward
-        print("epoch=%.0f, noise threshold=%.3f, total reward=%.3f, mean reward=%.3f" % (
-            epoch, agent.noise.threshold, total_reward, mean_reward))
+        print("epoch=%.0f, noise threshold=%.3f, total reward=%.3f, mean reward=%.3f, " % (
+            epoch, agent.noise.threshold, total_reward, mean_reward) + self.env.get_state_obs())
 
     def __reset__(self, epoch_num):
         self.rewards = np.zeros(epoch_num)
@@ -25,6 +28,7 @@ class SingleAgentEvaluationModule:
         while not done:
             if render:
                 self.env.render()
+            time.sleep(0.05)
             action = agent.get_action(state)
             next_state, reward, done, _ = self.env.step(action)
             if agent_learning:
@@ -42,6 +46,7 @@ class SingleAgentEvaluationModule:
         agent.train()
         for epoch in range(epoch_num):
             rewards = self._evaluate_(agent, agent_learning=True, render=render)
+            # time.sleep(1)
             total_reward = np.sum(rewards)
             self.__callback__(agent, epoch, total_reward)
 

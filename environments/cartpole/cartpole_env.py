@@ -9,6 +9,7 @@ import gym
 from gym import spaces, logger
 from gym.utils import seeding
 import numpy as np
+import time
 
 
 class CartPole(gym.Env):
@@ -63,14 +64,14 @@ class CartPole(gym.Env):
         self.total_mass = self.masspole + self.masscart
         self.length = 0.5  # actually half the pole's length
         self.polemass_length = self.masspole * self.length
-        self.action_max = np.array([2])
-        self.action_min = np.array([-2])
+        self.action_max = np.array([10])
+        self.action_min = np.array([-10])
         self.dt = dt  # seconds between state updates
         self.kinematics_integrator = "euler"
         self.terminal_time = terminal_time
         # Angle at which to fail the episode
         self.theta_threshold_radians = 12 * 2 * math.pi / 360
-        self.x_threshold = 4.8
+        self.x_threshold = 2.4
 
         # Angle limit set to 2 * theta_threshold_radians so failing observation
         # is still within bounds.
@@ -151,15 +152,23 @@ class CartPole(gym.Env):
         reward -= 0.01 * np.abs(force) * self.dt
         if done:
             # reward += -np.abs(theta) - 0.1 * np.abs(theta_dot) - 0.1 * np.abs(x_dot) - np.abs(x)
-            reward -= 5 * abs(theta) + 0.1 * abs(x) + 0.001 * abs(x_dot) + 0.001 * abs(theta_dot)
+            reward -= (abs(theta) + abs(x) + 0.1 * abs(x_dot) + 0.1 * abs(theta_dot))
 
         return np.array(self.state), reward, done, {}
+
+    def set_dt(self, dt):
+        self.dt = dt
 
     def reset(self):
         self.state = np.array([0, 0, 0, 180 * 2 * math.pi / 360, 0])
         # self.state = self.np_random.uniform(low=-0.05, high=0.05, size=(4,))
         self.steps_beyond_done = None
         return np.array(self.state)
+
+    def get_state_obs(self):
+        t, x, x_dot, theta, theta_dot = self.state
+        return "x=%.3f, angle=%.3f, x_dot=%.3f, angle_dot=%.3f" % (
+            x, theta, x_dot, theta_dot)
 
     def render(self, mode="human"):
         screen_width = 600

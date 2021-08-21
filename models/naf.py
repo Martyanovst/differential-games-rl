@@ -39,9 +39,11 @@ class NAF:
 
     def train(self):
         self.noise.threshold = 1
+        self.q_model.train()
 
     def eval(self):
         self.noise.threshold = 0
+        self.q_model.eval()
 
     def get_action(self, state):
         state = torch.FloatTensor(state)

@@ -1,28 +1,43 @@
 import argparse
+import json
+import os
+import random
+
+import numpy as np
+import torch
 
 from environments.dubinsCar.dubins_car_env import DubinsCar
+from environments.enviroment_generator import generate_env
 from environments.pendulum.pendulum_env import Pendulum
 from environments.simpleMotions.simple_motions_env import SimpleMotions
 from environments.vanDerPol.van_der_pol_env import VanDerPol
 from models.agent_evaluation_module import SingleAgentEvaluationModule
 from models.agent_generator import AgentGenerator
 
+def configure_random_seed(seed):
+    if seed:
+        torch.manual_seed(0)
+        random.seed(0)
+        np.random.seed(0)
+
+def file_path(string):
+    if os.path.isfile(string):
+        return string
+    else:
+        raise FileNotFoundError(string)
+
 parser = argparse.ArgumentParser()
-parser.add_argument('--env', type=str, choices=('simple-motions', 'van-der-pol', 'pendulum', 'dubins-car'),
-                    required=True)
-parser.add_argument('--model', type=str, required=True)
+parser.add_argument('--config', type=file_path, required=True)
 args = parser.parse_args()
 
-if args.env == 'simple-motions':
-    env = SimpleMotions()
-elif args.env == 'van-der-pol':
-    env = VanDerPol()
-elif args.env == 'pendulum':
-    env = Pendulum()
-else:
-    env = DubinsCar()
+with open(args.config) as json_config_file:
+    config = json.load(json_config_file)
 
-agent = AgentGenerator(env).load(args.model)
+configure_random_seed(config.get('random_seed'))
+
+env = generate_env(config['environment'])
+
+agent = AgentGenerator(env).load(config['checkpoint'])
 env.set_dt(agent.q_model.dt)
 
 evaluation_module = SingleAgentEvaluationModule(env)

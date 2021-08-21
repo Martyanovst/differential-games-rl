@@ -10,11 +10,15 @@ from models.sequential_network import Seq_Network
 
 
 class AgentGenerator:
-    def __init__(self, env, train_cfg):
+    def __init__(self, env, train_cfg=None):
         self.dt = env.dt
         self.g = env.g
-        self.epoch_num = train_cfg['epoch_num']
-        self.batch_size = train_cfg['batch_size']
+        if train_cfg:
+            self.epoch_num = train_cfg['epoch_num']
+            self.batch_size = train_cfg['batch_size']
+        else:
+            self.epoch_num = 1
+            self.batch_size = 128
         self.state_dim = env.state_dim
         self.action_dim = env.action_dim
         self.action_max = env.action_max
@@ -22,7 +26,7 @@ class AgentGenerator:
         self.beta = env.beta
         self.r = env.r
 
-        self.noise_min = 1e-3
+        self.noise_min = 1e-4
 
     def _naf_(self, q_model, model_cfg):
         if model_cfg:

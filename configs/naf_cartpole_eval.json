@@ -1,0 +1,10 @@
+{
+  "environment": {
+    "env_name": "cartpole",
+    "params": {
+      "dt": 0.1
+    }
+  },
+  "checkpoint": "./model",
+  "random_seed": 2021
+}
