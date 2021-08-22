@@ -8,7 +8,7 @@
   "model": {
     "model_name": "naf",
     "lr": 0.001,
-    "gamma": 1
+    "gamma": 0.999
   },
   "train_cfg": {
     "epoch_num": 2000,

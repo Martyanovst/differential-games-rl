@@ -28,7 +28,7 @@ class SingleAgentEvaluationModule:
         while not done:
             if render:
                 self.env.render()
-            time.sleep(0.05)
+            # time.sleep(0.05)
             action = agent.get_action(state)
             next_state, reward, done, _ = self.env.step(action)
             if agent_learning:
