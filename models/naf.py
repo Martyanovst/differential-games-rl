@@ -38,7 +38,7 @@ class NAF:
         }, path)
 
     def train(self):
-        self.noise.threshold = 1
+        self.noise.threshold = 10
         self.q_model.train()
 
     def eval(self):

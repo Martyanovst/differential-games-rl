@@ -44,8 +44,8 @@ class CentralizedNAF:
         }, path)
 
     def train(self):
-        self.u_noise.threshold = 1
-        self.v_noise.threshold = 1
+        self.u_noise.threshold = 10
+        self.v_noise.threshold = 10
 
     def eval(self):
         self.u_noise.threshold = 0

@@ -19,7 +19,7 @@ class OUNoise:
         self.theta = theta
         self.sigma = sigma
         self.state = np.ones(self.action_dimension) * self.mu
-        self.threshold = 1
+        self.threshold = 3
         self.threshold_min = threshold_min
         self.threshold_decrease = threshold_decrease
         self.reset()

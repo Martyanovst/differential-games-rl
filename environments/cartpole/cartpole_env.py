@@ -59,8 +59,8 @@ class CartPole(gym.Env):
         self.masscart = 1.0
         self.masspole = 0.1
         self.g = 0
-        self.r = 0
-        self.beta = 0
+        self.r = 0.1
+        self.beta = 0.01
         self.total_mass = self.masspole + self.masscart
         self.length = 0.5  # actually half the pole's length
         self.polemass_length = self.masspole * self.length
@@ -134,9 +134,9 @@ class CartPole(gym.Env):
         t += self.dt
         self.state = (t, x, x_dot, theta, theta_dot)
         done = t >= self.terminal_time
-        reward -= 0.01 * np.abs(force) * self.dt
+        reward -= self.r * np.abs(force) * self.dt
         if done:
-            reward -= (abs(theta) + abs(x) + abs(x_dot) + abs(theta_dot))
+            reward -= (1 * (abs(theta) + abs(x)) + abs(x_dot) + abs(theta_dot))
 
         return np.array(self.state), reward, done, {}
 
