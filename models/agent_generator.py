@@ -54,7 +54,7 @@ class AgentGenerator:
         q_model = QModel_Bounded(self.action_dim, self.action_min, self.action_max, nu_model, v_model, p_model, self.dt)
         return self._naf_(q_model, model_cfg)
 
-    def _generate__b_naf_reward_based(self, model_cfg):
+    def _generate_b_naf_reward_based(self, model_cfg):
         nu_model = Seq_Network([self.state_dim, 256, 128, self.action_dim], nn.ReLU())
         v_model = Seq_Network([self.state_dim, 256, 128, 1], nn.ReLU())
         q_model = QModel_Bounded_RewardBased(self.action_dim, self.action_min, self.action_max, nu_model,
@@ -75,7 +75,7 @@ class AgentGenerator:
         elif state_dict['q-model']['model-name'] == 'q-model-bounded':
             model = self._generate_b_naf(model_cfg)
         elif state_dict['q-model']['model-name'] == 'q-model-bounded-reward-based':
-            model = self._generate__b_naf_reward_based(model_cfg)
+            model = self._generate_b_naf_reward_based(model_cfg)
         else:
             model = self._generate_b_naf_gradient_based(model_cfg)
 
@@ -96,6 +96,6 @@ class AgentGenerator:
         elif model_name == 'bnaf':
             return self._generate_b_naf(model_cfg)
         elif model_name == 'rb-bnaf':
-            return self._generate__b_naf_reward_based(model_cfg)
+            return self._generate_b_naf_reward_based(model_cfg)
         elif model_name == 'gb-bnaf':
             return self._generate_b_naf_gradient_based(model_cfg)

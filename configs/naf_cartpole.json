@@ -6,7 +6,7 @@
     }
   },
   "model": {
-    "model_name": "bnaf",
+    "model_name": "rb-bnaf",
     "lr": 0.001,
     "gamma": 1
   },
@@ -15,8 +15,8 @@
     "batch_size": 256,
     "render": true,
     "random_seed": 2021,
-    "save_model_path": "./b_model",
-    "save_plot_path": "./b_plot",
-    "save_reward_path": "./b_reward"
+    "save_model_path": "./checkpoints/rb-bnaf",
+    "save_plot_path": "./graphics/rb-bnaf",
+    "save_rewards_path": "./rewards/rb-bnaf"
   }
 }
