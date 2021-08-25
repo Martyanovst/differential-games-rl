@@ -6,6 +6,7 @@ permalink: https://perma.cc/C9ZM-652R
 
 import math
 import gym
+import torch
 from gym import spaces, logger
 from gym.utils import seeding
 import numpy as np
@@ -58,7 +59,6 @@ class CartPole(gym.Env):
         self.gravity = 9.8
         self.masscart = 1.0
         self.masspole = 0.1
-        self.g = 0
         self.r = 0.1
         self.beta = 0.01
         self.total_mass = self.masspole + self.masscart
@@ -94,6 +94,14 @@ class CartPole(gym.Env):
         self.state = None
 
         self.steps_beyond_done = None
+
+    def g(self, state):
+        t, x, x_dot, theta, theta_dot = state
+        x_acc = torch.ones(x.shape[0]) / self.total_mass
+        theta_acc = -(torch.cos(theta) / self.total_mass) * self.length * (
+                    4.0 / 3.0 - (self.masspole * torch.cos(theta) ** 2) / self.total_mass)
+        a = torch.stack([torch.zeros(x.shape[0]), x_acc, torch.zeros(theta.shape[0]), theta_acc])
+        return a
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
