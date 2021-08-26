@@ -59,7 +59,7 @@ class CartPole(gym.Env):
         self.gravity = 9.8
         self.masscart = 1.0
         self.masspole = 0.1
-        self.r = 0.1
+        self.r = 0.5
         self.beta = 0.01
         self.total_mass = self.masspole + self.masscart
         self.length = 0.5  # actually half the pole's length

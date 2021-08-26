@@ -11,9 +11,9 @@
     "gamma": 1
   },
   "train_cfg": {
-    "epoch_num": 2000,
+    "epoch_num": 1500,
     "batch_size": 256,
-    "render": true,
+    "render": false,
     "random_seed": 2021,
     "save_model_path": "./checkpoints/gb-bnaf",
     "save_plot_path": "./graphics/gb-bnaf",
