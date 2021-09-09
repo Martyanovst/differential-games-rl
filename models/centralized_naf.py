@@ -44,8 +44,8 @@ class CentralizedNAF:
         }, path)
 
     def train(self):
-        self.u_noise.threshold = 10
-        self.v_noise.threshold = 10
+        self.u_noise.threshold = 1
+        self.v_noise.threshold = 1
 
     def eval(self):
         self.u_noise.threshold = 0
@@ -57,7 +57,8 @@ class CentralizedNAF:
         mu_value = self.q_model.u_mu_model(state).detach().numpy()
         noise = self.u_noise.noise()
         action = mu_value + noise
-        action = transform_interval(action, self.u_action_min, self.u_action_max)
+        action = transform_interval(
+            action, self.u_action_min, self.u_action_max)
         return np.clip(action, self.u_action_min, self.u_action_max)
 
     def get_v_action(self, state):
@@ -66,12 +67,14 @@ class CentralizedNAF:
         mu_value = self.q_model.v_mu_model(state).detach().numpy()
         noise = self.v_noise.noise()
         action = mu_value + noise
-        action = transform_interval(action, self.v_action_min, self.v_action_max)
+        action = transform_interval(
+            action, self.v_action_min, self.v_action_max)
         return np.clip(action, self.v_action_min, self.v_action_max)
 
     def update_targets(self, target, original):
         for target_param, original_param in zip(target.parameters(), original.parameters()):
-            target_param.data.copy_((1 - self.tau) * target_param.data + self.tau * original_param.data)
+            target_param.data.copy_(
+                (1 - self.tau) * target_param.data + self.tau * original_param.data)
 
     def add_to_memory(self, step):
         self.memory.append(step)
@@ -81,12 +84,14 @@ class CentralizedNAF:
 
         if len(self.memory) >= self.batch_size:
             batch = random.sample(self.memory, self.batch_size)
-            states, u_actions, v_actions, rewards, dones, next_states = map(torch.FloatTensor, zip(*batch))
+            states, u_actions, v_actions, rewards, dones, next_states = map(
+                torch.FloatTensor, zip(*batch))
             states.requires_grad = True
             rewards = rewards.reshape(self.batch_size, 1)
             dones = dones.reshape(self.batch_size, 1)
 
-            target = rewards + (1 - dones) * self.gamma * self.q_target.v_model(next_states).detach()
+            target = rewards + (1 - dones) * self.gamma * \
+                self.q_target.v_model(next_states).detach()
             q_values = self.q_model(states, u_actions, v_actions)
             loss = self.loss(q_values, target)
             self.opt.zero_grad()

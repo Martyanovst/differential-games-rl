@@ -2,21 +2,21 @@
   "environment": {
     "env_name": "cartpole",
     "params": {
-      "dt": 0.1
+      "dt": 100
     }
   },
   "model": {
-    "model_name": "gb-bnaf",
+    "model_name": "naf",
     "lr": 0.001,
     "gamma": 1
   },
   "train_cfg": {
-    "epoch_num": 1500,
+    "epoch_num": 1000,
     "batch_size": 256,
     "render": false,
     "random_seed": 2021,
-    "save_model_path": "./checkpoints/gb-bnaf",
-    "save_plot_path": "./graphics/gb-bnaf",
-    "save_rewards_path": "./rewards/gb-bnaf"
+    "save_model_path": "./checkpoints/cartpole/naf",
+    "save_plot_path": "./graphics/cartpole/naf",
+    "save_rewards_path": "./rewards/cartpole/naf"
   }
 }

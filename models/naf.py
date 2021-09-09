@@ -38,7 +38,7 @@ class NAF:
         }, path)
 
     def train(self):
-        self.noise.threshold = 10
+        self.noise.threshold = 1
         self.q_model.train()
 
     def eval(self):
@@ -56,7 +56,8 @@ class NAF:
 
     def update_targets(self, target, original):
         for target_param, original_param in zip(target.parameters(), original.parameters()):
-            target_param.data.copy_((1 - self.tau) * target_param.data + self.tau * original_param.data)
+            target_param.data.copy_(
+                (1 - self.tau) * target_param.data + self.tau * original_param.data)
 
     def add_to_memory(self, step):
         self.memory.append(step)
@@ -66,12 +67,14 @@ class NAF:
 
         if len(self.memory) >= self.batch_size:
             batch = random.sample(self.memory, self.batch_size)
-            states, actions, rewards, dones, next_states = map(torch.FloatTensor, zip(*batch))
+            states, actions, rewards, dones, next_states = map(
+                torch.FloatTensor, zip(*batch))
             states.requires_grad = True
             rewards = rewards.reshape(self.batch_size, 1)
             dones = dones.reshape(self.batch_size, 1)
 
-            target = rewards + (1 - dones) * self.gamma * self.q_target.v_model(next_states).detach()
+            target = rewards + (1 - dones) * self.gamma * \
+                self.q_target.v_model(next_states).detach()
             q_values = self.q_model(states, actions)
             loss = self.loss(q_values, target)
             self.opt.zero_grad()
