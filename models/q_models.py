@@ -77,12 +77,22 @@ class QModel_Bounded(nn.Module):
         self.mu_model = MuModel(nu_model)
         self.v_model = v_model
         self.p_model = p_model
+        self.tril_mask = torch.tril(torch.ones(
+            action_dim, action_dim), diagonal=-1).unsqueeze(0)
+        self.diag_mask = torch.diag(torch.diag(
+            torch.ones(action_dim, action_dim))).unsqueeze(0)
 
     def forward(self, state, action):
+        L = self.p_model(state).view(-1, self.action_dim, self.action_dim)
+        L = L * self.tril_mask.expand_as(L) + torch.exp(L) * self.diag_mask.expand_as(L)
+        P = torch.bmm(L, L.transpose(2, 1))
         nu = self.nu_model(state)
         mu = transform_interval(self.mu_model(state), self.action_min, self.action_max)
-        p = self.p_model(state)
-        A = - 0.5 * torch.exp(p) * (action - mu) * (action + mu - 2 * nu)
+        action_nu = (action - nu).unsqueeze(2)
+        mu_nu = (mu - nu).unsqueeze(2)
+        # A = - 0.5 * torch.exp(p) * (action - mu) * (action + mu - 2 * nu)
+        A = -0.5 * (torch.bmm(torch.bmm(action_nu.transpose(2, 1), P),
+                              action_nu)[:, :, 0] - torch.bmm(torch.bmm(mu_nu.transpose(2, 1), P), mu_nu)[:, :, 0])
         return A + self.v_model(state)
 
     def load_state_dict(self, state_dict, **kwargs):
@@ -117,14 +127,20 @@ class QModel_Bounded_RewardBased(nn.Module):
         self.action_dim = action_dim
         self.action_min = torch.FloatTensor(action_min)
         self.action_max = torch.FloatTensor(action_max)
-
         self.nu_model = nu_model
         self.mu_model = MuModel(nu_model)
         self.v_model = v_model
         self.beta = beta
         self.dt = dt
+        self.tril_mask = torch.tril(torch.ones(
+            action_dim, action_dim), diagonal=-1).unsqueeze(0)
+        self.diag_mask = torch.diag(torch.diag(
+            torch.ones(action_dim, action_dim))).unsqueeze(0)
 
     def forward(self, state, action):
+        L = self.p_model(state).view(-1, self.action_dim, self.action_dim)
+        L = L * self.tril_mask.expand_as(L) + torch.exp(L) * self.diag_mask.expand_as(L)
+        P = torch.bmm(L, L.transpose(2, 1))
         nu = self.nu_model(state)
         mu = transform_interval(self.mu_model(state), self.action_min, self.action_max)
         A = - self.dt * self.beta * (action - mu) * (action + mu - 2 * nu)

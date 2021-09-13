@@ -26,7 +26,7 @@ class AgentGenerator:
         self.beta = env.beta
         self.r = env.r
 
-        self.noise_min = 1e-3
+        self.noise_min = 1e-4
 
     def _naf_(self, q_model, model_cfg):
         if model_cfg:
