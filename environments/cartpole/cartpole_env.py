@@ -100,8 +100,7 @@ class CartPole(gym.Env):
         x_acc = torch.ones(x.shape[0]) / self.total_mass
         theta_acc = -(torch.cos(theta) / self.total_mass) * self.length * (
                     4.0 / 3.0 - (self.masspole * torch.cos(theta) ** 2) / self.total_mass)
-        a = torch.stack([torch.zeros(x.shape[0]), x_acc, torch.zeros(theta.shape[0]), theta_acc])
-        return a
+        return torch.stack([torch.zeros(x.shape[0]), x_acc, torch.zeros(theta.shape[0]), theta_acc])
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)

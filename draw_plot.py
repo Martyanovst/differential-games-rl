@@ -3,8 +3,8 @@ import numpy as np
 
 
 def plot(model, color, label):
-    data = np.load('./rewards/' + model + '.npy')
-    plt.plot(np.arange(1500), data, color=color, label=label)
+    data = np.load('./rewards/earthOrbit/' + model + '.npy')
+    plt.plot(np.arange(1000), data, color=color, label=label)
 
 plot('naf', 'b', 'naf')
 plot('bnaf', 'r', 'bnaf')
@@ -20,7 +20,7 @@ plot('gb-bnaf', 'y', 'gb-bnaf')
 # plot_best_by_last_value('SPHERE_R', 'b')
 # plot_best_by_last_value('SPHERE_R_G', 'r')
 
-# plt.ylim(-100, 0)
+plt.ylim(-10, 0)
 # plot('SPHERE_R', 'g', 'RB-BNAF(Δt=0.5)')
 # plot('SPHERE_R_DT', 'm', 'RB-BNAF(Δt=0.5, Δt=0.1)')
 # plt.axvline(x=125, linestyle="--", color='gray')

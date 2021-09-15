@@ -1,0 +1,22 @@
+{
+  "environment": {
+    "env_name": "earth-orbit",
+    "params": {
+      "dt": 25
+    }
+  },
+  "model": {
+    "model_name": "gb-bnaf",
+    "lr": 0.0005,
+    "gamma": 1
+  },
+  "train_cfg": {
+    "epoch_num": 1000,
+    "batch_size": 256,
+    "render": false,
+    "random_seed": 2021,
+    "save_model_path": "./checkpoints/earthOrbit/gb-bnaf",
+    "save_plot_path": "./graphics/earthOrbit/gb-bnaf",
+    "save_rewards_path": "./rewards/earthOrbit/gb-bnaf"
+  }
+}

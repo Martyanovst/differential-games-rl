@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 from numpy.linalg import norm
 
 
@@ -51,12 +52,15 @@ class EarthOrbitalMotion:
 
         return state_update
 
+    def g(self, state):
+        t, x, x_dot, theta, theta_dot = state
+        x_acc = torch.ones(x.shape[0]) / (1000*self.m)
+        theta_acc = torch.ones(x.shape[0]) / (x*self.m*1000)
+        return torch.stack([torch.zeros(x.shape[0]), x_acc, torch.zeros(theta.shape[0]), theta_acc])
+
     def reset(self):
         self.state = self.initial_state * self.normalized_vector
         return self.state
-
-    def g(self):
-        pass
 
     def get_state_obs(self):
         t, x, x_dot, theta, theta_dot = self.state
