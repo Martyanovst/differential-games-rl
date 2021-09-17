@@ -6,7 +6,7 @@
     }
   },
   "model": {
-    "model_name": "naf",
+    "model_name": "rb-bnaf",
     "lr": 0.0005,
     "gamma": 1
   },
@@ -15,8 +15,8 @@
     "batch_size": 256,
     "render": false,
     "random_seed": 2021,
-    "save_model_path": "./checkpoints/earthOrbit/naf",
-    "save_plot_path": "./graphics/earthOrbit/naf",
-    "save_rewards_path": "./rewards/earthOrbit/naf"
+    "save_model_path": "./checkpoints/earthOrbit/dt25/rb-bnaf",
+    "save_plot_path": "./graphics/earthOrbit/dt25/rb-bnaf",
+    "save_rewards_path": "./rewards/earthOrbit/dt25/rb-bnaf"
   }
 }

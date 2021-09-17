@@ -2,11 +2,11 @@
   "environment": {
     "env_name": "earth-orbit",
     "params": {
-      "dt": 25
+      "dt": 50
     }
   },
   "model": {
-    "model_name": "rb-bnaf",
+    "model_name": "naf",
     "lr": 0.0005,
     "gamma": 1
   },
@@ -15,8 +15,8 @@
     "batch_size": 256,
     "render": false,
     "random_seed": 2021,
-    "save_model_path": "./checkpoints/earthOrbit/rb-bnaf",
-    "save_plot_path": "./graphics/earthOrbit/rb-bnaf",
-    "save_rewards_path": "./rewards/earthOrbit/rb-bnaf"
+    "save_model_path": "./checkpoints/earthOrbit/dt100/naf",
+    "save_plot_path": "./graphics/earthOrbit/dt100/naf",
+    "save_rewards_path": "./rewards/earthOrbit/dt100/naf"
   }
 }
