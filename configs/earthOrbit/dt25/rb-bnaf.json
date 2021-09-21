@@ -14,7 +14,7 @@
     "epoch_num": 1000,
     "batch_size": 256,
     "render": false,
-    "random_seed": 2021,
+    "random_seed": [2021, 2022, 2023],
     "save_model_path": "./checkpoints/earthOrbit/dt25/rb-bnaf",
     "save_plot_path": "./graphics/earthOrbit/dt25/rb-bnaf",
     "save_rewards_path": "./rewards/earthOrbit/dt25/rb-bnaf"

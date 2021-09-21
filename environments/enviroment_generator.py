@@ -1,3 +1,4 @@
+from environments.aircraft.aircraft import AircraftLanding
 from environments.cartpole.cartpole_env import CartPole
 from environments.dubinsCar.dubins_car_env import DubinsCar
 from environments.pendulum.pendulum_env import Pendulum
@@ -20,3 +21,5 @@ def generate_env(config):
         return CartPole(**config['params'])
     elif env_name == 'earth-orbit':
         return EarthOrbitalMotion(**config['params'])
+    elif env_name == 'aircraft':
+        return AircraftLanding(**config['params'])

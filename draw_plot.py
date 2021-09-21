@@ -1,10 +1,20 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+seeds = [2021, 2022, 2023]
+path = './rewards/earthOrbit/dt25/'
+X = np.arange(1000)
+
 
 def plot(model, color, label):
-    data = np.load('./rewards/cartpole/' + model + '.npy')
-    plt.plot(np.arange(1000), data, color=color, label=label)
+    data = np.array([np.load(path + model + '_' + str(seed) + '.npy') for seed in seeds])
+    max = data.max(axis=0)
+    min = data.min(axis=0)
+    print(data)
+    mean = data.mean(axis=0)
+    plt.fill_between(X, min, max, color=color)
+    plt.plot(X, mean, color=color, label=label)
+
 
 plot('naf', 'b', 'naf')
 plot('bnaf', 'r', 'bnaf')
