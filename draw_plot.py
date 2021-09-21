@@ -10,9 +10,8 @@ def plot(model, color, label):
     data = np.array([np.load(path + model + '_' + str(seed) + '.npy') for seed in seeds])
     max = data.max(axis=0)
     min = data.min(axis=0)
-    print(data)
     mean = data.mean(axis=0)
-    plt.fill_between(X, min, max, color=color)
+    plt.fill_between(X, min, max, color=color, alpha=0.1)
     plt.plot(X, mean, color=color, label=label)
 
 
