@@ -27,7 +27,7 @@ class TargetProblem:
         self.inner_dt = self.dt / self.inner_step_n
         self.k = 1
         self.m = 1
-        self.g = 1
+        self.g_const = 1
         # вектор масштабирования координат состояния
         self.state = self.reset()
 
@@ -40,11 +40,14 @@ class TargetProblem:
         state_update[3] = vx
         state_update[4] = vy
         state_update[5] = - (self.k / self.m) * (x - x0)
-        state_update[6] = - (self.k / self.m) * (y - y0) - self.g
+        state_update[6] = - (self.k / self.m) * (y - y0) - self.g_const
         return state_update
 
     def g(self, state):
-        raise NotImplementedError()
+        t, x0, y0, x, y, vx, vy = state
+        return torch.stack(
+            [torch.ones(x.shape[0]), torch.ones(x.shape[0]), torch.zeros(x.shape[0]), torch.zeros(x.shape[0]),
+             torch.zeros(x.shape[0]), torch.zeros(x.shape[0])])
 
     def reset(self):
         self.state = self.initial_state
