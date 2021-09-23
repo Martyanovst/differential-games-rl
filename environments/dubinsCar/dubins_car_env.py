@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 
 
 class DubinsCar:
@@ -25,7 +26,7 @@ class DubinsCar:
         self.inner_dt = dt / self.inner_step_n
 
     def g(self, state):
-        return np.array([np.zeros(state.shape[0]), np.zeros(state.shape[0]), np.ones(state.shape[0]) * 0.75])
+        return torch.stack([torch.zeros(state.shape[1]), torch.zeros(state.shape[1]), torch.ones(state.shape[1]) * 0.75])
 
     def step(self, action):
         action_raw = action.copy()
