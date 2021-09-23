@@ -6,7 +6,7 @@
     }
   },
   "model": {
-    "model_name": "naf",
+    "model_name": "gb-bnaf",
     "lr": 0.0005,
     "gamma": 1
   },
@@ -15,8 +15,6 @@
     "batch_size": 256,
     "render": false,
     "random_seed": [2021, 2022, 2023],
-    "save_model_path": "./checkpoints/targetProblem/naf",
-    "save_plot_path": "./graphics/targetProblem/naf",
-    "save_rewards_path": "./rewards/targetProblem/naf"
+    "save_rewards_path": "./rewards/targetProblem/dt0.1/gb-bnaf"
   }
 }

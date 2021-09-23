@@ -12,7 +12,6 @@ class DubinsCar:
         self.dt = dt
         self.beta = 0.05
         self.r = 0.05
-        self.g = np.array([0, 0, 0.75])
         self.initial_state = initial_state
         self.inner_step_n = inner_step_n
         self.inner_dt = dt / inner_step_n
@@ -25,7 +24,11 @@ class DubinsCar:
         self.dt = dt
         self.inner_dt = dt / self.inner_step_n
 
+    def g(self, state):
+        return np.array([np.zeros(state.shape[0]), np.zeros(state.shape[0]), np.ones(state.shape[0]) * 0.75])
+
     def step(self, action):
+        action_raw = action.copy()
         action = np.clip(action, self.action_min, self.action_max)
         action = action * 0.75 + 0.25
 
@@ -37,11 +40,13 @@ class DubinsCar:
             reward = -np.abs(self.state[1] - 4) - np.abs(self.state[2]) - np.abs(self.state[3] - 0.75 * np.pi)
             done = True
         else:
-            reward = -self.r * (action[0] ** 2) * self.dt
+            reward = -self.r * (action_raw[0] ** 2) * self.dt
             done = False
 
         return self.state, reward, done, None
 
-    def render(self):
-        print('time: %.3f  x: %.3f y: %.3f theta: %.3f' % (self.state[0], self.state[1], self.state[2], self.state[3]))
+    def get_state_obs(self):
+        return 'time: %.3f  x: %.3f y: %.3f theta: %.3f' % (self.state[0], self.state[1], self.state[2], self.state[3])
 
+    def render(self):
+        print(self.get_state_obs())

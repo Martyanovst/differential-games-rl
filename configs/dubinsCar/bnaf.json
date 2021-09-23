@@ -1,6 +1,6 @@
 {
   "environment": {
-    "env_name": "target-problem",
+    "env_name": "dubins-car",
     "params": {
       "dt": 0.1
     }
@@ -15,8 +15,6 @@
     "batch_size": 256,
     "render": false,
     "random_seed": [2021, 2022, 2023],
-    "save_model_path": "./checkpoints/targetProblem/bnaf",
-    "save_plot_path": "./graphics/targetProblem/bnaf",
-    "save_rewards_path": "./rewards/targetProblem/bnaf"
+    "save_rewards_path": "./rewards/dubinsCar/bnaf"
   }
 }
