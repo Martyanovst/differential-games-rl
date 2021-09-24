@@ -1,0 +1,20 @@
+{
+  "environment": {
+    "env_name": "dubins-car",
+    "params": {
+      "dt": 0.25
+    }
+  },
+  "model": {
+    "model_name": "bnaf",
+    "lr": 0.0005,
+    "gamma": 1
+  },
+  "train_cfg": {
+    "epoch_num": 1000,
+    "batch_size": 256,
+    "render": false,
+    "random_seed": [2021, 2022, 2023],
+    "save_rewards_path": "./rewards/dubinsCar/dt0.25/bnaf"
+  }
+}

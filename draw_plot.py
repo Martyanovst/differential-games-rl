@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 seeds = [2021, 2022, 2023]
-path = './rewards/dubinsCar/'
+path = './rewards/dubinsCar/dt0.5/'
 X = np.arange(1000)
 
 
