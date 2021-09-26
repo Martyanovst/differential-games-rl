@@ -41,14 +41,19 @@ class SingleAgentEvaluationModule:
 
     def train_agent(self, agent, train_cfg):
         epoch_num = train_cfg['epoch_num']
+        dt_array = train_cfg.get('dt', [self.env.dt])
         render = train_cfg.get('render', False)
-        self.__reset__(epoch_num)
-        agent.train()
-        for epoch in range(epoch_num):
-            rewards = self._evaluate_(agent, agent_learning=True, render=render)
-            # time.sleep(1)
-            total_reward = np.sum(rewards)
-            self.__callback__(agent, epoch, total_reward)
+        self.__reset__(epoch_num * len(dt_array))
+        dt_idx = 0
+        for dt in dt_array:
+            self.env.dt = dt
+            agent.dt = dt
+            agent.train()
+            for epoch in range(epoch_num):
+                rewards = self._evaluate_(agent, agent_learning=True, render=render)
+                total_reward = np.sum(rewards)
+                self.__callback__(agent, (dt_idx * epoch_num) + epoch, total_reward)
+            dt_idx += 1
 
         return self.mean_rewards
 

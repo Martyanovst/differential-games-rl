@@ -11,9 +11,10 @@
     "gamma": 1
   },
   "train_cfg": {
-    "epoch_num": 1000,
+    "epoch_num": 2000,
     "batch_size": 256,
     "render": false,
+    "dt": [0.1],
     "random_seed": [2021, 2022, 2023],
     "save_rewards_path": "./rewards/dubinsCar/dt0.5/rb-bnaf"
   }

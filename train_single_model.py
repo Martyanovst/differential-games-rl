@@ -20,15 +20,15 @@ def configure_random_seed(seed):
 
 
 def plot_reward(epoch_num, rewards_array, seed, save_plot_path=None):
-    plt.plot(range(epoch_num), rewards_array)
-    plt.xlabel('episodes')
-    plt.ylabel('rewards')
-    ax = plt.gca()
-    ax.set_facecolor('#eaeaf2')
-    plt.grid(color='white')
     if save_plot_path:
+        plt.plot(range(epoch_num), rewards_array)
+        plt.xlabel('episodes')
+        plt.ylabel('rewards')
+        ax = plt.gca()
+        ax.set_facecolor('#eaeaf2')
+        plt.grid(color='white')
+        plt.show()
         plt.savefig(save_plot_path + '_' + str(seed))
-    # plt.show()
 
 
 def file_path(string):

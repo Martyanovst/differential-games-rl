@@ -39,6 +39,7 @@ class NAF:
 
     def train(self):
         self.noise.threshold = 1
+        self.memory.clear()
         self.q_model.train()
 
     def eval(self):
