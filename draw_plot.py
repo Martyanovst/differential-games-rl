@@ -3,7 +3,7 @@ import numpy as np
 
 seeds = [2021, 2022, 2023]
 path = './rewards/dubinsCar/dt0.5/'
-X = np.arange(2000)
+X = np.arange(1000)
 
 
 def plot(model, color, label):

@@ -15,7 +15,7 @@
     "batch_size": 256,
     "render": false,
     "dt": [0.1],
-    "random_seed": [2021, 2022, 2023],
+    "random_seed": [2022, 2023],
     "save_rewards_path": "./rewards/dubinsCar/dt0.5/rb-bnaf"
   }
 }
