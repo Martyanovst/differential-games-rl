@@ -11,8 +11,8 @@ class DubinsCar:
         self.action_max = action_max
         self.terminal_time = terminal_time
         self.dt = dt
-        self.beta = 0.001
-        self.r = 0.001
+        self.beta = 0.05
+        self.r = 0.05
         self.initial_state = initial_state
         self.inner_step_n = inner_step_n
         self.inner_dt = dt / inner_step_n

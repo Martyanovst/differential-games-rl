@@ -24,6 +24,7 @@ class NAF:
         self.gamma = gamma
         self.batch_size = batch_size
         self.noise = noise
+        self.learning_n_per_fit = 16
 
     def save(self, path):
         torch.save({
@@ -67,18 +68,19 @@ class NAF:
         self.add_to_memory(step)
 
         if len(self.memory) >= self.batch_size:
-            batch = random.sample(self.memory, self.batch_size)
-            states, actions, rewards, dones, next_states = map(
-                torch.FloatTensor, zip(*batch))
-            states.requires_grad = True
-            rewards = rewards.reshape(self.batch_size, 1)
-            dones = dones.reshape(self.batch_size, 1)
+            for _ in range(self.learning_n_per_fit):
+                batch = random.sample(self.memory, self.batch_size)
+                states, actions, rewards, dones, next_states = map(
+                    torch.FloatTensor, zip(*batch))
+                states.requires_grad = True
+                rewards = rewards.reshape(self.batch_size, 1)
+                dones = dones.reshape(self.batch_size, 1)
 
-            target = rewards + (1 - dones) * self.gamma * \
-                self.q_target.v_model(next_states).detach()
-            q_values = self.q_model(states, actions)
-            loss = self.loss(q_values, target)
-            self.opt.zero_grad()
-            loss.backward()
-            self.opt.step()
-            self.update_targets(self.q_target, self.q_model)
+                target = rewards + (1 - dones) * self.gamma * \
+                    self.q_target.v_model(next_states).detach()
+                q_values = self.q_model(states, actions)
+                loss = self.loss(q_values, target)
+                self.opt.zero_grad()
+                loss.backward()
+                self.opt.step()
+                self.update_targets(self.q_target, self.q_model)
