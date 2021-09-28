@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 
 
 class VanDerPol:
@@ -12,7 +13,6 @@ class VanDerPol:
         self.dt = dt
         self.beta = 0.05
         self.r = 0.05
-        self.g = np.array([0, 1])
         self.inner_step_n = inner_step_n
         self.inner_dt = self.dt / self.inner_step_n
         self.initial_state = initial_state
@@ -21,6 +21,9 @@ class VanDerPol:
     def reset(self):
         self.state = self.initial_state
         return self.state
+
+    def g(self, state):
+        return torch.stack([torch.zeros(state.shape[1]), torch.ones(state.shape[1])])
 
     def set_dt(self, dt):
         self.dt = dt
@@ -40,7 +43,10 @@ class VanDerPol:
             done = True
             reward = - self.state[1] ** 2 - self.state[2] ** 2
 
-        return self.state, reward, done, _
+        return self.state, reward, done, None
+
+    def get_state_obs(self):
+        return 'time: %.3f  x: %.3f y: %.3f' % (self.state[0], self.state[1], self.state[2])
 
     def render(self):
-        print('time: %.3f  x: %.3f y: %.3f' % (self.state[0], self.state[1], self.state[2]))
+        print(self.get_state_obs())

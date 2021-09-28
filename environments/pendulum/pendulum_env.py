@@ -47,5 +47,8 @@ class Pendulum:
 
         return self.state, reward, done, None
 
+    def get_state_obs(self):
+        return 'time: %.3f  angle: %.3f angular velocity: %.3f' % (self.state[0], self.state[1], self.state[2])
+
     def render(self):
-        print('time: %.3f  angle: %.3f angular velocity: %.3f' % (self.state[0], self.state[1], self.state[2]))
+        print(self.get_state_obs())
