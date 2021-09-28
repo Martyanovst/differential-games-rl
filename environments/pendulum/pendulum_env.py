@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 
 
 class Pendulum:
@@ -19,12 +20,14 @@ class Pendulum:
         self.beta = self.r
         self.m = 1.
         self.l = 1.
-        self.g = np.array([0, 3 / (self.m * self.l ** 2)])
         self.state = self.initial_state
 
     def set_dt(self, dt):
         self.dt = dt
         self.inner_dt = dt / self.inner_step_n
+
+    def g(self, state):
+        return torch.stack([torch.zeros(state.shape[1]), torch.ones(state.shape[1]) * 3 / (self.m * self.l ** 2)])
 
     def reset(self):
         self.state = self.initial_state

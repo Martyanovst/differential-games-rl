@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 seeds = [2021, 2022, 2023]
-path = './rewards/vanDerPol/'
+path = './rewards/pendulum/'
 X = np.arange(1000)
 
 
@@ -20,7 +20,7 @@ plot('bnaf', 'r', 'bnaf')
 plot('rb-bnaf', 'g', 'rb-bnaf')
 plot('gb-bnaf', 'y', 'gb-bnaf')
 
-plt.ylim(-4)
+plt.ylim(-5)
 
 # plot_best_by_last_value('NAF', 'b')
 # plot_best_by_last_value('SPHERE', 'r')
