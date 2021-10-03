@@ -14,6 +14,7 @@
     "epoch_num": 1000,
     "batch_size": 256,
     "render": false,
+    "dt": [0.1],
     "random_seed": [2021, 2022, 2023],
     "save_rewards_path": "./rewards/targetProblem/dt0.1/gb-bnaf"
   }

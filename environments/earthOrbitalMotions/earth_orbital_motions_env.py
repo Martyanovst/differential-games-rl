@@ -83,7 +83,7 @@ class EarthOrbitalMotion:
                             100000*(self.required_orbit[1] - self.state[4])])
             done = True
         else:
-            reward = - self.r * norm(action) * self.dt
+            reward = - self.r * (norm(action) ** 2) * self.dt
             done = False
 
         self.state = self.state * self.normalized_vector

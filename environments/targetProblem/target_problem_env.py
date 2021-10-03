@@ -71,7 +71,7 @@ class TargetProblem:
             reward = -((x0 ** 2) + (y0 ** 2) + ((x - self.xG) ** 2) + ((y - self.yG) ** 2))
             done = True
         else:
-            reward = - self.r * norm(action) * self.dt
+            reward = - self.r * (norm(action) ** 2) * self.dt
             done = False
 
         return self.state, reward, done, None
