@@ -2,8 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 seeds = [2021, 2022, 2023]
-path = './rewards/targetProblem/dt0.1/'
-X = np.arange(1000)
+path = './rewards/earthOrbit/dt25/'
+X = np.arange(2000)
 
 
 def plot(model, color, label):

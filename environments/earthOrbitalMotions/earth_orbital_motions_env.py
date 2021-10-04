@@ -6,7 +6,7 @@ from numpy.linalg import norm
 class EarthOrbitalMotion:
     def __init__(self, action_radius=np.array([0.5, 0.5]),
                  initial_state=np.array([0, 6900, 0, 0, 0.001109]), normalized_vector=np.array([1/2000, 1/7000, 100, 1, 100]),
-                 terminal_time=2000, dt=100, inner_step_n=100, required_orbit=6900):
+                 terminal_time=2000, dt=100, inner_step_n=100, required_orbit=7000):
 
         self.state_dim = 5
         self.action_dim = 2

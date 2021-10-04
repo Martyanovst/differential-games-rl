@@ -1,9 +1,7 @@
 {
   "environment": {
     "env_name": "cartpole",
-    "params": {
       "dt": 0.1
-    }
   },
   "checkpoint": "./checkpoints/gb-bnaf",
   "random_seed": 2021
