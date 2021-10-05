@@ -18,13 +18,15 @@ pip install -r requirements.txt
 ```    
     
 ## Training    
- To train the algorithm(s) in the paper, run this command:    
+To train, run this command:    
     
 ```    
 python train.py --config <path to config file>  
 ```    
     
-### **Training config file  structure:** The training configuration file is presented as a json file with 3 required components - *environment*, *model*, *train_settings*.  
+### **Training config file  structure:** 
+
+The training configuration file is presented as a json file with 3 required components - *environment*, *model*, *train_settings*.  
 Each of these blocks has its own fields, presented in the tables below:  
   
 ### environment's fields:  
