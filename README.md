@@ -73,7 +73,7 @@ Possible *model_name* values:
   
   
   
-### train_config.json example:
+#### train_config.json example:
 
 ```
 {    
@@ -116,7 +116,7 @@ This script prints to the console all the states of the environment during the e
     
 > Note that you can only use the model for the task on which it was trained    
 
-<h2>eval_config.json example:</h2>
+### eval_config.json example:
 
 ```
 {    
@@ -130,11 +130,7 @@ This script prints to the console all the states of the environment during the e
 ```    
     
  ## Results
-We use the same learning parameters of every our tasks.     
-We used neural networks with two layers of 256 and 128 rectified linear units (ReLU) and learn their used ADAM with the learning rate **lr = 0.0005**.    
-We use **batch size equal to 256** and smoothing parameter **tau = 0.001**.    
-We also took **dt = 0.1**. All calculations were performed on a personal computer in a standard way.    
-    
+We use the same learning parameters of every our tasks. We apply neural networks with two layers of 256 and 128 rectified linear units (ReLU) and learn their used ADAM with the learning rate **lr = 0.0005**. We use **batch size equal to 256** and smoothing parameter **tau = 0.001**. We also took **dt = 0.1**. All calculations were performed on a personal computer in a standard way.    
     
 Our models achieves the following reward's on:    
     
@@ -146,9 +142,7 @@ Our models achieves the following reward's on:
 | GB-BNAF            |     -3.2337     |         -0.2114        |  -0.6806  |  -1.3784  |    
     
 **Plots:**    
- Figures below show the learning results of the algorithms for considered examples of optimal control problems.    
-The figures display min and max results from 3 runs of each algorithm.    
-The bold lines represent average values for these 3 runs.    
+ Figures below show the learning results of the algorithms for considered examples of optimal control problems. The figure shows results averaged over 3 seeds.   
     
 | ![target-problem](plots/target-problem.png) | ![van-der-pol](plots/van-der-pol.png) |    
 |:----:|:----:|    
@@ -156,8 +150,7 @@ The bold lines represent average values for these 3 runs.
 | ![pendulum](plots/pendulum.png) | ![dubins-car](plots/dubins-car.png) |    
 |  *Pendulum* | *Dubins car* |    
     
-
-    
-## Contributing If you'd like to contribute, or have any suggestions for these guidelines, you can open an issue on this GitHub repository.    
+#### Contributing 
+If you'd like to contribute, or have any suggestions for these guidelines, you can open an issue on this GitHub repository.    
     
 All contributions welcome!
