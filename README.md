@@ -11,16 +11,14 @@ It currently includes code of optimal control problems and algorithms from the p
  
  ## Requirements 
  
- For training and evaluating described models, you will need python 3.6.    
-    
-To install requirements:    
+For training and evaluating described algorithms, you will need python 3.6. To install requirements:    
     
 ```    
 pip install -r requirements.txt    
 ```    
     
 ## Training    
- To train the model(s) in the paper, run this command:    
+ To train the algorithm(s) in the paper, run this command:    
     
 ```    
 python train.py --config <path to config file>  
