@@ -29,7 +29,7 @@ python train.py --config <path to config file>
 The training configuration file is presented as a json file with 3 required components - *environment*, *model*, *train_settings*.  
 Each of these blocks has its own fields, presented in the tables below:  
   
-### environment's fields:  
+#### environment's fields:  
   
 | Parameter name| Type | example | Description |    
 |-----------|------------|---------|-------------|    
@@ -42,7 +42,7 @@ posible *env_name* values:
 - *pendulum*
 - *dubins-car*  
   
-<h3>model's fields:</h3>   
+#### model's fields:   
 
 | Parameter name| Type | example | Description |    
 |-----------|------------|---------|-------------|    
@@ -102,7 +102,7 @@ possible *model_name* values:
 python eval.py --config <path to config file>    
 ```    
 This script prints to the console all the states of the environment during the evaluation and outputs the final score.    
-  ### **Evaluation config file  structure:**   
+  #### **Evaluation config file  structure:**   
   The configuration file is presented as a json file with 3 required params - *environment*, *checkpoint*, *random_seed*.  
     
   
