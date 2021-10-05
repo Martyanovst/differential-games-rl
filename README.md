@@ -2,7 +2,7 @@
   
 # This repository is the official implementation of "Continuous Deep Q-Learning in Optimal Control Problems: Normalized Advantage Functions Analysis"
 
-It currently includes code of optimal control problems and algorithms from the paper. The following optimal control problems are considered:    
+It currently includes code of optimal control problems and models from the paper. The following optimal control problems are considered:    
     
 - Target Problem
 - Van der Pol oscillator    
@@ -11,7 +11,7 @@ It currently includes code of optimal control problems and algorithms from the p
  
  ## Requirements 
  
-For training and evaluating described algorithms, you will need python 3.6. To install requirements:    
+For training and evaluating described models, you will need python 3.6. To install requirements:    
     
 ```    
 pip install -r requirements.txt    
@@ -51,7 +51,7 @@ Possible *env_name* values:
 |gamma| float  | 0.99        |Reward discount rate  
 
 Possible *model_name* values:  
-- *naf* - classic Normalized Advanced Functions algorithm.  
+- *naf* - original Normalized Advanced Functions algorithm.  
 - *bnaf* - bounded NAF.  
 - *rb-bnaf* - reward-based bounded NAF.  
 - *gb-bnaf* - gradient-based bounded NAF.  
