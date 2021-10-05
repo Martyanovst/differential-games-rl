@@ -44,14 +44,14 @@ args = parser.parse_args()
 
 with open(args.config) as json_config_file:
     config = json.load(json_config_file)
-train_settings = config['train_cfg']
+train_settings = config['train_settings']
 seeds = train_settings.get('random_seed')
 for seed in seeds:
     print(f'Start training with random seed: {seed}')
     configure_random_seed(seed)
     env = generate_env(config['environment'])
 
-    agent_generator = AgentGenerator(env, train_cfg=train_settings)
+    agent_generator = AgentGenerator(env, train_settings=train_settings)
 
     agent = agent_generator.generate(model_cfg=config['model'])
     training_module = SingleAgentEvaluationModule(env)

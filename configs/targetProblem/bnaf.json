@@ -1,12 +1,12 @@
 {
   "environment": {
-    "env_name": "pendulum",
+    "env_name": "target-problem",
     "params": {
       "dt": 0.1
     }
   },
   "model": {
-    "model_name": "gb-bnaf",
+    "model_name": "bnaf",
     "lr": 0.0005,
     "gamma": 1
   },
@@ -15,7 +15,7 @@
     "batch_size": 256,
     "render": false,
     "random_seed": [2021, 2022, 2023],
-    "save_rewards_path": "./rewards/pendulum/gb-bnaf",
-    "save_model_path": "./checkpoints/pendulum/gb-bnaf"
+    "save_rewards_path": "./rewards/targetProblem/bnaf",
+    "save_model_path": "./checkpoints/targetProblem/bnaf"
   }
 }

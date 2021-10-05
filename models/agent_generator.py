@@ -10,12 +10,12 @@ from models.sequential_network import Seq_Network
 
 
 class AgentGenerator:
-    def __init__(self, env, train_cfg=None):
+    def __init__(self, env, train_settings=None):
         self.dt = env.dt
         self.g = env.g
-        if train_cfg:
-            self.epoch_num = train_cfg['epoch_num']
-            self.batch_size = train_cfg['batch_size']
+        if train_settings:
+            self.epoch_num = train_settings['epoch_num']
+            self.batch_size = train_settings['batch_size']
         else:
             self.epoch_num = 1
             self.batch_size = 128

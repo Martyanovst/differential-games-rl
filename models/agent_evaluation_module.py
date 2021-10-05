@@ -39,10 +39,10 @@ class SingleAgentEvaluationModule:
             agent.noise.decrease()
         return total_reward
 
-    def train_agent(self, agent, train_cfg):
-        epoch_num = train_cfg['epoch_num']
-        dt_array = train_cfg.get('dt', [self.env.dt])
-        render = train_cfg.get('render', False)
+    def train_agent(self, agent, train_settings):
+        epoch_num = train_settings['epoch_num']
+        dt_array = train_settings.get('dt', [self.env.dt])
+        render = train_settings.get('render', False)
         self.__reset__(epoch_num * len(dt_array))
         dt_idx = 0
         for dt in dt_array:
@@ -115,9 +115,9 @@ class TwoAgentsEvaluationModule:
             u_agent.noise.decrease()
         return total_reward
 
-    def train_agent(self, u_agent, v_agent, train_cfg):
-        epoch_num = train_cfg['epoch_num']
-        self.learning_delay = train_cfg['learning_delay']
+    def train_agent(self, u_agent, v_agent, train_settings):
+        epoch_num = train_settings['epoch_num']
+        self.learning_delay = train_settings['learning_delay']
         self.__reset__(epoch_num)
         u_agent.train()
         v_agent.train()
