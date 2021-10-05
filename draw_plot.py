@@ -2,9 +2,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 seeds = [2021, 2022, 2023]
-path = './rewards/earthOrbit/dt25/'
-X = np.arange(2000)
+path = './rewards/targetProblem/dt0.1/'
+X = np.arange(1000)
 
+
+def get_value(path):
+    seeds = [2021, 2022, 2023]
+    for model in ['naf', 'bnaf', 'rb-bnaf', 'gb-bnaf']:
+        data = np.array([np.load(path + model + '_' + str(seed) + '.npy') for seed in seeds])
+        mean = data.mean(axis=0)
+        print(model, mean[-1])
 
 def plot(model, color, label):
     data = np.array([np.load(path + model + '_' + str(seed) + '.npy') for seed in seeds])
@@ -14,11 +21,11 @@ def plot(model, color, label):
     plt.fill_between(X, min, max, color=color, alpha=0.1)
     plt.plot(X, mean, color=color, label=label)
 
-
-plot('naf', 'b', 'naf')
-plot('bnaf', 'r', 'bnaf')
-plot('rb-bnaf', 'g', 'rb-bnaf')
-plot('gb-bnaf', 'y', 'gb-bnaf')
+get_value(path)
+# plot('naf', 'b', 'naf')
+# plot('bnaf', 'r', 'bnaf')
+# plot('rb-bnaf', 'g', 'rb-bnaf')
+# plot('gb-bnaf', 'y', 'gb-bnaf')
 
 # plt.ylim(-25)
 
@@ -37,11 +44,11 @@ plot('gb-bnaf', 'y', 'gb-bnaf')
 # plt.text(x=62, y=-3.5, s='Δt=0.5')
 # plt.text(x=187, y=-3.5, s='Δt=0.1')
 
-plt.xlabel('episodes')
-plt.ylabel('rewards')
-# plt.title(task)
-plt.legend(loc=4)
-ax = plt.gca()
-ax.set_facecolor('#eaeaf2')
-plt.grid(color='white')
-plt.show()
+# plt.xlabel('episodes')
+# plt.ylabel('rewards')
+# # plt.title(task)
+# plt.legend(loc=4)
+# ax = plt.gca()
+# ax.set_facecolor('#eaeaf2')
+# plt.grid(color='white')
+# plt.show()

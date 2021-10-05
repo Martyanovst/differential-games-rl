@@ -1,172 +1,146 @@
 
-# Continuous Deep Q-Learning in Optimal Control Problems: Normalized Advantage Functions Analysis  
-This repository is the official implementation of "Continuous Deep Q-Learning in Optimal Control  
-Problems: Normalized Advantage Functions Analysis".  
-It currently includes code and models for some optimal control tasks:  
   
-- Simple motions  
-- Van der Pol oscillator  
-- Pendulum with terminal time  
-- Dubins Car  
+# Continuous Deep Q-Learning in Optimal Control Problems: Normalized Advantage Functions Analysis This repository is the official implementation of "Continuous Deep Q-Learning in Optimal Control    
+Problems: Normalized Advantage Functions Analysis".    
+It currently includes code and models for some optimal control tasks:    
+    
+- Target Problem    
+- Van der Pol oscillator    
+- Pendulum
+- Dubins Car    
+    
+> You can find algorithms and tasks theoretical description in the paper.    
+ ## Requirements For training and evaluating described models, you will need python 3.6.    
+    
+To install requirements:    
+    
+```    
+pip install -r requirements.txt    
+```    
+    
+## Training    
+ To train the model(s) in the paper, run this command:    
+    
+```    
+python train.py --config <path to config file>  
+```    
+    
+### **Training config file  structure:** The training configuration file is presented as a json file with 3 required components - *environment*, *model*, *train_settings*.  
+Each of these blocks has its own fields, presented in the tables below:  
   
-> You can find algorithms and tasks theoretical description in the paper.  
+#### environment's fields:  
   
-## Requirements  
-For training and evaluating described models, you will need python 3.6.  
+| Parameter name| Type | example | Description |    
+|-----------|------------|---------|-------------|    
+| env_name|string| dubins-car| Optimal control task to solve    
+|dt| float  | 0.1        | Discretization step of continuous environment  
+posible *env_name* values:  
+- *target-problem*
+-  *van-der-pol*  
+- *pendulum*
+- *dubins-car*  
   
-To install requirements:  
-  
-```  
-pip install -r requirements.txt  
-```  
-  
-## Training  
-  
-To train the model(s) in the paper, run this command:  
-  
-```  
-python train.py --config <path to config file>
-```  
-  
-### **Training config file  structure:**  
-The training configuration file is presented as a json file with 3 required components - *environment*, *model*, *train_settings*.
-Each of these blocks has its own fields, presented in the tables below:
+<h3>model's fields:</h3>   
 
-#### environment's fields:
-
-| Parameter name| Type | example | Description |  
-|-----------|------------|---------|-------------|  
-| env_name|string| dubins-car| Optimal control task to solve  
-|dt| float  | 0.1        | Discretization step of continuous environment
-posible *env_name*  values:
-- *simple-motions* 
-- *van-der-pol*
--  *pendulum* 
--  *dubins-car*
-
-<h3>model's fields:</h3>  
-
-| Parameter name| Type | example | Description |  
-|-----------|------------|---------|-------------|  
-| model_name|string| naf| One of the algorithms, described in article  
-|lr| float  | 0.001        | Learning rate
-|gamma| float  | 0.99        |Reward discount rate
-possible *model_name*  values:
-- *naf* - classic Normalized Advanced Functions algorithm.
-- *bnaf* - bounded NAF.
--  *rb-bnaf* - reward-based bounded NAF.
--  *gb-bnaf* - gradient-based bounded NAF.
-
-<h3>train_settings fields:</h3>  
-
-| Parameter name| Type | example | Description |  
-|-----------|------------|---------|-------------|  
-| epoch_num|int| 1000|  Number of training epochs 
-|batch_size| int| 256        | Batch size
-|gamma| float  | 0.99        |Reward discount rate
-|render| boolean  | false        | Is need to visualize the environment during training
-|random_seed| int| 2021        | Random seed to fix stochastic effects
-|save_rewards_path| path| \path\to\file       |   Path to save training reward history in numpy array format
-|save_model_path| path| \path\to\file       |   Path to save trained agent
-|save_plot_path| path| \path\to\file       |   Path to save training reward history plot
-
-
-
-
-\
-\
-**train_config.json example:**  
-```  
-{  
-  "environment": {  
-	  "env_name": "dubins-car",    
-	  "dt": 0.1  
- },
-  "model": {  
-	  "model_name": "naf",  
-	  "lr": 0.0005,  
-	  "gamma": 1  
-  },  
-  "train_settings": {  
-	  "epoch_num": 1000,  
-	  "batch_size": 256,  
-	  "render": false,  
-	  "random_seed": [2021, 2022, 2023],  
-	  "save_rewards_path": "./rewards/dubinsCar/dt0.1/naf"  
-  }  
-}  
-```  
-  > You can find prepared config files for all environment's in folder **/configs**.
+| Parameter name| Type | example | Description |    
+|-----------|------------|---------|-------------|    
+| model_name|string| naf| One of the algorithms, described in article    
+|lr| float  | 0.001        | Learning rate  
+|gamma| float  | 0.99        |Reward discount rate  
+possible *model_name* values:  
+- *naf* - classic Normalized Advanced Functions algorithm.  
+- *bnaf* - bounded NAF.  
+- *rb-bnaf* - reward-based bounded NAF.  
+- *gb-bnaf* - gradient-based bounded NAF.  
   
-## Evaluation  
+<h3>train_settings fields:</h3>   
+
+| Parameter name| Type | example | Description |    
+|-----------|------------|---------|-------------|    
+| epoch_num|int| 1000|  Number of training epochs   
+|batch_size| int| 256        | Batch size  
+|gamma| float  | 0.99        |Reward discount rate  
+|render| boolean  | false        | Is need to visualize the environment during training  
+|random_seed| int| 2021        | Random seed to fix stochastic effects  
+|save_rewards_path| path| \path\to\file       |   Path to save training reward history in numpy array format  
+|save_model_path| path| \path\to\file       |   Path to save trained agent  
+|save_plot_path| path| \path\to\file       |   Path to save training reward history plot  
   
-To evaluate pre-trained model, run:  
   
+  
+  
+  
+<h2>train_config.json example:</h2>
+
 ```
-python eval.py --config <path to config file>  
+{    
+  "environment": {    
+     "env_name": "dubins-car",      
+     "dt": 0.1    
+ },  
+  "model": {    
+     "model_name": "naf",    
+     "lr": 0.0005,    
+     "gamma": 1    
+  },    
+  "train_settings": {    
+     "epoch_num": 1000,    
+     "batch_size": 256,    
+     "render": false,    
+     "random_seed": [2021, 2022, 2023],    
+     "save_rewards_path": "./rewards/dubinsCar/dt0.1/naf"    
+  }    
+}    
+```    
+ > You can find prepared config files for all environment's in folder **/configs**.  ## Evaluation    
+ To evaluate pre-trained model, run:    
+    
 ```  
-This script prints to the console all the states of the environment during the evaluation and outputs the final score.  
-  ### **Evaluation config file  structure:** 
+python eval.py --config <path to config file>    
+```    
+This script prints to the console all the states of the environment during the evaluation and outputs the final score.    
+  ### **Evaluation config file  structure:**   
+  The configuration file is presented as a json file with 3 required params - *environment*, *checkpoint*, *random_seed*.  
+    
+  
+    
+| Parameter name | Type | example | Description |    
+|-----------|------------|---------|-------------|    
+| environment|json object|{ "env_name": "dubins-car",  "dt": 0.1 } | the same object as in the training section  
+|checkpoint    |path |  \path\to\checkpoint\file               | Path to pre-trained model  
+|random_seed|int|  2021               | Random seed to fix stochastic effects  
+    
+> Note that you can only use the model for the task on which it was trained    
+    
+ ## Results
+We use the same learning parameters of every our tasks.     
+We used neural networks with two layers of 256 and 128 rectified linear units (ReLU) and learn their used ADAM with the learning rate **lr = 0.001**.    
+We use **batch size equal to 256** and smoothing parameter **tau = 0.001**.    
+We also took **dt = 0.1**. All calculations were performed on a personal computer in a standard way.    
+    
+    
+Our models achieves the following reward's on:    
+    
+|                    | Target problem  | Van der Pol oscillator | Pendulum | Dubins car |    
+| ------------------ |---------------- | ---------------------- | --------- | --------- |    
+| NAF                |     -40.3163     |         -0.4144        |  -3.4032  |  -2.6129  |    
+| BNAF              |     -29.7177     |         -0.1814        |  -0.9545  |  -0.9786  |    
+| RB-BNAF            |     -166.1029     |         -0.1599        |  -2.7187  |  -0.5529  |    
+| GB-BNAF            |     -3.2337     |         -0.2114        |  -0.6806  |  -1.3784  |    
+    
+**Plots:**    
+ Figures below show the learning results of the algorithms for considered examples of optimal control problems.    
+The figures display min and max results from 3 runs of each algorithm.    
+The bold lines represent average values for these 3 runs.    
+    
+| ![target-problem](plots/target-problem.png) | ![van-der-pol](plots/van-der-pol.png) |    
+|:----:|:----:|    
+|  *Target problem* | *Van der Pol oscillator* |    
+| ![pendulum](plots/pendulum.png) | ![dubins-car](plots/dubins-car.png) |    
+|  *Pendulum* | *Dubins car* |    
+    
 
-  The configuration file is presented as a json file with 3 required params - *environment*, *checkpoint*, *random_seed*.
-  
-
-  
-| Parameter name | Type | example | Description |  
-|-----------|------------|---------|-------------|  
-| environment|json object|{ "env_name": "dubins-car",  "dt": 0.1 } | the same object as in the training section
-|checkpoint    |path |  \path\to\checkpoint\file               | Path to pre-trained model
-|random_seed|int|  2021               | Random seed to fix stochastic effects
-  
-> Note that you can only use the model for the task on which it was trained  
-  
-  
-## Results  
-We use the same learning parameters of every our tasks.   
-We used neural networks with two layers of 256 and 128 rectified linear units (ReLU) and learn their used ADAM with the learning rate **lr = 0.001**.  
-We use **batch size equal to 256** and smoothing parameter **tau = 0.001**.  
-We also took **dt** of different scales for environments. All calculations were performed on a personal computer in a standard way.  
-  
-  
-Our models achieves the following performance on:  
-  
-|                    | Simple motions  | Van der Pol oscillator | Pendulum | Dubins car |  
-| ------------------ |---------------- | ---------------------- | --------- | --------- |  
-| NAF                |     0.28296     |         0.31336        |  0.93049  |  1.37627  |  
-| BNAF               |     0.29308     |         0.18098        |  0.81743  |  0.72863  |  
-| RB-BNAF            |     0.21927     |         0.49881        |  0.68373  |  0.75363  |  
-| GB-BNAF            |     0.21882     |         1.34460        |  0.69741  |  2.83410  |  
-  
-**Plots:**  
-  
-Figures below show the learning results of the algorithms for considered examples of optimal control problems.  
-The figures display min and max results from 3 runs of each algorithm.  
-The bold lines represent average values for these 3 runs.  
-  
-| ![simple-motions](plots/simple-motions.png) | ![van-der-pol](plots/van-der-pol.png) |  
-|:----:|:----:|  
-|  *Simple Motions* | *Van der Pol oscillator* |  
-| ![pendulum](plots/pendulum.png) | ![dubins-car](plots/dubins-car.png) |  
-|  *Pendulum* | *Dubins car* |  
-  
-Figures above shows that BNAF and RB-BNAF have more stable learning then NAF in all examples.  
-The most stable and fastest algorithm is RB-BNAF,  
-although it has the result slightly worse than NAF and BNAF in Van der Pol oscillator problem.  
-Also we can see that GB-BNAF has the good result only in Simple motions and Pendulum problems.  
-Thus, we consider that GB-BNAF is the most unsuccessful modification of NAF.  
-  
-| ![simple-motions](plots/simple-motions_dt_reduced.png) | ![van-der-pol](plots/van-der-pol_dt_reduced.png) |  
-|:----:|:----:|  
-|  *Simple Motions* | *Van der Pol oscillator* |  
-| ![pendulum](plots/pendulum_dt_reduced.png) | ![dubins-car](plots/dubins-car_dt_reduced.png) |  
-|  *Pendulum* | *Dubins car* |  
-  
-   
-Figures above shows the learning results for RB-BNAF, when we reduce **dt** in the middle of the learning.  
-We can see that it does not make the algorithm results worse,  
-although the learning becomes slower in Van der Pol oscillator and Dubins car problems.  
-  
-## Contributing  
-If you'd like to contribute, or have any suggestions for these guidelines, you can open an issue on this GitHub repository.  
-  
+    
+## Contributing If you'd like to contribute, or have any suggestions for these guidelines, you can open an issue on this GitHub repository.    
+    
 All contributions welcome!
