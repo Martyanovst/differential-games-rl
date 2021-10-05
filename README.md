@@ -36,9 +36,9 @@ Each of these blocks has its own fields, presented in the tables below:
 | env_name|string| dubins-car| Optimal control task to solve    
 |dt| float  | 0.1        | Discretization step of continuous environment  
 
-posible *env_name* values:  
+Possible *env_name* values:  
 - *target-problem*
--  *van-der-pol*  
+- *van-der-pol*  
 - *pendulum*
 - *dubins-car*  
   
@@ -50,13 +50,13 @@ posible *env_name* values:
 |lr| float  | 0.001        | Learning rate  
 |gamma| float  | 0.99        |Reward discount rate  
 
-possible *model_name* values:  
+Possible *model_name* values:  
 - *naf* - classic Normalized Advanced Functions algorithm.  
 - *bnaf* - bounded NAF.  
 - *rb-bnaf* - reward-based bounded NAF.  
 - *gb-bnaf* - gradient-based bounded NAF.  
   
-<h3>train_settings fields:</h3>   
+#### train_settings fields:
 
 | Parameter name| Type | example | Description |    
 |-----------|------------|---------|-------------|    
@@ -73,7 +73,7 @@ possible *model_name* values:
   
   
   
-<h2>train_config.json example:</h2>
+### train_config.json example:
 
 ```
 {    
@@ -95,7 +95,8 @@ possible *model_name* values:
   }    
 }    
 ```    
- > You can find prepared config files for all environment's in folder **/configs**.  ## Evaluation    
+ > You can find prepared config files for all environment's in folder **/configs**.  
+## Evaluation    
  To evaluate pre-trained model, run:    
     
 ```  
