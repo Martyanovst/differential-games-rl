@@ -116,7 +116,7 @@ This script prints to the console all the states of the environment during the e
     
 > Note that you can only use the model for the task on which it was trained    
 
-### eval_config.json example:
+#### eval_config.json example:
 
 ```
 {    
