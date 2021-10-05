@@ -2,7 +2,7 @@
   
 # This repository is the official implementation of "Continuous Deep Q-Learning in Optimal Control Problems: Normalized Advantage Functions Analysis"
 
-It currently includes code and models for the following optimal control problems:    
+The following optimal control problems are considered:    
     
 - Target Problem
 - Van der Pol oscillator    
