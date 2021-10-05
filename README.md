@@ -2,14 +2,14 @@
   
 # This repository is the official implementation of "Continuous Deep Q-Learning in Optimal Control Problems: Normalized Advantage Functions Analysis"
 
-It currently includes code and models for some optimal control tasks:    
+It currently includes code and models for the following optimal control problems:    
     
-- Target Problem    
+- Target Problem
 - Van der Pol oscillator    
 - Pendulum
 - Dubins Car    
     
-> You can find algorithms and tasks theoretical description in the paper.    
+> You can find the theoretical description of algorithms and problems in the paper.    
  ## Requirements 
  
  For training and evaluating described models, you will need python 3.6.    
