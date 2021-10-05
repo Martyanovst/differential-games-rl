@@ -34,6 +34,7 @@ Each of these blocks has its own fields, presented in the tables below:
 |-----------|------------|---------|-------------|    
 | env_name|string| dubins-car| Optimal control task to solve    
 |dt| float  | 0.1        | Discretization step of continuous environment  
+
 posible *env_name* values:  
 - *target-problem*
 -  *van-der-pol*  
@@ -47,6 +48,7 @@ posible *env_name* values:
 | model_name|string| naf| One of the algorithms, described in article    
 |lr| float  | 0.001        | Learning rate  
 |gamma| float  | 0.99        |Reward discount rate  
+
 possible *model_name* values:  
 - *naf* - classic Normalized Advanced Functions algorithm.  
 - *bnaf* - bounded NAF.  
@@ -106,7 +108,7 @@ This script prints to the console all the states of the environment during the e
     
 | Parameter name | Type | example | Description |    
 |-----------|------------|---------|-------------|    
-| environment|json object|{ "env_name": "dubins-car",  "dt": 0.1 } | the same object as in the training section  
+| environment|json |{"env_name": "dubins-car",  "dt": 0.1 } | the same object as in the training section  
 |checkpoint    |path |  \path\to\checkpoint\file               | Path to pre-trained model  
 |random_seed|int|  2021               | Random seed to fix stochastic effects  
     
