@@ -1,7 +1,7 @@
 
   
-# Continuous Deep Q-Learning in Optimal Control Problems: Normalized Advantage Functions Analysis This repository is the official implementation of "Continuous Deep Q-Learning in Optimal Control    
-Problems: Normalized Advantage Functions Analysis".    
+# This repository is the official implementation of "Continuous Deep Q-Learning in Optimal Control Problems: Normalized Advantage Functions Analysis"
+
 It currently includes code and models for some optimal control tasks:    
     
 - Target Problem    
@@ -10,7 +10,9 @@ It currently includes code and models for some optimal control tasks:
 - Dubins Car    
     
 > You can find algorithms and tasks theoretical description in the paper.    
- ## Requirements For training and evaluating described models, you will need python 3.6.    
+ ## Requirements 
+ 
+ For training and evaluating described models, you will need python 3.6.    
     
 To install requirements:    
     
