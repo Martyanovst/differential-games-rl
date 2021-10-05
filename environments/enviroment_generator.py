@@ -7,11 +7,10 @@ from environments.vanDerPol.van_der_pol_env import VanDerPol
 def generate_env(config):
     env_name = config['env_name']
     if env_name == 'van-der-pol':
-        return VanDerPol(**config['params'])
+        return VanDerPol(dt=config['dt'])
     elif env_name == 'pendulum':
-        return Pendulum(**config['params'])
+        return Pendulum(dt=config['dt'])
     elif env_name == 'dubins-car':
-        return DubinsCar(**config['params'])
+        return DubinsCar(dt=config['dt'])
     elif env_name == 'target-problem':
-        return TargetProblem(**config['params'])
-
+        return TargetProblem(dt=config['dt'])

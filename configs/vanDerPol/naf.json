@@ -1,22 +1,20 @@
 {
   "environment": {
     "env_name": "van-der-pol",
-    "params": {
-      "dt": 0.1
-    }
+     "dt": 0.1
   },
   "model": {
     "model_name": "naf",
     "lr": 0.0005,
     "gamma": 1
   },
-  "train_cfg": {
+  "train_settings": {
     "epoch_num": 1000,
     "batch_size": 256,
     "render": false,
-    "dt": [0.1],
-    "random_seed": [2021, 2022, 2023],
+    "random_seed": 2021,
     "save_rewards_path": "./rewards/vanDerPol/naf",
-    "save_model_path": "./checkpoints/vanDerPol/naf"
+    "save_model_path": "./checkpoints/vanDerPol/naf",
+    "save_plot_path": "./plots/vanDerPol-naf"
   }
 }

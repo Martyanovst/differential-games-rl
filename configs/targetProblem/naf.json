@@ -1,9 +1,7 @@
 {
   "environment": {
     "env_name": "target-problem",
-    "params": {
-      "dt": 0.1
-    }
+     "dt": 0.1
   },
   "model": {
     "model_name": "naf",
@@ -16,6 +14,7 @@
     "render": false,
     "random_seed": [2021],
     "save_rewards_path": "./rewards/targetProblem/naf",
-    "save_model_path": "./checkpoints/targetProblem/naf"
+    "save_model_path": "./checkpoints/targetProblem/naf",
+    "save_plot_path": "./plots/targetProblem-naf"
   }
 }

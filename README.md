@@ -28,12 +28,13 @@ python train.py --config <path to config file>
 ### **Training config file  structure:** The training configuration file is presented as a json file with 3 required components - *environment*, *model*, *train_settings*.  
 Each of these blocks has its own fields, presented in the tables below:  
   
-#### environment's fields:  
+### environment's fields:  
   
 | Parameter name| Type | example | Description |    
 |-----------|------------|---------|-------------|    
 | env_name|string| dubins-car| Optimal control task to solve    
 |dt| float  | 0.1        | Discretization step of continuous environment  
+
 posible *env_name* values:  
 - *target-problem*
 -  *van-der-pol*  
@@ -47,6 +48,7 @@ posible *env_name* values:
 | model_name|string| naf| One of the algorithms, described in article    
 |lr| float  | 0.001        | Learning rate  
 |gamma| float  | 0.99        |Reward discount rate  
+
 possible *model_name* values:  
 - *naf* - classic Normalized Advanced Functions algorithm.  
 - *bnaf* - bounded NAF.  
@@ -106,15 +108,28 @@ This script prints to the console all the states of the environment during the e
     
 | Parameter name | Type | example | Description |    
 |-----------|------------|---------|-------------|    
-| environment|json object|{ "env_name": "dubins-car",  "dt": 0.1 } | the same object as in the training section  
+| environment|json |{"env_name": "dubins-car",  "dt": 0.1 } | the same object as in the training section  
 |checkpoint    |path |  \path\to\checkpoint\file               | Path to pre-trained model  
 |random_seed|int|  2021               | Random seed to fix stochastic effects  
     
 > Note that you can only use the model for the task on which it was trained    
+
+<h2>eval_config.json example:</h2>
+
+```
+{    
+  "environment": {    
+     "env_name": "dubins-car",      
+     "dt": 0.1    
+ },  
+  "checkpoint": ./naf_checkpoint,
+  "random_seed": 2021      
+}    
+```    
     
  ## Results
 We use the same learning parameters of every our tasks.     
-We used neural networks with two layers of 256 and 128 rectified linear units (ReLU) and learn their used ADAM with the learning rate **lr = 0.001**.    
+We used neural networks with two layers of 256 and 128 rectified linear units (ReLU) and learn their used ADAM with the learning rate **lr = 0.0005**.    
 We use **batch size equal to 256** and smoothing parameter **tau = 0.001**.    
 We also took **dt = 0.1**. All calculations were performed on a personal computer in a standard way.    
     
