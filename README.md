@@ -90,8 +90,8 @@ Possible *model_name* values:
      "epoch_num": 1000,    
      "batch_size": 256,    
      "render": false,    
-     "random_seed": [2021, 2022, 2023],    
-     "save_rewards_path": "./rewards/dubinsCar/dt0.1/naf"    
+     "random_seed": 2021,    
+     "save_rewards_path": "./rewards/dubinsCar/naf"    
   }    
 }    
 ```    
