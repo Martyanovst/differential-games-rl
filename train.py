@@ -45,22 +45,23 @@ args = parser.parse_args()
 with open(args.config) as json_config_file:
     config = json.load(json_config_file)
 train_settings = config['train_settings']
-seed = train_settings.get('random_seed')
-print(f'Start training with random seed: {seed}')
-configure_random_seed(seed)
-env = generate_env(config['environment'])
+seeds = train_settings.get('random_seed')
+for seed in seeds:
+    print(f'Start training with random seed: {seed}')
+    configure_random_seed(seed)
+    env = generate_env(config['environment'])
 
-agent_generator = AgentGenerator(env, train_settings=train_settings)
+    agent_generator = AgentGenerator(env, train_settings=train_settings)
 
-agent = agent_generator.generate(model_cfg=config['model'])
-training_module = SingleAgentEvaluationModule(env)
-rewards = training_module.train_agent(agent, train_settings)
-plot_reward(train_settings['epoch_num'], rewards, train_settings.get('save_model_path'))
+    agent = agent_generator.generate(model_cfg=config['model'])
+    training_module = SingleAgentEvaluationModule(env)
+    rewards = training_module.train_agent(agent, train_settings)
+    plot_reward(train_settings['epoch_num'], rewards, train_settings.get('save_plot_path'))
 
-save_model_path = train_settings.get('save_model_path')
-if save_model_path:
-    agent.save(save_model_path)
+    save_model_path = train_settings.get('save_model_path')
+    if save_model_path:
+        agent.save(save_model_path)
 
-save_rewards_path = train_settings.get('save_rewards_path')
-if save_rewards_path:
-    np.save(save_rewards_path, rewards)
+    save_rewards_path = train_settings.get('save_rewards_path')
+    if save_rewards_path:
+        np.save(save_rewards_path + str(seed), rewards)

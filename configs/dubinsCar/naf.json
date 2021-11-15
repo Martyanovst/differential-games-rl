@@ -9,12 +9,10 @@
     "gamma": 1
   },
   "train_settings": {
-    "epoch_num": 10,
+    "epoch_num": 1000,
     "batch_size": 256,
     "render": false,
-    "random_seed": 2021,
-    "save_rewards_path": "./rewards/dubinsCar/naf",
-    "save_model_path": "./checkpoints/dubinsCar/naf",
-    "save_plot_path": "./plots/dubinsCar-naf"
+    "random_seed": [2021, 2022, 2023, 2024, 2025],
+    "save_rewards_path": "./rewards/dubinsCar/naf"
   }
 }

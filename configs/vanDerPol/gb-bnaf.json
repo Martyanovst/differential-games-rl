@@ -12,9 +12,7 @@
     "epoch_num": 1000,
     "batch_size": 256,
     "render": false,
-    "random_seed": 2021,
-    "save_rewards_path": "./rewards/vanDerPol/gb-bnaf",
-    "save_model_path": "./checkpoints/vanDerPol/gb-bnaf",
-    "save_plot_path": "./plots/vanDerPol-gb-bnaf"
+    "random_seed": [2021, 2022, 2023, 2024, 2025],
+    "save_rewards_path": "./rewards/vanDerPol/gb-bnaf"
   }
 }
