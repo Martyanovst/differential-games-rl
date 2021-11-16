@@ -41,7 +41,7 @@ class AgentGenerator:
                    batch_size=self.batch_size, gamma=gamma, tau=1e-3, q_model_lr=lr)
 
     def _generate_naf(self, model_cfg):
-        mu_model = Seq_Network([self.state_dim, 256, 128, self.action_dim], nn.ReLU(), nn.Tanh())
+        mu_model = Seq_Network([self.state_dim, 256, 128, self.action_dim], nn.ReLU())
         v_model = Seq_Network([self.state_dim, 256, 128, 1], nn.ReLU())
         p_model = Seq_Network([self.state_dim, 256, self.action_dim ** 2], nn.ReLU())
         q_model = QModel(self.action_dim, self.action_min, self.action_max, mu_model, p_model, v_model, self.dt)

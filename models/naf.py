@@ -6,7 +6,6 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from models.linear_transformations import transform_interval
 
 
 class NAF:
@@ -53,8 +52,8 @@ class NAF:
         mu_value = self.q_model.mu_model(state).detach().numpy()
         noise = self.noise.noise()
         action = mu_value + noise
-        action = transform_interval(action, self.action_min, self.action_max)
-        return np.clip(action, self.action_min, self.action_max)
+        action = np.clip(action, self.action_min, self.action_max)
+        return action
 
     def update_targets(self, target, original):
         for target_param, original_param in zip(target.parameters(), original.parameters()):
