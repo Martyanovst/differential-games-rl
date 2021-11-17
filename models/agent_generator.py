@@ -1,5 +1,6 @@
 import torch
 
+from models.ddpg import DDPG
 from models.naf import NAF
 
 from models.ou_noise import OUNoise, load_noise
@@ -68,6 +69,24 @@ class AgentGenerator:
                                                g=self.g, dt=self.dt)
         return self._naf_(q_model, model_cfg)
 
+    def _generate_ddpg(self, model_cfg):
+        # self, state_dim, action_dim, action_min, action_max, q_model, pi_model, noise,
+        # q_model_lr = 1e-3, pi_model_lr = 1e-4, gamma = 0.99, batch_size = 64, tau = 1e-3,
+        # memory_len = 6000000, learning_iter_per_fit = 1, convex_comb_for_actions = False
+        if model_cfg:
+            lr = model_cfg.get('lr', 1e-3)
+            gamma = model_cfg.get('gamma', 1)
+        else:
+            lr = 1e-3
+            gamma = 1
+        pi_model = Seq_Network([self.state_dim, 256, 128, self.action_dim], nn.ReLU())
+        q_model = Seq_Network([self.state_dim + self.action_dim, 256, 128, 1], nn.ReLU())
+
+        noise = OUNoise(self.action_dim, threshold_min=self.noise_min,
+                        threshold_decrease=self.noise_min ** (1 / self.epoch_num))
+        return DDPG(self.action_min, self.action_max, q_model, pi_model, noise,
+                    batch_size=self.batch_size, gamma=gamma, tau=1e-3, q_model_lr=lr)
+
     def load(self, path, model_cfg=None):
         state_dict = torch.load(path)
         if state_dict['q-model']['model-name'] == 'q-model':
@@ -99,3 +118,5 @@ class AgentGenerator:
             return self._generate_b_naf_reward_based(model_cfg)
         elif model_name == 'gb-bnaf':
             return self._generate_b_naf_gradient_based(model_cfg)
+        elif model_name == 'ddpg':
+            return self._generate_ddpg(model_cfg)

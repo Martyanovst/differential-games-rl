@@ -3,7 +3,7 @@ import numpy as np
 
 seeds = [2021, 2022, 2023, 2024, 2025]
 path = './rewards/dubinsCar/'
-X = np.arange(1000)
+X = np.arange(2000)
 
 
 def plot(model, color, label):
@@ -19,6 +19,7 @@ plot('naf', 'b', 'naf')
 plot('bnaf', 'r', 'bnaf')
 plot('rb-bnaf', 'g', 'rb-bnaf')
 plot('gb-bnaf', 'y', 'gb-bnaf')
+plot('ddpg', 'm', 'ddpg')
 
 plt.ylim(-14)
 
