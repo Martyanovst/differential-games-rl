@@ -1,0 +1,18 @@
+{
+  "environment": {
+    "env_name": "pendulum",
+     "dt": 0.1
+  },
+  "model": {
+    "model_name": "ddpg",
+    "lr": 0.0005,
+    "gamma": 1
+  },
+  "train_settings": {
+    "epoch_num": 1500,
+    "batch_size": 256,
+    "render": false,
+    "random_seed": [2021, 2022, 2023, 2024, 2025],
+    "save_rewards_path": "./rewards/pendulum/ddpg"
+  }
+}
