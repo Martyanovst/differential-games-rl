@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 seeds = [2021, 2022, 2023, 2024, 2025]
-path = './rewards/vanDerPol/'
+path = './rewards/targetProblem/'
 X = np.arange(1000)
 
 
@@ -21,7 +21,7 @@ plot('rb-bnaf', 'g', 'rb-bnaf')
 plot('gb-bnaf', 'y', 'gb-bnaf')
 plot('ddpg', 'm', 'ddpg')
 
-plt.ylim(-6)
+# plt.ylim(-6)
 
 plt.xlabel('episodes')
 plt.ylabel('rewards')

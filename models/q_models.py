@@ -181,7 +181,7 @@ class QModel_Bounded_GradientBased(nn.Module):
         self.tanh = nn.Tanh()
 
     def forward(self, state, action):
-        g = self.g(state.transpose(1, 0)).transpose(1, 0).unsqueeze(1)
+        g = self.g(state.transpose(1, 0)).transpose(2, 1)
         g_value = torch.FloatTensor(g)
         v = self.v_model(state)
         v.backward(torch.ones((state.shape[0], 1)))
@@ -203,9 +203,9 @@ class QModel_Bounded_GradientBased(nn.Module):
         v = self.v_model(state)
         v.backward()
         dv = state.grad[1:].detach()
-        g_value = torch.FloatTensor(self.g(state.unsqueeze(1)).squeeze(1))
+        g_value = torch.FloatTensor(self.g(state.unsqueeze(1)).squeeze(1)).transpose(2, 1)
         mu = (0.5 * (1 / self.r) * torch.matmul(g_value,
-                                                dv))
+                                                dv)).squeeze(0)
         return transform_interval(self.tanh(mu), self.action_min, self.action_max)
 
     def state_dict(self, **kwargs):
