@@ -27,7 +27,11 @@ class Pendulum:
         self.inner_dt = dt / self.inner_step_n
 
     def g(self, state):
-        return torch.stack([torch.zeros(state.shape[1]), torch.ones(state.shape[1]) * 3 / (self.m * self.l ** 2)])
+        return torch.stack([
+            torch.zeros(state.shape[1]),
+            torch.ones(state.shape[1]) * 3 / (self.m * self.l ** 2)]) \
+            .transpose(0, 1) \
+            .unsqueeze(1)
 
     def reset(self):
         self.state = self.initial_state

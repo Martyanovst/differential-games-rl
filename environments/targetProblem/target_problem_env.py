@@ -45,9 +45,15 @@ class TargetProblem:
 
     def g(self, state):
         t, x0, y0, x, y, vx, vy = state
-        return torch.stack(
-            [torch.ones(x.shape[0]), torch.ones(x.shape[0]), torch.zeros(x.shape[0]), torch.zeros(x.shape[0]),
-             torch.zeros(x.shape[0]), torch.zeros(x.shape[0])])
+        return torch.FloatTensor(
+            [[[1, 0],
+              [0, 1],
+              [0, 0],
+              [0, 0],
+              [0, 0],
+              [0, 0]]]) \
+            .repeat(x.shape[0], 1, 1). \
+            transpose(2, 1)
 
     def reset(self):
         self.state = self.initial_state

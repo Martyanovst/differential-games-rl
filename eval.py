@@ -6,13 +6,10 @@ import random
 import numpy as np
 import torch
 
-from environments.dubinsCar.dubins_car_env import DubinsCar
 from environments.enviroment_generator import generate_env
-from environments.pendulum.pendulum_env import Pendulum
-from environments.simpleMotions.simple_motions_env import SimpleMotions
-from environments.vanDerPol.van_der_pol_env import VanDerPol
 from models.agent_evaluation_module import SingleAgentEvaluationModule
 from models.agent_generator import AgentGenerator
+
 
 def configure_random_seed(seed):
     if seed:

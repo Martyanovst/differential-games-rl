@@ -68,9 +68,12 @@ class NAF:
         self.add_to_memory(step)
 
         if len(self.memory) >= self.batch_size:
-            batch = random.sample(self.memory, self.batch_size)
-            states, actions, rewards, dones, next_states = map(
-                torch.FloatTensor, zip(*batch))
+            batch = list(zip(*random.sample(self.memory, self.batch_size)))
+            states = torch.FloatTensor(np.array(batch[0]))
+            actions = torch.FloatTensor(np.array(batch[1]))
+            rewards = torch.FloatTensor(np.array(batch[2]))
+            dones = torch.FloatTensor(np.array(batch[3]))
+            next_states = torch.FloatTensor(np.array(batch[4]))
             states.requires_grad = True
             rewards = rewards.reshape(self.batch_size, 1)
             dones = dones.reshape(self.batch_size, 1)
