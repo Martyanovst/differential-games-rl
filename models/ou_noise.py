@@ -35,7 +35,7 @@ class OUNoise:
 
     def decrease(self):
         if self.threshold > self.threshold_min:
-            self.threshold *= self.threshold_decrease
+            self.threshold -= self.threshold_decrease
 
     def state_dict(self):
         return {

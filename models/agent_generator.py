@@ -36,8 +36,10 @@ class AgentGenerator:
         else:
             lr = 1e-3
             gamma = 1
+        # noise = OUNoise(self.action_dim, threshold_min=self.noise_min,
+        #                 threshold_decrease=self.noise_min ** (1 / self.epoch_num))
         noise = OUNoise(self.action_dim, threshold_min=self.noise_min,
-                        threshold_decrease=self.noise_min ** (1 / self.epoch_num))
+                        threshold_decrease=(1 - self.noise_min) / self.epoch_num)
         return NAF(self.action_min, self.action_max, q_model, noise,
                    batch_size=self.batch_size, gamma=gamma, tau=1e-3, q_model_lr=lr)
 
@@ -104,7 +106,7 @@ class AgentGenerator:
         q_model = Seq_Network([self.state_dim + self.action_dim, 256, 128, 1], nn.ReLU())
 
         noise = OUNoise(self.action_dim, threshold_min=self.noise_min,
-                        threshold_decrease=self.noise_min ** (1 / self.epoch_num))
+                        threshold_decrease=(1 - self.noise_min) / self.epoch_num)
         return DDPG(self.action_min, self.action_max, q_model, pi_model, noise,
                     batch_size=self.batch_size, gamma=gamma, tau=1e-3, q_model_lr=lr)
 
