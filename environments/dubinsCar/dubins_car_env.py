@@ -26,7 +26,12 @@ class DubinsCar:
         self.inner_dt = dt / self.inner_step_n
 
     def g(self, state):
-        return torch.stack([torch.zeros(state.shape[1]), torch.zeros(state.shape[1]), torch.ones(state.shape[1]) * 0.75])
+        return torch.stack(
+            [torch.zeros(state.shape[1]),
+             torch.zeros(state.shape[1]),
+             torch.ones(state.shape[1]) * 0.75]) \
+            .transpose(0, 1) \
+            .unsqueeze(1)
 
     def step(self, action):
         action_raw = action.copy()

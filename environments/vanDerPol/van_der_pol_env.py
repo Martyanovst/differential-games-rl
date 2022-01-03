@@ -23,7 +23,11 @@ class VanDerPol:
         return self.state
 
     def g(self, state):
-        return torch.stack([torch.zeros(state.shape[1]), torch.ones(state.shape[1])])
+        return torch.stack([
+            torch.zeros(state.shape[1]),
+            torch.ones(state.shape[1])])\
+            .transpose(0, 1) \
+            .unsqueeze(1)
 
     def set_dt(self, dt):
         self.dt = dt
