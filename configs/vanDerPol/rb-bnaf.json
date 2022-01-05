@@ -12,7 +12,7 @@
     "epoch_num": 1000,
     "batch_size": 256,
     "render": false,
-    "random_seed": [2024, 2025],
+    "random_seed": [2021, 2022, 2023],
     "save_rewards_path": "./rewards/vanDerPol/rb-bnaf"
   }
 }
