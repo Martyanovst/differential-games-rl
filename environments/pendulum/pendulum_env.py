@@ -31,7 +31,8 @@ class Pendulum:
             torch.zeros(state.shape[1]),
             torch.ones(state.shape[1]) * 3 / (self.m * self.l ** 2)]) \
             .transpose(0, 1) \
-            .unsqueeze(1)
+            .unsqueeze(1) \
+            .type(torch.FloatTensor)
 
     def reset(self):
         self.state = self.initial_state

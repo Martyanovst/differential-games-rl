@@ -52,8 +52,8 @@ class TargetProblem:
               [0, 0],
               [0, 0],
               [0, 0]]]) \
-            .repeat(x.shape[0], 1, 1). \
-            transpose(2, 1)
+            .repeat(x.shape[0], 1, 1) \
+            .transpose(2, 1)
 
     def reset(self):
         self.state = self.initial_state

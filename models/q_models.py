@@ -203,7 +203,6 @@ class QModel_Bounded_GradientBased(nn.Module):
         v.backward()
         dv = state.grad[1:].detach()
         g = self.g(state.unsqueeze(1)).squeeze(1)
-        g = torch.FloatTensor(g)
         mu = (0.5 * (1 / self.r) * torch.matmul(g, dv)).squeeze(0)
         return transform_interval(self.tanh(mu), self.action_min, self.action_max)
 

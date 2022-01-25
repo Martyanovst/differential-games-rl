@@ -25,9 +25,10 @@ class VanDerPol:
     def g(self, state):
         return torch.stack([
             torch.zeros(state.shape[1]),
-            torch.ones(state.shape[1])])\
+            torch.ones(state.shape[1])]) \
             .transpose(0, 1) \
-            .unsqueeze(1)
+            .unsqueeze(1) \
+            .type(torch.FloatTensor)
 
     def set_dt(self, dt):
         self.dt = dt

@@ -9,7 +9,7 @@ from models.linear_transformations import transform_interval
 from models.q_models import MuModel
 
 
-class DDPG:
+class CVI:
 
     def __init__(self, action_min, action_max, q_model, pi_model, noise,
                  q_model_lr=1e-3, pi_model_lr=1e-4, gamma=0.99, batch_size=64, tau=1e-3,

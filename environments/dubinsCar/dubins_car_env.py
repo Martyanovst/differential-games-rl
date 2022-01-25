@@ -31,7 +31,8 @@ class DubinsCar:
              torch.zeros(state.shape[1]),
              torch.ones(state.shape[1]) * 0.75]) \
             .transpose(0, 1) \
-            .unsqueeze(1)
+            .unsqueeze(1) \
+            .type(torch.FloatTensor)
 
     def step(self, action):
         action_raw = action.copy()
