@@ -13,6 +13,52 @@ class MuModel(nn.Module):
         nu = self.nu_model(state)
         return self.tanh(nu)
 
+class CVI_VModel(nn.Module):
+    def __init__(self, action_dim, action_min, action_max,
+                 v_model, r, g, dt):
+        super().__init__()
+        self.action_dim = action_dim
+        self.action_min = torch.FloatTensor(action_min)
+        self.action_max = torch.FloatTensor(action_max)
+        self.v_model = v_model
+        self.dt = dt
+        self.r = r
+        self.g = g
+        self.tanh = nn.Tanh()
+
+    def forward(self, state):
+        return self.v_model(state)
+
+    def mu_model(self, state):
+        v = self.v_model(state)
+        v.backward()
+        dv = state.grad[1:].detach()
+        g = self.g(state.unsqueeze(1)).squeeze(1)
+        mu = (0.5 * (1 / self.r) * torch.matmul(g, dv)).squeeze(0)
+        return transform_interval(self.tanh(mu), self.action_min, self.action_max)
+
+    def state_dict(self, **kwargs):
+        return {
+            'model-name': 'q-model-bounded-gradient-based',
+            'action_dim': self.action_dim,
+            'action_min': self.action_min,
+            'action_max': self.action_max,
+            'dt': self.dt,
+            'r': self.r,
+            'v_model': self.v_model.state_dict()
+        }
+
+    def load_state_dict(self, state_dict, **kwargs):
+        self.action_dim = state_dict['action_dim']
+        self.action_min = state_dict['action_min']
+        self.action_max = state_dict['action_max']
+        self.dt = state_dict['dt']
+        self.r = state_dict['r']
+        self.v_model.load_state_dict(state_dict['v_model'])
+        return self
+
+
+
 
 class QModel(nn.Module):
     def __init__(self, action_dim, action_min, action_max,

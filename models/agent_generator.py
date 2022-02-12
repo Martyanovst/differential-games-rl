@@ -1,12 +1,13 @@
 import torch
 
+from models.continuos_value_iteration import CVI
 from models.ddpg import DDPG
 from models.naf import NAF
 
 from models.ou_noise import OUNoise, load_noise
 import torch.nn as nn
 
-from models.q_models import QModel, QModel_Bounded, QModel_Bounded_RewardBased, QModel_Bounded_GradientBased
+from models.q_models import QModel, QModel_Bounded, QModel_Bounded_RewardBased, QModel_Bounded_GradientBased, CVI_VModel
 from models.sequential_network import Seq_Network
 
 
@@ -46,14 +47,14 @@ class AgentGenerator:
     def _generate_naf(self, model_cfg):
         mu_model = Seq_Network([self.state_dim, 256, 128, self.action_dim], nn.ReLU(), nn.Tanh())
         v_model = Seq_Network([self.state_dim, 256, 128, 1], nn.ReLU())
-        p_model = Seq_Network([self.state_dim, 256, self.action_dim ** 2], nn.ReLU())
+        p_model = Seq_Network([self.state_dim, 256, 128, self.action_dim ** 2], nn.ReLU())
         q_model = QModel(self.action_dim, self.action_min, self.action_max, mu_model, p_model, v_model, self.dt)
         return self._naf_(q_model, model_cfg)
 
     def _generate_b_naf(self, model_cfg):
         nu_model = Seq_Network([self.state_dim, 256, 128, self.action_dim], nn.ReLU())
         v_model = Seq_Network([self.state_dim, 256, 128, 1], nn.ReLU())
-        p_model = Seq_Network([self.state_dim, 256, self.action_dim ** 2], nn.ReLU())
+        p_model = Seq_Network([self.state_dim, 256, 128, self.action_dim ** 2], nn.ReLU())
         q_model = QModel_Bounded(self.action_dim, self.action_min, self.action_max, nu_model, v_model, p_model, self.dt)
         return self._naf_(q_model, model_cfg)
 
@@ -93,9 +94,6 @@ class AgentGenerator:
         return model
 
     def _generate_ddpg(self, model_cfg):
-        # self, state_dim, action_dim, action_min, action_max, q_model, pi_model, noise,
-        # q_model_lr = 1e-3, pi_model_lr = 1e-4, gamma = 0.99, batch_size = 64, tau = 1e-3,
-        # memory_len = 6000000, learning_iter_per_fit = 1, convex_comb_for_actions = False
         if model_cfg:
             lr = model_cfg.get('lr', 1e-3)
             gamma = model_cfg.get('gamma', 1)
@@ -110,6 +108,21 @@ class AgentGenerator:
         return DDPG(self.action_min, self.action_max, q_model, pi_model, noise,
                     batch_size=self.batch_size, gamma=gamma, tau=1e-3, q_model_lr=lr)
 
+    def _generate_cvi(self, model_cfg):
+        if model_cfg:
+            lr = model_cfg.get('lr', 1e-3)
+            gamma = model_cfg.get('gamma', 1)
+        else:
+            lr = 1e-3
+            gamma = 1
+        v_model_backbone = Seq_Network([self.state_dim, 256, 128, 1], nn.ReLU())
+        v_model = CVI_VModel(self.action_dim, self.action_min, self.action_max, v_model_backbone, self.r, self.g,
+                             self.dt)
+        noise = OUNoise(self.action_dim, threshold_min=self.noise_min,
+                        threshold_decrease=(1 - self.noise_min) / self.epoch_num)
+        return CVI(self.action_min, self.action_max, v_model, noise, batch_size=self.batch_size, gamma=gamma, tau=1e-3,
+                   v_model_lr=lr)
+
     def generate(self, model_cfg):
         model_name = model_cfg['model_name']
         if model_name == 'naf':
@@ -122,3 +135,5 @@ class AgentGenerator:
             return self._generate_b_naf_gradient_based(model_cfg)
         elif model_name == 'ddpg':
             return self._generate_ddpg(model_cfg)
+        elif model_name == 'cvi':
+            return self._generate_cvi(model_cfg)
