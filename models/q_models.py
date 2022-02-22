@@ -58,8 +58,6 @@ class CVI_VModel(nn.Module):
         return self
 
 
-
-
 class QModel(nn.Module):
     def __init__(self, action_dim, action_min, action_max,
                  mu_model, p_model, v_model, dt):

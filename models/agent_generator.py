@@ -27,6 +27,7 @@ class AgentGenerator:
         self.action_min = env.action_min
         self.beta = env.beta
         self.r = env.r
+        self.virtual_step = env.batch_step
 
         self.noise_min = 1e-4
 
@@ -120,7 +121,8 @@ class AgentGenerator:
                              self.dt)
         noise = OUNoise(self.action_dim, threshold_min=self.noise_min,
                         threshold_decrease=(1 - self.noise_min) / self.epoch_num)
-        return CVI(self.action_min, self.action_max, v_model, noise, batch_size=self.batch_size, gamma=gamma, tau=1e-3,
+        return CVI(self.action_min, self.action_max, v_model, self.virtual_step, noise, batch_size=self.batch_size,
+                   gamma=gamma, tau=1e-3,
                    v_model_lr=lr)
 
     def generate(self, model_cfg):

@@ -43,6 +43,16 @@ class TargetProblem:
         state_update[6] = - (self.k / self.m) * (y - y0) - self.g_const
         return state_update
 
+    def batch_f(self, states, u):
+        state_update = np.ones(states.shape)
+        state_update[:, 1] = u[:, 0]
+        state_update[:, 2] = u[:, 1]
+        state_update[:, 3] = states[:, 5]
+        state_update[:, 4] = states[:, 6]
+        state_update[:, 5] = - (self.k / self.m) * (states[:, 3] - states[:, 1])
+        state_update[:, 6] = - (self.k / self.m) * (states[:, 4] - states[:, 2]) - self.g_const
+        return state_update
+
     def g(self, state):
         t, x0, y0, x, y, vx, vy = state
         return torch.FloatTensor(
@@ -81,3 +91,20 @@ class TargetProblem:
             done = False
 
         return self.state, reward, done, None
+
+    def batch_step(self, states, actions):
+        for _ in range(self.inner_step_n):
+            k1 = self.batch_f(states, actions)
+            k2 = self.batch_f(states + k1 * self.inner_dt / 2, actions)
+            k3 = self.batch_f(states + k2 * self.inner_dt / 2, actions)
+            k4 = self.batch_f(states + k3 * self.inner_dt, actions)
+            states = states + (k1 + 2 * k2 + 2 * k3 + k4) * self.inner_dt / 6
+
+        rewards = - self.r * (norm(actions, axis=1) ** 2) * self.dt
+        dones = np.full(states.shape[0], False)
+        completed = states[:, 0] >= self.terminal_time
+        rewards[completed] = -((states[completed, 1] ** 2) + (states[completed, 2] ** 2) + (
+                    (states[completed, 3] - self.xG) ** 2) + ((states[completed, 4] - self.yG) ** 2))
+        dones[completed] = True
+
+        return states, rewards, dones, None

@@ -50,6 +50,18 @@ class VanDerPol:
 
         return self.state, reward, done, None
 
+    def batch_step(self, states, actions):
+        actions = np.clip(actions, self.action_min, self.action_max)
+        for _ in range(self.inner_step_n):
+            f = np.column_stack([np.ones(states.shape[0]), states[:, 2], (1 - states[:, 1] ** 2) * states[:, 2] - states[:, 1] + actions[:, 0]])
+            states = states + f * self.inner_dt
+
+        rewards = - self.r * actions[:, 0] ** 2 * self.dt
+        dones = np.full(states.shape[0], False)
+        rewards[states[:, 0] >= self.terminal_time] = -states[states[:, 0] >= self.terminal_time, 1] ** 2 - states[states[:, 0] >= self.terminal_time, 2] ** 2
+        dones[states[:, 0] >= self.terminal_time] = True
+        return states, rewards, dones, _
+
     def get_state_obs(self):
         return 'time: %.3f  x: %.3f y: %.3f' % (self.state[0], self.state[1], self.state[2])
 
