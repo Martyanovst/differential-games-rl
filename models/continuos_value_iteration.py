@@ -7,7 +7,6 @@ import torch
 import torch.nn as nn
 
 from models.linear_transformations import transform_interval
-from models.q_models import CVI_VModel
 
 
 class CVI:
@@ -52,14 +51,14 @@ class CVI:
     def get_action(self, state):
         state = torch.FloatTensor(state)
         state.requires_grad = True
-        mu_value = self.v_model(state).detach().numpy()
+        mu_value = self.v_model.get_max_value(state).detach().numpy()
         noise = self.noise.noise()
         action = mu_value + noise
         action = transform_interval(action, self.action_min, self.action_max)
         return np.clip(action, self.action_min, self.action_max)
 
     def get_action_without_noise(self, state):
-        mu_value = self.v_model(state).detach().numpy()
+        mu_value = self.v_model.batch_max_value(state).detach().numpy()
         action = transform_interval(mu_value, self.action_min, self.action_max)
         return np.clip(action, self.action_min, self.action_max)
 
@@ -68,27 +67,24 @@ class CVI:
             target_param.data.copy_(
                 (1 - self.tau) * target_param.data + self.tau * original_param.data)
 
-    def add_to_memory(self, state, reward, done):
-        self.memory.append([state, reward, done])
+    def add_to_memory(self, state):
+        self.memory.append([state])
 
     def fit(self, step):
-        state, _, reward, done, _ = step
+        state, _, _, done, _ = step
         if not done:
-            self.add_to_memory(state, reward, done)
+            self.add_to_memory(state)
 
         if len(self.memory) >= self.batch_size:
             batch = list(zip(*random.sample(self.memory, self.batch_size)))
             states_numpy = np.array(batch[0])
             states = torch.FloatTensor(states_numpy)
             states.requires_grad = True
-            rewards = torch.FloatTensor(np.array(batch[1]))
-            dones = torch.FloatTensor(np.array(batch[2]))
             actions = self.get_action_without_noise(states)
-            next_states_np, _, _, _ = self.virtual_step(states_numpy.copy(), actions)
-            next_states = torch.FloatTensor(next_states_np)
-            rewards = rewards.reshape(self.batch_size, 1)
-            dones = dones.reshape(self.batch_size, 1)
-
+            next_states, rewards, dones, _ = self.virtual_step(states_numpy.copy(), actions)
+            next_states = torch.FloatTensor(next_states)
+            rewards = torch.FloatTensor(rewards).reshape(self.batch_size, 1)
+            dones = torch.FloatTensor(dones).reshape(self.batch_size, 1)
             target = rewards + (1 - dones) * self.gamma * \
                      self.v_target(next_states).detach()
             v_values = self.v_model(states)

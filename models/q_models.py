@@ -13,6 +13,7 @@ class MuModel(nn.Module):
         nu = self.nu_model(state)
         return self.tanh(nu)
 
+
 class CVI_VModel(nn.Module):
     def __init__(self, action_dim, action_min, action_max,
                  v_model, r, g, dt):
@@ -29,12 +30,21 @@ class CVI_VModel(nn.Module):
     def forward(self, state):
         return self.v_model(state)
 
-    def mu_model(self, state):
+    def get_max_value(self, state):
         v = self.v_model(state)
         v.backward()
         dv = state.grad[1:].detach()
         g = self.g(state.unsqueeze(1)).squeeze(1)
         mu = (0.5 * (1 / self.r) * torch.matmul(g, dv)).squeeze(0)
+        self.v_model.zero_grad()
+        return transform_interval(self.tanh(mu), self.action_min, self.action_max)
+
+    def batch_max_value(self, states):
+        v = self.v_model(states)
+        v.backward(gradient=torch.ones_like(v))
+        dv = states.grad[:, 1:].detach().unsqueeze(2)
+        g = torch.FloatTensor(self.g(states.transpose(1, 0))).detach()
+        mu = (0.5 * (1 / self.r) * torch.matmul(g, dv)[:, :, 0]).squeeze(0)
         return transform_interval(self.tanh(mu), self.action_min, self.action_max)
 
     def state_dict(self, **kwargs):
