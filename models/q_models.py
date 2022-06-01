@@ -19,8 +19,8 @@ class CVI_VModel(nn.Module):
                  v_model, r, g, dt):
         super().__init__()
         self.action_dim = action_dim
-        self.action_min = torch.FloatTensor(action_min)
-        self.action_max = torch.FloatTensor(action_max)
+        self.action_min = action_min[0]
+        self.action_max = action_max[0]
         self.v_model = v_model
         self.dt = dt
         self.r = r
@@ -37,15 +37,16 @@ class CVI_VModel(nn.Module):
         g = self.g(state.unsqueeze(1)).squeeze(1)
         mu = (0.5 * (1 / self.r) * torch.matmul(g, dv)).squeeze(0)
         self.v_model.zero_grad()
-        return transform_interval(self.tanh(mu), self.action_min, self.action_max)
+        return torch.clip(mu, self.action_min, self.action_max)
 
     def batch_max_value(self, states):
         v = self.v_model(states)
         v.backward(gradient=torch.ones_like(v))
         dv = states.grad[:, 1:].detach().unsqueeze(2)
-        g = torch.FloatTensor(self.g(states.transpose(1, 0))).detach()
+        g = torch.FloatTensor(self.g(states.transpose(1, 0)))
         mu = (0.5 * (1 / self.r) * torch.matmul(g, dv)[:, :, 0]).squeeze(0)
-        return transform_interval(self.tanh(mu), self.action_min, self.action_max)
+        self.v_model.zero_grad()
+        return torch.clip(mu, self.action_min, self.action_max)
 
     def state_dict(self, **kwargs):
         return {

@@ -1,8 +1,8 @@
-#python3 train.py --config configs/targetProblem/naf.json
-#python3 train.py --config configs/targetProblem/bnaf.json
-#python3 train.py --config configs/targetProblem/rb-bnaf.json
-#python3 train.py --config configs/targetProblem/gb-bnaf.json
-#python3 train.py --config configs/targetProblem/ddpg.json
+python3 train.py --config configs/targetProblem/naf.json
+python3 train.py --config configs/targetProblem/bnaf.json
+python3 train.py --config configs/targetProblem/rb-bnaf.json
+python3 train.py --config configs/targetProblem/gb-bnaf.json
+python3 train.py --config configs/targetProblem/ddpg.json
 
 python3 train.py --config configs/pendulum/naf.json
 python3 train.py --config configs/pendulum/bnaf.json

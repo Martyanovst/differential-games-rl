@@ -57,16 +57,17 @@ class Pendulum:
 
     def batch_step(self, states, actions):
         actions = np.clip(actions, self.action_min, self.action_max)
-
         for _ in range(self.inner_step_n):
-            states += np.column_stack([np.ones(states.shape[0]), states[:, 2],
-                                                - 3 * self.gravity / (2 * self.l) * np.sin(states[:, 1] + np.pi)
-                                                + 3. / (self.m * self.l ** 2) * actions[:, 0]]) * self.inner_dt
+            not_done = states[:, 0] < self.terminal_time
+            states[not_done] += np.column_stack([np.ones(states[not_done].shape[0]), states[not_done][:, 2],
+                                                - 3 * self.gravity / (2 * self.l) * np.sin(states[not_done][:, 1] + np.pi)
+                                                + 3. / (self.m * self.l ** 2) * actions[not_done, 0]]) * self.inner_dt
 
         rewards = - self.r * actions[:, 0] ** 2 * self.dt
         dones = np.full(states.shape[0], False)
-        rewards[states[:, 0] >= self.terminal_time] = - np.abs(states[states[:, 0] >= self.terminal_time, 1]) - 0.1 * np.abs(states[states[:, 0] >= self.terminal_time, 2])
-        dones[states[:, 0] >= self.terminal_time] = True
+        is_done = states[:, 0] >= self.terminal_time
+        rewards[states[:, 0] >= self.terminal_time] = - np.abs(states[is_done, 1]) - 0.1 * np.abs(states[is_done, 2])
+        dones[is_done] = True
 
         return states, rewards, dones, None
 

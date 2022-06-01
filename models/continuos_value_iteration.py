@@ -51,16 +51,14 @@ class CVI:
     def get_action(self, state):
         state = torch.FloatTensor(state)
         state.requires_grad = True
-        mu_value = self.v_model.get_max_value(state).detach().numpy()
+        mu_value = self.v_target.get_max_value(state).detach().numpy()
         noise = self.noise.noise()
         action = mu_value + noise
-        action = transform_interval(action, self.action_min, self.action_max)
-        return np.clip(action, self.action_min, self.action_max)
+        return action
 
     def get_action_without_noise(self, state):
         mu_value = self.v_model.batch_max_value(state).detach().numpy()
-        action = transform_interval(mu_value, self.action_min, self.action_max)
-        return np.clip(action, self.action_min, self.action_max)
+        return mu_value
 
     def update_targets(self, target, original):
         for target_param, original_param in zip(target.parameters(), original.parameters()):
@@ -77,17 +75,25 @@ class CVI:
 
         if len(self.memory) >= self.batch_size:
             batch = list(zip(*random.sample(self.memory, self.batch_size)))
-            states_numpy = np.array(batch[0])
+            init_states = np.array(batch[0])
+            states_numpy = init_states.copy()
             states = torch.FloatTensor(states_numpy)
             states.requires_grad = True
-            actions = self.get_action_without_noise(states)
-            next_states, rewards, dones, _ = self.virtual_step(states_numpy.copy(), actions)
+            rewards = np.zeros(states.shape[0])
+            for i in range(4):
+                states = torch.FloatTensor(states_numpy)
+                states.requires_grad = True
+                actions = self.get_action_without_noise(states)
+                next_states, rewards_step, dones, _ = self.virtual_step(states_numpy.copy(), actions)
+                rewards += rewards_step
+                states_numpy = next_states
+            init_states = torch.FloatTensor(init_states)
             next_states = torch.FloatTensor(next_states)
             rewards = torch.FloatTensor(rewards).reshape(self.batch_size, 1)
             dones = torch.FloatTensor(dones).reshape(self.batch_size, 1)
             target = rewards + (1 - dones) * self.gamma * \
                      self.v_target(next_states).detach()
-            v_values = self.v_model(states)
+            v_values = self.v_model(init_states)
             loss = self.loss(v_values, target)
             self.opt.zero_grad()
             loss.backward()

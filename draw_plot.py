@@ -2,8 +2,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 seeds = [2021, 2022, 2023, 2024, 2025]
-path = './rewards/pendulum/'
-X = np.arange(1500)
+task = 'dubinsCar'
+path = f'./rewards/{task}/'
+X = np.arange(2000)
 
 
 def plot(model, color, label):
@@ -22,11 +23,11 @@ plot('gb-bnaf', 'y', 'gb-bnaf')
 plot('ddpg', 'm', 'ddpg')
 plot('cvi', 'black', 'cvi')
 
-plt.ylim(-30)
+plt.ylim(-14)
 
 plt.xlabel('episodes')
 plt.ylabel('rewards')
-# plt.title(task)
+plt.title(task)
 plt.legend(loc=4)
 ax = plt.gca()
 ax.set_facecolor('#eaeaf2')
